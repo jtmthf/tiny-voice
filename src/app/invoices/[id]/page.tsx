@@ -5,15 +5,38 @@ import { app } from '@/app/instance';
 import { formatMoney } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/format-date';
 import { parseInvoiceId } from '@/shared/ids/invoice-id';
-import { isOverdue } from '@/invoicing/index';
+import { isOverdue as isDueDateOverdue } from '@/shared/time/due-date';
 import type { DueDate } from '@/shared/time/due-date';
 import { InvoiceActions } from './invoice-actions';
 
-async function InvoiceHeader({ id }: { id: string }) {
+// ---------------------------------------------------------------------------
+// Data-level cached queries — shared across all components on this page
+// ---------------------------------------------------------------------------
+
+async function getCachedInvoiceSummary(id: string) {
   'use cache';
   cacheTag('invoices', `invoice:${id}`);
+  return app.queries.invoicing.getInvoiceSummary(parseInvoiceId(id));
+}
 
-  const summary = await app.queries.invoicing.getInvoiceSummary(parseInvoiceId(id));
+async function getCachedLineItems(id: string) {
+  'use cache';
+  cacheTag('invoices', `invoice:${id}`);
+  return app.queries.invoicing.getInvoiceLineItems(parseInvoiceId(id));
+}
+
+async function getCachedPayments(id: string) {
+  'use cache';
+  cacheTag('invoices', `invoice:${id}`);
+  return app.queries.invoicing.getInvoicePayments(parseInvoiceId(id));
+}
+
+// ---------------------------------------------------------------------------
+// Components
+// ---------------------------------------------------------------------------
+
+async function InvoiceHeader({ id }: { id: string }) {
+  const summary = await getCachedInvoiceSummary(id);
   if (!summary) return null;
 
   return (
@@ -55,7 +78,7 @@ async function InvoiceClientInfo({ id }: { id: string }) {
   'use cache';
   cacheTag('invoices', 'clients');
 
-  const summary = await app.queries.invoicing.getInvoiceSummary(parseInvoiceId(id));
+  const summary = await getCachedInvoiceSummary(id);
   if (!summary) return null;
 
   const client = await app.queries.clients.getClient(summary.clientId);
@@ -69,13 +92,10 @@ async function InvoiceClientInfo({ id }: { id: string }) {
 }
 
 async function InvoiceLineItems({ id }: { id: string }) {
-  'use cache';
-  cacheTag('invoices', `invoice:${id}`);
+  const lineItems = await getCachedLineItems(id);
+  if (!lineItems) return null;
 
-  const invoice = await app.invoiceRepo.findById(parseInvoiceId(id));
-  if (!invoice) return null;
-
-  if (invoice.lineItems.length === 0) {
+  if (lineItems.length === 0) {
     return <p className="empty">No line items.</p>;
   }
 
@@ -90,7 +110,7 @@ async function InvoiceLineItems({ id }: { id: string }) {
         </tr>
       </thead>
       <tbody>
-        {invoice.lineItems.map((li) => (
+        {lineItems.map((li) => (
           <tr key={li.id}>
             <td>{li.description}</td>
             <td>{li.quantity}</td>
@@ -104,13 +124,10 @@ async function InvoiceLineItems({ id }: { id: string }) {
 }
 
 async function InvoicePayments({ id }: { id: string }) {
-  'use cache';
-  cacheTag('invoices', `invoice:${id}`);
+  const payments = await getCachedPayments(id);
+  if (!payments) return null;
 
-  const invoice = await app.invoiceRepo.findById(parseInvoiceId(id));
-  if (!invoice) return null;
-
-  if (invoice.payments.length === 0) {
+  if (payments.length === 0) {
     return <p className="empty">No payments recorded.</p>;
   }
 
@@ -124,7 +141,7 @@ async function InvoicePayments({ id }: { id: string }) {
         </tr>
       </thead>
       <tbody>
-        {invoice.payments.map((p) => (
+        {payments.map((p) => (
           <tr key={p.id}>
             <td>{p.id.slice(0, 8)}...</td>
             <td>{formatMoney(p.amount)}</td>
@@ -136,22 +153,16 @@ async function InvoicePayments({ id }: { id: string }) {
   );
 }
 
-async function getInvoiceStatus(id: string): Promise<string | null> {
-  const summary = await app.queries.invoicing.getInvoiceSummary(parseInvoiceId(id));
-  return summary?.status ?? null;
-}
-
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const summary = await app.queries.invoicing.getInvoiceSummary(parseInvoiceId(id));
+  const summary = await getCachedInvoiceSummary(id);
   if (!summary) notFound();
 
-  const status = await getInvoiceStatus(id);
   const lateFeesEnabled = app.featureFlags.isEnabled('lateFees');
-  const invoice = await app.invoiceRepo.findById(parseInvoiceId(id));
-  const invoiceIsOverdue = invoice ? isOverdue(invoice, app.clock.today() as DueDate) : false;
-  const showLateFeeButton = lateFeesEnabled && invoiceIsOverdue;
+  const showLateFeeButton = lateFeesEnabled
+    && summary.status === 'sent'
+    && isDueDateOverdue(summary.dueDate, app.clock.today() as DueDate);
 
   return (
     <>
@@ -160,7 +171,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         <InvoiceHeader id={id} />
         <InvoiceClientInfo id={id} />
 
-        <InvoiceActions invoiceId={id} status={status ?? 'draft'} showLateFeeButton={showLateFeeButton} />
+        <InvoiceActions invoiceId={id} status={summary.status} showLateFeeButton={showLateFeeButton} />
 
         <h2 style={{ marginTop: '1.5rem' }}>Line Items</h2>
         <InvoiceLineItems id={id} />

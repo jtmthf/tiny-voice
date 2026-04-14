@@ -58,6 +58,10 @@ export { calculateLateFeeLineItem, daysOverdue } from './commands/calculate-late
 // --- Queries ---
 export { getInvoiceSummary } from './queries/get-invoice-summary';
 export type { InvoiceSummary } from './queries/get-invoice-summary';
+export { getInvoiceLineItems } from './queries/get-invoice-line-items';
+export type { LineItemSummary } from './queries/get-invoice-line-items';
+export { getInvoicePayments } from './queries/get-invoice-payments';
+export type { PaymentSummary } from './queries/get-invoice-payments';
 export { listInvoices } from './queries/list-invoices';
 export { getOutstandingByClient } from './queries/get-outstanding-by-client';
 

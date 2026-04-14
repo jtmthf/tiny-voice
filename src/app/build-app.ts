@@ -18,6 +18,8 @@ import {
   StubPdfGenerator,
   ConsoleNotificationSender,
   getInvoiceSummary,
+  getInvoiceLineItems,
+  getInvoicePayments,
   listInvoices,
   getOutstandingByClient,
 } from '@/invoicing/index';
@@ -109,6 +111,8 @@ export function buildApp(overrides: Partial<AppDeps> = {}): AppDeps {
     },
     invoicing: {
       getInvoiceSummary: (id) => getInvoiceSummary({ repo: invoiceRepo }, id),
+      getInvoiceLineItems: (id) => getInvoiceLineItems({ repo: invoiceRepo }, id),
+      getInvoicePayments: (id) => getInvoicePayments({ repo: invoiceRepo }, id),
       listInvoices: (filters) => {
         const invoices = listInvoices({ repo: invoiceRepo }, filters);
         return invoices.map((inv): InvoiceSummary => ({

@@ -15,6 +15,8 @@ import type {
   PdfGenerator,
   NotificationSender,
   InvoiceSummary,
+  LineItemSummary,
+  PaymentSummary,
   InvoicingEventMap,
 } from '@/invoicing/index';
 import type { RevenueReadModel, MonthlyRevenue } from '@/reporting/index';
@@ -45,6 +47,8 @@ export interface AppDeps {
     };
     readonly invoicing: {
       getInvoiceSummary(id: InvoiceId): InvoiceSummary | null;
+      getInvoiceLineItems(id: InvoiceId): readonly LineItemSummary[] | null;
+      getInvoicePayments(id: InvoiceId): readonly PaymentSummary[] | null;
       listInvoices(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly InvoiceSummary[];
       getOutstandingByClient(clientId: ClientId): Money;
     };
@@ -58,3 +62,10 @@ export interface AppDeps {
   // Combined unsubscribe for cleanup/test control
   readonly unsubscribe: () => void;
 }
+
+/**
+ * Narrow read-only view for RSC pages. Only exposes queries, feature flags,
+ * and clock — no repos, event bus, or infrastructure. This is the type
+ * exported from `instance.ts` so pages cannot bypass the query layer.
+ */
+export type AppReadView = Pick<AppDeps, 'queries' | 'featureFlags' | 'clock'>;

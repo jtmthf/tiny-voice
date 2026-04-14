@@ -72,7 +72,9 @@ Note: The revenue projection is registered via `registerRevenueProjection` from 
 
 Returns an `AppDeps` object (defined in `src/app/app-deps.ts`). Accepts `Partial<AppDeps>` overrides so tests can swap any piece.
 
-`src/app/instance.ts` calls `buildApp()` at module scope and exports `app` / `instance`. RSCs and the oRPC route handler import from here. Client components must never import this file.
+`src/app/instance.ts` calls `buildApp()` at module scope and exports `app` typed as `AppReadView` — a narrow interface exposing only `queries`, `featureFlags`, and `clock`. RSC pages import from here and can only read data through `app.queries.*`. Repos, event bus, DB, and other infrastructure are not on this type. Mutations go through Server Actions which use the RPC context (`get-rpc-context.ts`), a separate channel with full access to command dependencies. Client components must never import this file.
+
+**Why the read surface is narrow:** Without this constraint, RSC pages drift toward calling repos directly, bypassing the query layer. This breaks data-level `'use cache'` (which works at the query boundary), couples pages to aggregate internals, and makes cache invalidation unpredictable. If a page needs data not currently on `app.queries`, the fix is a new query function — not widening `AppReadView`.
 
 ## How to add a new feature
 
@@ -81,7 +83,7 @@ Example: "Add a CSV export of monthly revenue."
 1. **Create a query** in the appropriate module: `src/reporting/queries/export-revenue-csv.ts`. Export the handler function and a Zod input schema (co-located).
 2. **Add to module index**: Re-export from `src/reporting/index.ts`.
 3. **If it's a mutation**: Wire through `src/app/rpc/contract.ts` as a new procedure with `.actionable()` in `src/app/rpc/router.ts`.
-4. **If it's a query**: Add to `AppDeps.queries` in `src/app/app-deps.ts` and `src/app/build-app.ts`. Call from an RSC with `'use cache'` + `cacheTag`.
+4. **If it's a query**: Add to `AppDeps.queries` in `src/app/app-deps.ts` and `src/app/build-app.ts` (and `build-test-app.ts`). Call from an RSC with `'use cache'` + `cacheTag`. RSC pages access data only through `app.queries.*` — never import repos or call `findById` directly from a page component.
 5. **If it needs a new port** (new IO boundary): Define the port interface in the module's `ports/` directory. Implement real + test adapters in `adapters/`. Wire in `buildApp`.
 6. **If it emits events**: Define event type + Zod schema in the module's `events/` directory. Add to `InvoicingEventMap` (or create a new event map). Register subscribers in `src/app/register-subscribers.ts`.
 7. **Write tests**: Property-based tests for domain invariants (fast-check), example tests for happy/sad paths, integration test via `buildIntegrationTestApp()` for SQL-backed flows.
