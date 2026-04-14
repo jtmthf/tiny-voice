@@ -50,7 +50,17 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 - Domain vocabulary: `docs/domain-terms.md`
 - Architecture details: `docs/architecture.md`
 
-## Framework-specific rules
+## Documentation rules
+
+Assume built-in knowledge of the libraries below is incomplete or out of date. Before writing or modifying code that uses any of them, fetch the latest documentation via Context7 (`resolve-library-id` then `query-docs`).
+
+| Library | Context7 ID | Notes |
+|---|---|---|
+| Next.js | -- | Use `node_modules/next/dist/docs/` instead of Context7 |
+| Zod 4 | `/websites/zod_dev_v4` | v4 API differs significantly from v3 |
+| oRPC | `/llmstxt/orpc_dev_llms-full_txt` | Niche framework -- training data is sparse |
+| neverthrow | `/supermacro/neverthrow` | |
+| fast-check | `/dubzzz/fast-check` | Property-based testing; also `@fast-check/vitest` integration |
 
 <!-- BEGIN:nextjs-agent-rules -->
 
