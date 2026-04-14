@@ -28,7 +28,7 @@
 | H7 | RSC bypasses query layer for invoiceRepo *(invoices/[id]/page.tsx:75,110,152)* | New `getInvoiceLineItems` + `getInvoicePayments` queries; components route through `app.queries.invoicing.*` | FIXED |
 | H8 | listInvoices loads full aggregates for summary use *(build-app.ts:110-125)* | Add dedicated SQL summary query with JOINs | FIXED |
 | H9 | Missing index on invoices.created_at *(migrations/0002)* | Add migration: `CREATE INDEX idx_invoices_created_at ON invoices(created_at DESC)` | FIXED |
-| H10 | Lost update window in commands *(send-invoice.ts:30, record-payment.ts:34)* | OCC guard is correct; verify concurrencyConflict maps to HTTP 409 in rpc-errors.ts | OPEN |
+| H10 | Lost update window in commands *(send-invoice.ts:30, record-payment.ts:34)* | OCC guard is correct; verify concurrencyConflict maps to HTTP 409 in rpc-errors.ts | VERIFIED |
 | H11 | Dashboard fetches all invoices twice *(page.tsx:11,58)* | Merge RecentInvoices + InvoiceSummary or lift query | OPEN |
 | H12 | LIKE wildcard defeats index on revenue *(sqlite-revenue-read-model.ts:53-57)* | Replace with `WHERE month >= ? AND month < ?` range | OPEN |
 | H13 | Duplicated Invoice->Summary mapping *(build-app.ts:110 + build-test-app.ts:83)* | Extract `toInvoiceSummary()` function | OPEN |
