@@ -12,10 +12,11 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "deps": "depcruise src",
-    "check:filenames": "node --import tsx scripts/check-filenames.ts",
+    "check:filenames": "pnpm lint",
     "test": "vitest run",
     "test:watch": "vitest",
     "migrate": "node --import tsx scripts/migrate.ts",
+    "seed": "node --import tsx scripts/seed.ts",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
@@ -31,12 +32,14 @@
     "pdfkit": "^0.18.0",
     "react": "19",
     "react-dom": "19",
+    "server-only": "^0.0.1",
     "uuid": "^13.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
+    "@faker-js/faker": "^10.4.0",
     "@fast-check/vitest": "^0.4.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.6.0",
@@ -46,6 +49,7 @@
     "@types/uuid": "^11.0.0",
     "dependency-cruiser": "^17.3.10",
     "eslint": "^10.2.0",
+    "eslint-plugin-check-file": "^3.3.1",
     "eslint-plugin-import-x": "^4.16.2",
     "eslint-plugin-unicorn": "^64.0.0",
     "fast-check": "^4.6.0",
@@ -55,5 +59,8 @@
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.2",
     "vitest": "^4.1.4"
+  },
+  "simple-git-hooks": {
+    "commit-msg": "pnpm commitlint --edit $1"
   }
 }

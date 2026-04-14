@@ -1,7 +1,68 @@
 // @ts-check
+import path from 'node:path';
 import tseslint from 'typescript-eslint';
 import importX from 'eslint-plugin-import-x';
 import unicorn from 'eslint-plugin-unicorn';
+import checkFile from 'eslint-plugin-check-file';
+
+// Inline rule: filename must match a named export (case-insensitive, ignoring `-` and `_`).
+// No ESLint 10 plugin does this — `eslint-plugin-filename-export` uses the removed
+// `context.getFilename()` API. This rule uses the current `context.filename` and
+// covers the same semantics: files with at least one named export whose name matches
+// the file's basename (stripped of separators, case-insensitive) pass.
+const normalize = (s) => s.replace(/[-_]/g, '').toLowerCase();
+const filenameMatchesExport = {
+  meta: {
+    type: 'problem',
+    docs: { description: 'Filename must match at least one named export.' },
+    schema: [],
+    messages: {
+      mismatch:
+        "Filename '{{file}}' does not match any named export. Expected an export like '{{expected}}'.",
+    },
+  },
+  create(context) {
+    const exportNames = [];
+    return {
+      ExportNamedDeclaration(node) {
+        if (node.declaration) {
+          // export const foo = / export function foo() / export class Foo
+          if (node.declaration.type === 'VariableDeclaration') {
+            for (const d of node.declaration.declarations) {
+              if (d.id?.type === 'Identifier') exportNames.push(d.id.name);
+            }
+          } else if (node.declaration.id?.type === 'Identifier') {
+            exportNames.push(node.declaration.id.name);
+          }
+        }
+        for (const spec of node.specifiers ?? []) {
+          if (spec.exported?.type === 'Identifier') exportNames.push(spec.exported.name);
+        }
+      },
+      'Program:exit'(node) {
+        const file = context.filename;
+        const base = path.basename(file).replace(/\.(test|property\.test|spec)\.[tj]sx?$/, '').replace(/\.[tj]sx?$/, '');
+        // Skip index files, Next.js reserved filenames, type-only declaration files.
+        const skip = ['index', 'layout', 'page', 'route', 'loading', 'error', 'not-found', 'middleware'];
+        if (skip.includes(base)) return;
+        if (file.endsWith('.d.ts')) return;
+        // Skip test-support collection files under **/testing/ (factories.ts, arbitraries.ts, fixtures.ts).
+        if (/[/\\]testing[/\\]/.test(file)) return;
+        if (exportNames.length === 0) return; // nothing to compare against
+        const want = normalize(base);
+        const hit = exportNames.some((n) => normalize(n) === want);
+        if (!hit) {
+          context.report({
+            node,
+            messageId: 'mismatch',
+            data: { file: base, expected: base.replace(/(^|-)(.)/g, (_, __, c) => c.toUpperCase()) },
+          });
+        }
+      },
+    };
+  },
+};
+const localPlugin = { rules: { 'filename-matches-export': filenameMatchesExport } };
 
 export default tseslint.config(
   // Global ignores
@@ -19,14 +80,21 @@ export default tseslint.config(
     plugins: {
       'import-x': importX,
       unicorn,
+      'check-file': checkFile,
+      local: localPlugin,
     },
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['*.config.ts', '*.config.js'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {
+      // Deprecated API detection
+      '@typescript-eslint/no-deprecated': 'error',
+
       // import-x rules
       'import-x/no-default-export': 'error',
       'import-x/no-cycle': 'error',
@@ -49,8 +117,20 @@ export default tseslint.config(
         },
       ],
 
-      // TODO: eslint-plugin-filenames-simple for filename-matches-export.
-      // If it proves unreliable with flat config, scripts/check-filenames.ts covers it.
+      // Enforce kebab-case filenames via check-file (replaces filenames-simple which needs ESLint <9)
+      'check-file/filename-naming-convention': [
+        'error',
+        { '**/*.{ts,tsx}': 'KEBAB_CASE' },
+        { ignoreMiddleExtensions: true },
+      ],
+      'check-file/folder-naming-convention': [
+        'error',
+        { 'src/**/': 'NEXT_JS_APP_ROUTER_CASE' },
+      ],
+
+      // Filename must match a named export. See inline rule at top of this file for rationale.
+      'local/filename-matches-export': 'error',
+
     },
   },
 

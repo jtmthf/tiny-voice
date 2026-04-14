@@ -30,6 +30,7 @@ module.exports = {
         'Domain code (entities, commands, queries, ports) must not depend on adapters or app layer.',
       from: {
         path: '^src/(clients|invoicing|reporting)/(entities|commands|queries|ports)',
+        pathNot: '\\.test\\.ts$',
       },
       to: {
         path: [
@@ -39,25 +40,57 @@ module.exports = {
       },
     },
     {
-      name: 'no-cross-module-internals',
+      name: 'no-clients-into-invoicing-internals',
+      severity: 'error',
+      comment: 'clients may only import from invoicing/index.ts.',
+      from: { path: '^src/clients/' },
+      to: { path: '^src/invoicing/(?!index\\.ts$)' },
+    },
+    {
+      name: 'no-clients-into-reporting-internals',
+      severity: 'error',
+      comment: 'clients may only import from reporting/index.ts.',
+      from: { path: '^src/clients/' },
+      to: { path: '^src/reporting/(?!index\\.ts$)' },
+    },
+    {
+      name: 'no-invoicing-into-clients-internals',
+      severity: 'error',
+      comment: 'invoicing may only import from clients/index.ts.',
+      from: { path: '^src/invoicing/' },
+      to: { path: '^src/clients/(?!index\\.ts$)' },
+    },
+    {
+      name: 'no-invoicing-into-reporting-internals',
+      severity: 'error',
+      comment: 'invoicing may only import from reporting/index.ts.',
+      from: { path: '^src/invoicing/' },
+      to: { path: '^src/reporting/(?!index\\.ts$)' },
+    },
+    {
+      name: 'no-reporting-into-clients-internals',
+      severity: 'error',
+      comment: 'reporting may only import from clients/index.ts.',
+      from: { path: '^src/reporting/' },
+      to: { path: '^src/clients/(?!index\\.ts$)' },
+    },
+    {
+      name: 'no-reporting-into-invoicing-internals',
+      severity: 'error',
+      comment: 'reporting may only import from invoicing/index.ts.',
+      from: { path: '^src/reporting/' },
+      to: { path: '^src/invoicing/(?!index\\.ts$)' },
+    },
+    {
+      name: 'no-next-outside-app',
       severity: 'error',
       comment:
-        'Modules may only import from other modules via their index.ts barrel.',
+        'next/* imports are framework concerns and must stay in src/app/. Domain modules and shared kernel must not depend on Next.js.',
       from: {
-        path: '^src/(clients|invoicing|reporting)/',
+        path: '^src/(clients|invoicing|reporting|shared)/',
+        pathNot: '\\.test\\.ts$',
       },
-      to: {
-        path: '^src/(clients|invoicing|reporting)/',
-        pathNot: [
-          // Allow imports within the same module (handled by "from" path prefix match)
-          // Allow imports of other modules' index.ts
-          '^src/(clients|invoicing|reporting)/index\\.ts$',
-        ],
-      },
-      module: {
-        // Only flag when importing a DIFFERENT module's internals
-        pathNot: '^src/$1/',
-      },
+      to: { path: '^next/' },
     },
   ],
   options: {
