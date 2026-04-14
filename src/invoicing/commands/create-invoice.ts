@@ -4,6 +4,7 @@ import { ClientIdSchema } from '@/shared/ids/client-id';
 import { DueDateSchema } from '@/shared/time/due-date';
 import type { Clock } from '@/shared/time/clock';
 import type { Result } from '@/shared/result/result';
+import { err } from '@/shared/result/result';
 import { TaxRateSchema } from '../value-objects/tax-rate';
 import type { Invoice } from '../entities/invoice';
 import { createInvoice as createInvoicePure } from '../entities/invoice';
@@ -40,7 +41,7 @@ export function createInvoice(
 
   const invoice = result.value;
   const saveResult = deps.repo.save(invoice);
-  if (saveResult.isErr()) return saveResult.map(() => invoice);
+  if (saveResult.isErr()) return err(saveResult.error);
 
   return result;
 }

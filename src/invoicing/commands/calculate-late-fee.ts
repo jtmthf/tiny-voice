@@ -89,7 +89,7 @@ export function calculateLateFee(
 
   const updated = result.value;
   const saveResult = deps.repo.save(updated);
-  if (saveResult.isErr()) return saveResult.map(() => updated);
+  if (saveResult.isErr()) return err(saveResult.error);
 
   return result;
 }

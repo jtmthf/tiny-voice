@@ -137,8 +137,8 @@ export function InvoiceActions({ invoiceId, status, showLateFeeButton }: { invoi
         </button>
       </div>
 
-      {error && <p className="error-message">{error}</p>}
-      {message && <p style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>{message}</p>}
+      {error && <p className="error-message" role="alert">{error}</p>}
+      {message && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>{message}</p>}
     </div>
   );
 }

@@ -32,16 +32,16 @@
 | H11 | Dashboard fetches all invoices twice *(page.tsx:11,58)* | Merge RecentInvoices + InvoiceSummary or lift query | FIXED |
 | H12 | LIKE wildcard defeats index on revenue *(sqlite-revenue-read-model.ts:53-57)* | Replace with `WHERE month >= ? AND month < ?` range | FIXED |
 | H13 | Duplicated Invoice->Summary mapping *(build-app.ts:110 + build-test-app.ts:83)* | Extract `toInvoiceSummary()` function | WONTFIX — composition-root wiring duplication is structural; `AppQueries` type ensures both stay in sync |
-| H14 | Repeated actionable() context boilerplate *(router.ts:250-299)* | Extract shared `getContext` lambda | OPEN |
-| H15 | Fragile error mapping in router *(router.ts:87-196)* | Use `result.match()` or add explicit return after map | OPEN |
-| H16 | Misleading `.map()` on Err in commands *(send-invoice.ts:38, etc.)* | Replace with `return err(saveResult.error)` | OPEN |
-| H17 | Invoicing queries have zero tests *(invoicing/queries/)* | Add tests for get-invoice-summary, list-invoices, get-outstanding-by-client | OPEN |
-| H18 | calculateTax (banker's rounding) untested *(value-objects/tax-rate.ts)* | Add unit + property tests for half-cent boundary rounding | OPEN |
-| H19 | Command not-found paths untested *(send/void/record-payment tests)* | Add `'returns error for non-existent invoice'` test to each | OPEN |
-| H20 | Multiple aria-live gaps *(error.tsx, loading.tsx, invoice-actions.tsx)* | Add `role="alert"` / `aria-live="polite"` to dynamic status messages | OPEN |
-| H21 | No skip-to-content link *(layout.tsx:8)* | Add visually-hidden skip link + `id="main-content"` on `<main>` | OPEN |
-| H22 | Invoice link text is meaningless *(page.tsx:32, invoices/page.tsx:36)* | Add `sr-only` context: status + amount | OPEN |
-| H23 | Table header contrast fails WCAG AA *(globals.css:82-87)* | Darken to `#595959` | OPEN |
+| H14 | Repeated actionable() context boilerplate *(router.ts:250-299)* | Extract shared `getContext` lambda | FIXED — `actionContext()` already extracted; remaining repetition is declarative per-action cache-tag config |
+| H15 | Fragile error mapping in router *(router.ts:87-196)* | Use `result.match()` or add explicit return after map | WONTFIX — `: never` return type already guarantees exhaustiveness; `.match()` doesn't apply to raw error objects |
+| H16 | Misleading `.map()` on Err in commands *(send-invoice.ts:38, etc.)* | Replace with `return err(saveResult.error)` | FIXED |
+| H17 | Invoicing queries have zero tests *(invoicing/queries/)* | Add tests for get-invoice-summary, list-invoices, get-outstanding-by-client | FIXED |
+| H18 | calculateTax (banker's rounding) untested *(value-objects/tax-rate.ts)* | Add unit + property tests for half-cent boundary rounding | FIXED |
+| H19 | Command not-found paths untested *(send/void/record-payment tests)* | Add `'returns error for non-existent invoice'` test to each | FIXED |
+| H20 | Multiple aria-live gaps *(error.tsx, loading.tsx, invoice-actions.tsx)* | Add `role="alert"` / `aria-live="polite"` to dynamic status messages | FIXED |
+| H21 | No skip-to-content link *(layout.tsx:8)* | Add visually-hidden skip link + `id="main-content"` on `<main>` | FIXED |
+| H22 | Invoice link text is meaningless *(page.tsx:32, invoices/page.tsx:36)* | Add `sr-only` context: status + amount | FIXED |
+| H23 | Table header contrast fails WCAG AA *(globals.css:82-87)* | Darken to `#595959` | FIXED — overridden on `th` only, `--color-text-muted` unchanged |
 
 ---
 

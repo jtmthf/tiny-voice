@@ -33,7 +33,7 @@ async function InvoiceList({ status }: { status: string | undefined }) {
       <tbody>
         {invoices.map((inv) => (
           <tr key={inv.id}>
-            <td><Link href={`/invoices/${inv.id}`}>{inv.id.slice(0, 8)}...</Link></td>
+            <td><Link href={`/invoices/${inv.id}`}>{inv.id.slice(0, 8)}...<span className="sr-only">, {inv.status}, {formatMoney(inv.total)}</span></Link></td>
             <td><span className={`badge badge-${inv.status}`}>{inv.status}</span></td>
             <td>{inv.lineItemCount}</td>
             <td>{formatMoney(inv.total)}</td>

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import { FixedClock } from '@/shared/time/fixed-clock';
 import { InProcessEventBus } from '@/shared/events/in-process-event-bus';
@@ -71,6 +72,21 @@ describe('recordPayment command', () => {
     expect(result.isOk()).toBe(true);
     if (result.isOk()) expect(result.value.status).toBe('paid');
     expect(events[0]!.becamePaid).toBe(true);
+  });
+
+  it('returns error for non-existent invoice', async () => {
+    const repo = new InMemoryInvoiceRepo();
+    const clock = new FixedClock(new Date('2025-02-01T10:00:00Z'));
+    const eventBus = new InProcessEventBus<InvoicingEventMap>();
+    const outbox = new InMemoryOutbox();
+
+    const result = await recordPayment(
+      { db: STUB_DB, repo, outbox, clock, eventBus },
+      { invoiceId: newInvoiceId(), paymentId: newPaymentId(), amountCents: 1000n },
+    );
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) expect(result.error.kind).toBe('InvalidInput');
   });
 
   it('rejects overpayment', async () => {

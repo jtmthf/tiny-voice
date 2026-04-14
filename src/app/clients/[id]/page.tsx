@@ -48,7 +48,7 @@ async function ClientInvoices({ clientId }: { clientId: string }) {
       <tbody>
         {invoices.map((inv) => (
           <tr key={inv.id}>
-            <td><Link href={`/invoices/${inv.id}`}>{inv.id.slice(0, 8)}...</Link></td>
+            <td><Link href={`/invoices/${inv.id}`}>{inv.id.slice(0, 8)}...<span className="sr-only">, {inv.status}, {formatMoney(inv.total)}</span></Link></td>
             <td><span className={`badge badge-${inv.status}`}>{inv.status}</span></td>
             <td>{formatMoney(inv.total)}</td>
             <td>{formatMoney(inv.outstandingBalance)}</td>

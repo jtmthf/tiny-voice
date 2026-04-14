@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { FixedClock } from '@/shared/time/fixed-clock';
 import { InProcessEventBus } from '@/shared/events/in-process-event-bus';
 import { InMemoryOutbox } from '@/shared/events/in-memory-outbox';
@@ -49,6 +50,17 @@ describe('sendInvoice command', () => {
     const result = await sendInvoice({ db: STUB_DB, repo, outbox, clock, eventBus }, { invoiceId: invoice.id });
     expect(result.isErr()).toBe(true);
     if (result.isErr()) expect(result.error.kind).toBe('NoLineItems');
+  });
+
+  it('returns error for non-existent invoice', async () => {
+    const repo = new InMemoryInvoiceRepo();
+    const clock = new FixedClock(new Date('2025-01-20T10:00:00Z'));
+    const eventBus = new InProcessEventBus<InvoicingEventMap>();
+    const outbox = new InMemoryOutbox();
+
+    const result = await sendInvoice({ db: STUB_DB, repo, outbox, clock, eventBus }, { invoiceId: newInvoiceId() });
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) expect(result.error.kind).toBe('InvalidInput');
   });
 
   it('rejects sending an already-sent invoice', async () => {
