@@ -67,12 +67,11 @@ export class SqliteRevenueReadModel implements RevenueReadModel {
   }
 
   getByYear(year: number): readonly MonthlyRevenue[] {
-    const prefix = `${year}-`;
     const rows = this.db
       .prepare<RevenueRow>(
-        "SELECT * FROM revenue_by_month WHERE month LIKE ? || '%' ORDER BY month ASC",
+        'SELECT * FROM revenue_by_month WHERE month >= ? AND month <= ? ORDER BY month ASC',
       )
-      .all(prefix);
+      .all(`${year}-01`, `${year}-12`);
     return rows.map(rowToMonthlyRevenue);
   }
 

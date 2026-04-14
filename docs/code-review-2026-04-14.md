@@ -30,7 +30,7 @@
 | H9 | Missing index on invoices.created_at *(migrations/0002)* | Add migration: `CREATE INDEX idx_invoices_created_at ON invoices(created_at DESC)` | FIXED |
 | H10 | Lost update window in commands *(send-invoice.ts:30, record-payment.ts:34)* | OCC guard is correct; verify concurrencyConflict maps to HTTP 409 in rpc-errors.ts | VERIFIED |
 | H11 | Dashboard fetches all invoices twice *(page.tsx:11,58)* | Merge RecentInvoices + InvoiceSummary or lift query | FIXED |
-| H12 | LIKE wildcard defeats index on revenue *(sqlite-revenue-read-model.ts:53-57)* | Replace with `WHERE month >= ? AND month < ?` range | OPEN |
+| H12 | LIKE wildcard defeats index on revenue *(sqlite-revenue-read-model.ts:53-57)* | Replace with `WHERE month >= ? AND month < ?` range | FIXED |
 | H13 | Duplicated Invoice->Summary mapping *(build-app.ts:110 + build-test-app.ts:83)* | Extract `toInvoiceSummary()` function | OPEN |
 | H14 | Repeated actionable() context boilerplate *(router.ts:250-299)* | Extract shared `getContext` lambda | OPEN |
 | H15 | Fragile error mapping in router *(router.ts:87-196)* | Use `result.match()` or add explicit return after map | OPEN |
