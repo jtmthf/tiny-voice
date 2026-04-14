@@ -3,12 +3,16 @@ import { cacheTag } from 'next/cache';
 import { app } from '@/app/instance';
 import { formatMoney } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/format-date';
+import { Money } from '@/shared/money/money';
 
-async function RecentInvoices() {
+async function getCachedInvoiceSummaries() {
   'use cache';
   cacheTag('invoices');
+  return app.queries.invoicing.listInvoices();
+}
 
-  const invoices = await app.queries.invoicing.listInvoices();
+async function RecentInvoices() {
+  const invoices = await getCachedInvoiceSummaries();
   const recent = invoices.slice(0, 10);
 
   if (recent.length === 0) {
@@ -56,22 +60,10 @@ async function ClientSummary() {
 }
 
 async function InvoiceSummary() {
-  'use cache';
-  cacheTag('invoices');
-
-  const invoices = await app.queries.invoicing.listInvoices();
+  const invoices = await getCachedInvoiceSummaries();
   const sent = invoices.filter((i) => i.status === 'sent');
-  let totalOutstanding = '$0.00';
-  if (sent.length > 0) {
-    // Sum outstanding from all sent invoices
-    let cents = 0n;
-    for (const inv of sent) {
-      cents += inv.outstandingBalance.cents;
-    }
-    const sign = cents < 0n ? '-' : '';
-    const abs = cents < 0n ? -cents : cents;
-    totalOutstanding = `${sign}$${abs / 100n}.${(abs % 100n).toString().padStart(2, '0')}`;
-  }
+  const totalOutstandingCents = sent.reduce((sum, inv) => sum + inv.outstandingBalance.cents, 0n);
+  const totalOutstanding = Money.fromCents(totalOutstandingCents);
 
   return (
     <>
@@ -81,7 +73,7 @@ async function InvoiceSummary() {
       </div>
       <div className="stat-card">
         <div className="label">Outstanding</div>
-        <div className="value">{totalOutstanding}</div>
+        <div className="value">{formatMoney(totalOutstanding)}</div>
       </div>
     </>
   );
