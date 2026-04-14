@@ -31,7 +31,7 @@
 | H10 | Lost update window in commands *(send-invoice.ts:30, record-payment.ts:34)* | OCC guard is correct; verify concurrencyConflict maps to HTTP 409 in rpc-errors.ts | VERIFIED |
 | H11 | Dashboard fetches all invoices twice *(page.tsx:11,58)* | Merge RecentInvoices + InvoiceSummary or lift query | FIXED |
 | H12 | LIKE wildcard defeats index on revenue *(sqlite-revenue-read-model.ts:53-57)* | Replace with `WHERE month >= ? AND month < ?` range | FIXED |
-| H13 | Duplicated Invoice->Summary mapping *(build-app.ts:110 + build-test-app.ts:83)* | Extract `toInvoiceSummary()` function | OPEN |
+| H13 | Duplicated Invoice->Summary mapping *(build-app.ts:110 + build-test-app.ts:83)* | Extract `toInvoiceSummary()` function | WONTFIX — composition-root wiring duplication is structural; `AppQueries` type ensures both stay in sync |
 | H14 | Repeated actionable() context boilerplate *(router.ts:250-299)* | Extract shared `getContext` lambda | OPEN |
 | H15 | Fragile error mapping in router *(router.ts:87-196)* | Use `result.match()` or add explicit return after map | OPEN |
 | H16 | Misleading `.map()` on Err in commands *(send-invoice.ts:38, etc.)* | Replace with `return err(saveResult.error)` | OPEN |
