@@ -6,7 +6,8 @@ import type { Invoice } from '../entities/invoice';
 import type { InvoiceError } from '../errors/invoice-error';
 import { InvoiceError as IE } from '../errors/invoice-error';
 import type { InvoiceStatus } from '../value-objects/invoice-status';
-import type { InvoiceRepository } from '../ports/invoice-repository';
+import type { InvoiceRepository, InvoiceListItem } from '../ports/invoice-repository';
+import { subtotal, paidAmount } from '../entities/invoice';
 
 function clone(invoice: Invoice): Invoice {
   return {
@@ -46,5 +47,20 @@ export class InMemoryInvoiceRepo implements InvoiceRepository {
       results = results.filter((inv) => inv.clientId === filters.clientId);
     }
     return results.map(clone);
+  }
+
+  listSummaries(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly InvoiceListItem[] {
+    const invoices = this.list(filters);
+    return invoices.map((inv): InvoiceListItem => ({
+      id: inv.id,
+      clientId: inv.clientId,
+      status: inv.status,
+      taxRate: inv.taxRate,
+      dueDate: inv.dueDate,
+      createdAt: inv.createdAt,
+      lineItemCount: inv.lineItems.length,
+      subtotalCents: subtotal(inv).cents,
+      paidAmountCents: paidAmount(inv).cents,
+    }));
   }
 }

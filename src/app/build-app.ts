@@ -20,10 +20,10 @@ import {
   getInvoiceSummary,
   getInvoiceLineItems,
   getInvoicePayments,
-  listInvoices,
+  listInvoiceSummaries,
   getOutstandingByClient,
 } from '@/invoicing/index';
-import type { InvoicingEventMap, InvoiceSummary } from '@/invoicing/index';
+import type { InvoicingEventMap } from '@/invoicing/index';
 import {
   SqliteRevenueReadModel,
   getRevenueByMonth,
@@ -32,14 +32,6 @@ import {
 import { setRpcContext } from './rpc/get-rpc-context';
 import { registerSubscribers } from './register-subscribers';
 import type { AppDeps } from './app-deps';
-import {
-  subtotal,
-  taxAmount,
-  total,
-  paidAmount,
-  outstandingBalance,
-} from '@/invoicing/index';
-
 /**
  * Composition root. Constructs all dependencies, wires subscribers,
  * and returns the fully assembled AppDeps.
@@ -102,8 +94,6 @@ export function buildApp(overrides: Partial<AppDeps> = {}): AppDeps {
   });
 
   // 9. Build queries — closures over repos/readModel calling each module's query functions.
-  //    listInvoices returns Invoice[], but AppDeps.queries.invoicing.listInvoices
-  //    returns InvoiceSummary[]. We wrap and convert here.
   const queries = overrides.queries ?? {
     clients: {
       getClient: (id) => getClient({ repo: clientRepo }, id),
@@ -113,22 +103,7 @@ export function buildApp(overrides: Partial<AppDeps> = {}): AppDeps {
       getInvoiceSummary: (id) => getInvoiceSummary({ repo: invoiceRepo }, id),
       getInvoiceLineItems: (id) => getInvoiceLineItems({ repo: invoiceRepo }, id),
       getInvoicePayments: (id) => getInvoicePayments({ repo: invoiceRepo }, id),
-      listInvoices: (filters) => {
-        const invoices = listInvoices({ repo: invoiceRepo }, filters);
-        return invoices.map((inv): InvoiceSummary => ({
-          id: inv.id,
-          clientId: inv.clientId,
-          status: inv.status,
-          lineItemCount: inv.lineItems.length,
-          subtotal: subtotal(inv),
-          taxAmount: taxAmount(inv),
-          total: total(inv),
-          paidAmount: paidAmount(inv),
-          outstandingBalance: outstandingBalance(inv),
-          dueDate: inv.dueDate,
-          createdAt: inv.createdAt,
-        }));
-      },
+      listInvoices: (filters) => listInvoiceSummaries({ repo: invoiceRepo }, filters),
       getOutstandingByClient: (clientId) => getOutstandingByClient({ repo: invoiceRepo }, clientId),
     },
     reporting: {

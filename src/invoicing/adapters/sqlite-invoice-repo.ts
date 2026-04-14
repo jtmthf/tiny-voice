@@ -13,7 +13,7 @@ import { InvoiceError as IE } from '../errors/invoice-error';
 import type { InvoiceStatus } from '../value-objects/invoice-status';
 import type { TaxRate } from '../value-objects/tax-rate';
 import type { DueDate } from '@/shared/time/due-date';
-import type { InvoiceRepository } from '../ports/invoice-repository';
+import type { InvoiceRepository, InvoiceListItem } from '../ports/invoice-repository';
 
 interface InvoiceRow {
   id: string;
@@ -28,6 +28,12 @@ interface InvoiceRow {
 interface InvoiceWithChildrenRow extends InvoiceRow {
   line_items_json: string;
   payments_json: string;
+}
+
+interface SummaryRow extends InvoiceRow {
+  line_item_count: number;
+  subtotal_cents: string | null;
+  paid_amount_cents: string | null;
 }
 
 interface LineItemRow {
@@ -215,5 +221,44 @@ export class SqliteInvoiceRepo implements InvoiceRepository {
       const validPayments = payments.filter((p) => p.id !== null);
       return toInvoice(row, validLineItems.map(toLineItem), validPayments.map(toPayment));
     });
+  }
+
+  listSummaries(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly InvoiceListItem[] {
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+
+    if (filters?.status) {
+      conditions.push('i.status = ?');
+      params.push(filters.status);
+    }
+    if (filters?.clientId) {
+      conditions.push('i.client_id = ?');
+      params.push(toDb(filters.clientId));
+    }
+
+    const where = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+
+    const sql = `
+      SELECT
+        i.*,
+        COALESCE((SELECT COUNT(*) FROM line_items li WHERE li.invoice_id = i.id), 0) AS line_item_count,
+        (SELECT SUM(CAST(li.unit_price_cents AS INTEGER) * li.quantity) FROM line_items li WHERE li.invoice_id = i.id) AS subtotal_cents,
+        (SELECT SUM(CAST(p.amount_cents AS INTEGER)) FROM payments p WHERE p.invoice_id = i.id) AS paid_amount_cents
+      FROM invoices i${where}
+      ORDER BY i.created_at DESC`;
+
+    const rows = this.db.prepare<SummaryRow>(sql).all(...params);
+
+    return rows.map((row): InvoiceListItem => ({
+      id: fromDb('inv', row.id),
+      clientId: fromDb('client', row.client_id),
+      status: row.status as InvoiceStatus,
+      taxRate: row.tax_rate as TaxRate,
+      dueDate: row.due_date as DueDate,
+      createdAt: new Date(row.created_at),
+      lineItemCount: row.line_item_count,
+      subtotalCents: BigInt(row.subtotal_cents ?? '0'),
+      paidAmountCents: BigInt(row.paid_amount_cents ?? '0'),
+    }));
   }
 }

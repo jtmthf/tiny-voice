@@ -12,17 +12,10 @@ import {
   getInvoiceSummary,
   getInvoiceLineItems,
   getInvoicePayments,
-  listInvoices,
+  listInvoiceSummaries,
   getOutstandingByClient,
 } from '@/invoicing/index';
-import type { InvoicingEventMap, InvoiceSummary } from '@/invoicing/index';
-import {
-  subtotal,
-  taxAmount,
-  total,
-  paidAmount,
-  outstandingBalance,
-} from '@/invoicing/index';
+import type { InvoicingEventMap } from '@/invoicing/index';
 import {
   InMemoryRevenueReadModel,
   getRevenueByMonth,
@@ -85,22 +78,7 @@ export function buildTestApp(overrides: Partial<AppDeps> = {}): TestAppResult {
       getInvoiceSummary: (id) => getInvoiceSummary({ repo: invoiceRepo }, id),
       getInvoiceLineItems: (id) => getInvoiceLineItems({ repo: invoiceRepo }, id),
       getInvoicePayments: (id) => getInvoicePayments({ repo: invoiceRepo }, id),
-      listInvoices: (filters) => {
-        const invoices = listInvoices({ repo: invoiceRepo }, filters);
-        return invoices.map((inv): InvoiceSummary => ({
-          id: inv.id,
-          clientId: inv.clientId,
-          status: inv.status,
-          lineItemCount: inv.lineItems.length,
-          subtotal: subtotal(inv),
-          taxAmount: taxAmount(inv),
-          total: total(inv),
-          paidAmount: paidAmount(inv),
-          outstandingBalance: outstandingBalance(inv),
-          dueDate: inv.dueDate,
-          createdAt: inv.createdAt,
-        }));
-      },
+      listInvoices: (filters) => listInvoiceSummaries({ repo: invoiceRepo }, filters),
       getOutstandingByClient: (clientId) => getOutstandingByClient({ repo: invoiceRepo }, clientId),
     },
     reporting: {

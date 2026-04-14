@@ -63,6 +63,7 @@ export type { LineItemSummary } from './queries/get-invoice-line-items';
 export { getInvoicePayments } from './queries/get-invoice-payments';
 export type { PaymentSummary } from './queries/get-invoice-payments';
 export { listInvoices } from './queries/list-invoices';
+export { listInvoiceSummaries } from './queries/list-invoice-summaries';
 export { getOutstandingByClient } from './queries/get-outstanding-by-client';
 
 // --- Events ---
@@ -75,7 +76,7 @@ export { InvoiceVoidedSchema } from './events/invoice-voided';
 export type { InvoicingEventMap } from './events/invoicing-event-map';
 
 // --- Ports ---
-export type { InvoiceRepository } from './ports/invoice-repository';
+export type { InvoiceRepository, InvoiceListItem } from './ports/invoice-repository';
 export type { PdfGenerator, PdfInput, PdfError } from './ports/pdf-generator';
 export type { NotificationSender, NotificationError, InvoiceSentNotification, PaymentReceivedNotification } from './ports/notification-sender';
 
