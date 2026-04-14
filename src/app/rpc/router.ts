@@ -243,59 +243,61 @@ export const router = {
 
 // ---------------------------------------------------------------------------
 // Server Actions — each procedure gets .actionable() for Next.js consumption
+//
+// Cache invalidation is co-located here via inline onSuccess interceptors
+// that call `updateTag` after a successful mutation. Read-only procedures
+// (generatePdf) omit the interceptor.
 // ---------------------------------------------------------------------------
+
+import { updateTag } from 'next/cache';
+
+async function actionContext() {
+  const { getRpcContext } = await import('./get-rpc-context');
+  return getRpcContext();
+}
+
+function withCacheInvalidation(...tags: string[]) {
+  return async function <T>(options: { next(): Promise<T> }): Promise<T> {
+    const result = await options.next();
+    for (const tag of tags) updateTag(tag);
+    return result;
+  };
+}
 
 export const actions = {
   clients: {
     create: clientsCreate.actionable({
-      context: async () => {
-        const { getRpcContext } = await import('./get-rpc-context');
-        return getRpcContext();
-      },
+      context: actionContext,
+      interceptors: [withCacheInvalidation('clients')],
     }),
   },
   invoicing: {
     create: invoicingCreate.actionable({
-      context: async () => {
-        const { getRpcContext } = await import('./get-rpc-context');
-        return getRpcContext();
-      },
+      context: actionContext,
+      interceptors: [withCacheInvalidation('invoices')],
     }),
     addLineItem: invoicingAddLineItem.actionable({
-      context: async () => {
-        const { getRpcContext } = await import('./get-rpc-context');
-        return getRpcContext();
-      },
+      context: actionContext,
+      interceptors: [withCacheInvalidation('invoices')],
     }),
     send: invoicingSend.actionable({
-      context: async () => {
-        const { getRpcContext } = await import('./get-rpc-context');
-        return getRpcContext();
-      },
+      context: actionContext,
+      interceptors: [withCacheInvalidation('invoices')],
     }),
     recordPayment: invoicingRecordPayment.actionable({
-      context: async () => {
-        const { getRpcContext } = await import('./get-rpc-context');
-        return getRpcContext();
-      },
+      context: actionContext,
+      interceptors: [withCacheInvalidation('invoices', 'revenue')],
     }),
     void: invoicingVoid.actionable({
-      context: async () => {
-        const { getRpcContext } = await import('./get-rpc-context');
-        return getRpcContext();
-      },
+      context: actionContext,
+      interceptors: [withCacheInvalidation('invoices')],
     }),
     calculateLateFee: invoicingCalculateLateFee.actionable({
-      context: async () => {
-        const { getRpcContext } = await import('./get-rpc-context');
-        return getRpcContext();
-      },
+      context: actionContext,
+      interceptors: [withCacheInvalidation('invoices')],
     }),
     generatePdf: invoicingGeneratePdf.actionable({
-      context: async () => {
-        const { getRpcContext } = await import('./get-rpc-context');
-        return getRpcContext();
-      },
+      context: actionContext,
     }),
   },
 };

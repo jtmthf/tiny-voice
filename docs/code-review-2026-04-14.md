@@ -23,7 +23,7 @@
 | H2 | Event published after save, outside transaction *(record-payment.ts:50-56)* | Transactional outbox pattern: save + enqueue in one transaction, drain after commit | FIXED |
 | H3 | Revenue bigint truncated to Number *(sqlite-revenue-read-model.ts:38)* | Store as TEXT like other money columns; use `BigInt()` on read | FIXED |
 | H4 | InvoiceDetail page fetches same data 4-5x *(invoices/[id]/page.tsx:16-153)* | Data-level `'use cache'` queries shared across components; page-level redundancies removed | FIXED |
-| H5 | createInvoice + calculateLateFee missing cache invalidation *(actions/index.ts:57,83)* | Add `invalidateOnSuccess(result, 'invoices')` | OPEN |
+| H5 | createInvoice + calculateLateFee missing cache invalidation *(actions/index.ts:57,83)* | Add `invalidateOnSuccess(result, 'invoices')` | FIXED |
 | H6 | Event schemas use `z.date()`/`z.bigint()` -- not wire-safe *(invoice-payment-recorded.ts:7-8)* | Use `z.string()` + parse on read | OPEN |
 | H7 | RSC bypasses query layer for invoiceRepo *(invoices/[id]/page.tsx:75,110,152)* | New `getInvoiceLineItems` + `getInvoicePayments` queries; components route through `app.queries.invoicing.*` | FIXED |
 | H8 | listInvoices loads full aggregates for summary use *(build-app.ts:110-125)* | Add dedicated SQL summary query with JOINs | OPEN |

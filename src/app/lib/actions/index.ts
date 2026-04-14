@@ -8,26 +8,13 @@
  * reference boundary — the bundler does NOT trace into the router's server-only
  * dependencies (pdfkit, better-sqlite3, etc.) for the client bundle.
  *
- * Each function wraps an `.actionable()` call from the router.
- *
- * Cache invalidation lives here — `updateTag` must be called in a Server Action
- * (see Next.js docs). Tags correspond to the `cacheTag()` calls in RSC pages.
+ * Cache invalidation is handled by `onSuccess` interceptors on each
+ * `.actionable()` call in `router.ts`. Tags are declared once, co-located
+ * with the procedure — nothing to remember here.
  */
 
 import { redirect } from 'next/navigation';
-import { updateTag } from 'next/cache';
 import { actions as rpcActions } from '@/app/rpc/router';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Invalidate cache tags only when the result tuple indicates success. */
-function invalidateOnSuccess(result: [error: unknown, data: unknown], ...tags: string[]) {
-  const [err] = result;
-  if (err) return;
-  for (const tag of tags) updateTag(tag);
-}
 
 // ---------------------------------------------------------------------------
 // FormData-accepting actions (for useActionState + progressive enhancement)
@@ -40,7 +27,6 @@ export async function createClientForm(prev: FormState, formData: FormData): Pro
   const email = formData.get('email') as string;
   const [err, data] = await rpcActions.clients.create({ name, email });
   if (err) return { error: err.message };
-  updateTag('clients');
   redirect(`/clients/${data.id}`);
 }
 
@@ -49,9 +35,7 @@ export async function createClientForm(prev: FormState, formData: FormData): Pro
 // ---------------------------------------------------------------------------
 
 export async function createClient(input: { name: string; email: string }) {
-  const result = await rpcActions.clients.create(input);
-  invalidateOnSuccess(result, 'clients');
-  return result;
+  return rpcActions.clients.create(input);
 }
 
 export async function createInvoice(input: { clientId: string; taxRate: number; dueDate: string }) {
@@ -63,21 +47,15 @@ export async function addLineItem(input: { invoiceId: string; description: strin
 }
 
 export async function sendInvoice(input: { invoiceId: string }) {
-  const result = await rpcActions.invoicing.send(input);
-  invalidateOnSuccess(result, 'invoices');
-  return result;
+  return rpcActions.invoicing.send(input);
 }
 
 export async function recordPayment(input: { invoiceId: string; amountCents: number }) {
-  const result = await rpcActions.invoicing.recordPayment(input);
-  invalidateOnSuccess(result, 'invoices', 'revenue');
-  return result;
+  return rpcActions.invoicing.recordPayment(input);
 }
 
 export async function voidInvoice(input: { invoiceId: string }) {
-  const result = await rpcActions.invoicing.void(input);
-  invalidateOnSuccess(result, 'invoices');
-  return result;
+  return rpcActions.invoicing.void(input);
 }
 
 export async function calculateLateFee(input: { invoiceId: string }) {
