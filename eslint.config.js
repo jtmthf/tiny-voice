@@ -136,6 +136,20 @@ export default tseslint.config(
       // No barrel files (index.ts that only re-export from siblings)
       'barrel-files/avoid-barrel-files': 'error',
 
+      // Async safety
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+
+      // Exhaustive switches on union types
+      '@typescript-eslint/switch-exhaustiveness-check': 'error',
+
+      // Enforce import type for type-only imports
+      '@typescript-eslint/consistent-type-imports': ['error', {
+        prefer: 'type-imports',
+        fixStyle: 'inline-type-imports',
+        disallowTypeAnnotations: true,
+      }],
+
     },
   },
 

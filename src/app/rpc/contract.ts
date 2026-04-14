@@ -1,6 +1,7 @@
 import { z } from 'zod/v4';
 import { os } from '@orpc/server';
 import { rpcErrors } from './rpc-errors';
+import type { RpcContext } from './rpc-context';
 import { ClientIdSchema } from '@/shared/ids/client-id';
 import { InvoiceIdSchema } from '@/shared/ids/invoice-id';
 
@@ -54,7 +55,7 @@ type InvoiceDto = z.infer<typeof InvoiceDto>;
 // Shared base with context type + common errors
 // ---------------------------------------------------------------------------
 
-const base = os.$context<import('./rpc-context').RpcContext>().errors(rpcErrors);
+const base = os.$context<RpcContext>().errors(rpcErrors);
 
 // ---------------------------------------------------------------------------
 // Clients namespace

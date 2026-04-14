@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type { InvoiceId } from '@/shared/ids/invoice-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import { InMemoryInvoiceRepo } from '../adapters/in-memory-invoice-repo';
 import { buildDraftInvoice, buildSentInvoice } from '../testing/invoice-factory';
@@ -52,7 +53,7 @@ describe('addLineItem command', () => {
     const result = await addLineItem(
       { repo },
       {
-        invoiceId: newLineItemId() as unknown as import('@/shared/ids/invoice-id').InvoiceId,
+        invoiceId: newLineItemId() as unknown as InvoiceId,
         lineItemId: newLineItemId(),
         description: 'Nope',
         quantity: 1,

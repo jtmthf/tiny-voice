@@ -1,5 +1,4 @@
-import { Money } from '@/shared/money/money';
-import { add } from '@/shared/money/money';
+import { type Money, add } from '@/shared/money/money';
 import type { YearMonth } from '@/shared/time/year-month';
 import type { MonthlyRevenue, RevenueReadModel } from '../ports/revenue-read-model';
 

@@ -4,6 +4,7 @@ import fc from 'fast-check';
 import { FixedClock } from '@/shared/time/fixed-clock';
 import { Money } from '@/shared/money/money';
 import type { DueDate } from '@/shared/time/due-date';
+import type { InvoiceId } from '@/shared/ids/invoice-id';
 import { InMemoryInvoiceRepo } from '../adapters/in-memory-invoice-repo';
 import {
   buildSentInvoice,
@@ -170,7 +171,7 @@ describe('calculateLateFee command', () => {
     const clock = new FixedClock(new Date('2025-03-15T12:00:00Z'));
 
     const result = await calculateLateFee({ repo, clock }, {
-      invoiceId: '00000000-0000-7000-8000-000000000000' as import('@/shared/ids/invoice-id').InvoiceId,
+      invoiceId: '00000000-0000-7000-8000-000000000000' as InvoiceId,
     });
 
     expect(result.isErr()).toBe(true);

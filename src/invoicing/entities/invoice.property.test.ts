@@ -2,6 +2,7 @@ import { it } from '@fast-check/vitest';
 import { describe, expect } from 'vitest';
 import fc from 'fast-check';
 import { Money, add, equals } from '@/shared/money/money';
+import type { LineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import {
   subtotal,
@@ -165,7 +166,7 @@ describe('Invoice PBT invariants', () => {
 
       // Try to add line item
       const addResult = addLineItem(voidedInv, {
-        id: newPaymentId() as unknown as import('@/shared/ids/line-item-id').LineItemId,
+        id: newPaymentId() as unknown as LineItemId,
         description: 'x',
         quantity: 1,
         unitPrice: Money.fromCents(100n),

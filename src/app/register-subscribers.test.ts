@@ -8,6 +8,7 @@ import { newPaymentId } from '@/shared/ids/payment-id';
 import type { InvoiceSent } from '@/invoicing/events/invoice-sent';
 import type { InvoicePaymentRecorded } from '@/invoicing/events/invoice-payment-recorded';
 import type { InvoiceVoided } from '@/invoicing/events/invoice-voided';
+import type { YearMonth } from '@/shared/time/year-month';
 
 describe('subscribers', () => {
   let app: AppDeps;
@@ -48,7 +49,7 @@ describe('subscribers', () => {
       await app.eventBus.publish('InvoicePaymentRecorded', event);
 
       // Revenue projection updated
-      const revenue = await app.revenueReadModel.getByMonth('2026-04' as import('@/shared/time/year-month').YearMonth);
+      const revenue = await app.revenueReadModel.getByMonth('2026-04' as YearMonth);
       expect(revenue).not.toBeNull();
       expect(revenue!.total.cents).toBe(5000n);
 
