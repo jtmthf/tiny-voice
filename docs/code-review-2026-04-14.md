@@ -21,7 +21,7 @@
 |----|---------|-------------|--------|
 | H1 | No authentication on any endpoint *(route.ts:1, actions/index.ts:1)* | Intentional omission for demo app; documented in CLAUDE.md | DOCUMENTED |
 | H2 | Event published after save, outside transaction *(record-payment.ts:50-56)* | Transactional outbox pattern: save + enqueue in one transaction, drain after commit | FIXED |
-| H3 | Revenue bigint truncated to Number *(sqlite-revenue-read-model.ts:38)* | Store as TEXT like other money columns; use `BigInt()` on read | OPEN |
+| H3 | Revenue bigint truncated to Number *(sqlite-revenue-read-model.ts:38)* | Store as TEXT like other money columns; use `BigInt()` on read | FIXED |
 | H4 | InvoiceDetail page fetches same data 4-5x *(invoices/[id]/page.tsx:16-153)* | Fetch once at page level, pass as props | OPEN |
 | H5 | createInvoice + calculateLateFee missing cache invalidation *(actions/index.ts:57,83)* | Add `invalidateOnSuccess(result, 'invoices')` | OPEN |
 | H6 | Event schemas use `z.date()`/`z.bigint()` -- not wire-safe *(invoice-payment-recorded.ts:7-8)* | Use `z.string()` + parse on read | OPEN |
