@@ -22,8 +22,8 @@ describe('subscribers', () => {
       const event: InvoiceSent = {
         invoiceId: newInvoiceId(),
         clientId: newClientId(),
-        totalCents: 10000n,
-        sentAt: new Date('2026-04-13T00:00:00Z'),
+        totalCents: '10000',
+        sentAt: '2026-04-13T00:00:00.000Z',
       };
 
       await app.eventBus.publish('InvoiceSent', event);
@@ -38,9 +38,9 @@ describe('subscribers', () => {
       const event: InvoicePaymentRecorded = {
         invoiceId: newInvoiceId(),
         paymentId: newPaymentId(),
-        amountCents: 5000n,
+        amountCents: '5000',
         becamePaid: false,
-        recordedAt: new Date('2026-04-13T00:00:00Z'),
+        recordedAt: '2026-04-13T00:00:00.000Z',
       };
 
       await app.eventBus.publish('InvoicePaymentRecorded', event);
@@ -60,7 +60,7 @@ describe('subscribers', () => {
     it('does not send a notification', async () => {
       const event: InvoiceVoided = {
         invoiceId: newInvoiceId(),
-        voidedAt: new Date('2026-04-13T00:00:00Z'),
+        voidedAt: '2026-04-13T00:00:00.000Z',
       };
 
       await app.eventBus.publish('InvoiceVoided', event);
@@ -76,8 +76,8 @@ describe('subscribers', () => {
       const event: InvoiceSent = {
         invoiceId: newInvoiceId(),
         clientId: newClientId(),
-        totalCents: 10000n,
-        sentAt: new Date('2026-04-13T00:00:00Z'),
+        totalCents: '10000',
+        sentAt: '2026-04-13T00:00:00.000Z',
       };
 
       await app.eventBus.publish('InvoiceSent', event);

@@ -19,9 +19,9 @@ function buildPaymentEvent(overrides?: Partial<InvoicePaymentRecorded>): Invoice
   return {
     invoiceId: newInvoiceId(),
     paymentId: newPaymentId(),
-    amountCents: 10000n,
+    amountCents: '10000',
     becamePaid: false,
-    recordedAt: new Date('2025-01-15'),
+    recordedAt: '2025-01-15T00:00:00.000Z',
     ...overrides,
   };
 }
@@ -47,11 +47,11 @@ describe('registerRevenueProjection', () => {
 
     await eventBus.publish(
       'InvoicePaymentRecorded',
-      buildPaymentEvent({ recordedAt: new Date('2025-01-10'), amountCents: 5000n }),
+      buildPaymentEvent({ recordedAt: '2025-01-10T00:00:00.000Z', amountCents: '5000' }),
     );
     await eventBus.publish(
       'InvoicePaymentRecorded',
-      buildPaymentEvent({ recordedAt: new Date('2025-02-20'), amountCents: 3000n }),
+      buildPaymentEvent({ recordedAt: '2025-02-20T00:00:00.000Z', amountCents: '3000' }),
     );
 
     const jan = readModel.getByMonth('2025-01' as YearMonth);
@@ -67,11 +67,11 @@ describe('registerRevenueProjection', () => {
 
     await eventBus.publish(
       'InvoicePaymentRecorded',
-      buildPaymentEvent({ recordedAt: new Date('2025-03-05'), amountCents: 2000n }),
+      buildPaymentEvent({ recordedAt: '2025-03-05T00:00:00.000Z', amountCents: '2000' }),
     );
     await eventBus.publish(
       'InvoicePaymentRecorded',
-      buildPaymentEvent({ recordedAt: new Date('2025-03-25'), amountCents: 7000n }),
+      buildPaymentEvent({ recordedAt: '2025-03-25T00:00:00.000Z', amountCents: '7000' }),
     );
 
     const mar = readModel.getByMonth('2025-03' as YearMonth);
@@ -88,7 +88,7 @@ describe('registerRevenueProjection', () => {
     unsub();
     await eventBus.publish(
       'InvoicePaymentRecorded',
-      buildPaymentEvent({ amountCents: 99999n }),
+      buildPaymentEvent({ amountCents: '99999' }),
     );
 
     const result = readModel.getByMonth('2025-01' as YearMonth);

@@ -45,8 +45,8 @@ export async function sendInvoice(
     deps.outbox.enqueue('InvoiceSent', {
       invoiceId: updated.id,
       clientId: updated.clientId,
-      totalCents: total(updated).cents,
-      sentAt: deps.clock.now(),
+      totalCents: total(updated).cents.toString(),
+      sentAt: deps.clock.now().toISOString(),
     });
 
     return saveResult;

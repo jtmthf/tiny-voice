@@ -44,7 +44,7 @@ export async function voidInvoice(
 
     deps.outbox.enqueue('InvoiceVoided', {
       invoiceId: updated.id,
-      voidedAt: deps.clock.now(),
+      voidedAt: deps.clock.now().toISOString(),
     });
 
     return saveResult;

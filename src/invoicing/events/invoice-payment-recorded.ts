@@ -5,9 +5,9 @@ import { PaymentIdSchema } from '@/shared/ids/payment-id';
 export const InvoicePaymentRecordedSchema = z.object({
   invoiceId: InvoiceIdSchema,
   paymentId: PaymentIdSchema,
-  amountCents: z.bigint(),
+  amountCents: z.string(),
   becamePaid: z.boolean(),
-  recordedAt: z.date(),
+  recordedAt: z.iso.datetime(),
 });
 
 export type InvoicePaymentRecorded = z.infer<typeof InvoicePaymentRecordedSchema>;

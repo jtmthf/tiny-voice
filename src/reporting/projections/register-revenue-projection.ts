@@ -15,9 +15,10 @@ export function registerRevenueProjection(deps: {
   logger: Logger;
 }): () => void {
   return deps.eventBus.subscribe('InvoicePaymentRecorded', (payload) => {
-    const month = yearMonthOf(payload.recordedAt);
-    const amount = Money.fromCents(payload.amountCents);
-    deps.readModel.recordPayment({ month, amount, at: payload.recordedAt });
+    const recordedAt = new Date(payload.recordedAt);
+    const month = yearMonthOf(recordedAt);
+    const amount = Money.fromCents(BigInt(payload.amountCents));
+    deps.readModel.recordPayment({ month, amount, at: recordedAt });
     deps.logger.info('revenue.projection.updated', { month, invoiceId: payload.invoiceId });
   });
 }

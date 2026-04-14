@@ -55,9 +55,9 @@ export async function recordPayment(
     deps.outbox.enqueue('InvoicePaymentRecorded', {
       invoiceId: updated.id,
       paymentId: input.paymentId,
-      amountCents: input.amountCents,
+      amountCents: input.amountCents.toString(),
       becamePaid: updated.status === 'paid',
-      recordedAt: now,
+      recordedAt: now.toISOString(),
     });
 
     return saveResult;

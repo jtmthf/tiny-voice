@@ -51,7 +51,7 @@ export function registerSubscribers(deps: RegisterSubscribersDeps): () => void {
       await deps.notifications.sendInvoiceSent({
         invoiceId: payload.invoiceId,
         clientName,
-        totalCents: payload.totalCents,
+        totalCents: BigInt(payload.totalCents),
       });
       deps.logger.info('notification.invoice_sent', { invoiceId: payload.invoiceId });
     }),
@@ -65,7 +65,7 @@ export function registerSubscribers(deps: RegisterSubscribersDeps): () => void {
 
       await deps.notifications.sendPaymentReceived({
         invoiceId: payload.invoiceId,
-        amountCents: payload.amountCents,
+        amountCents: BigInt(payload.amountCents),
         outstanding,
       });
       deps.logger.info('notification.payment_received', { invoiceId: payload.invoiceId });
