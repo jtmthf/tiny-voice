@@ -15,7 +15,6 @@ module.exports = {
       from: {
         orphan: true,
         pathNot: [
-          '(^|/)index\\.ts$',
           '\\.test\\.ts$',
           '\\.property\\.test\\.ts$',
           '^src/app/',
@@ -40,46 +39,28 @@ module.exports = {
       },
     },
     {
-      name: 'no-clients-into-invoicing-internals',
+      name: 'no-clients-into-other-adapters',
       severity: 'error',
-      comment: 'clients may only import from invoicing/index.ts.',
+      comment:
+        'clients must not import adapters from invoicing or reporting.',
       from: { path: '^src/clients/' },
-      to: { path: '^src/invoicing/(?!index\\.ts$)' },
+      to: { path: '^src/(invoicing|reporting)/adapters/' },
     },
     {
-      name: 'no-clients-into-reporting-internals',
+      name: 'no-invoicing-into-other-adapters',
       severity: 'error',
-      comment: 'clients may only import from reporting/index.ts.',
-      from: { path: '^src/clients/' },
-      to: { path: '^src/reporting/(?!index\\.ts$)' },
-    },
-    {
-      name: 'no-invoicing-into-clients-internals',
-      severity: 'error',
-      comment: 'invoicing may only import from clients/index.ts.',
+      comment:
+        'invoicing must not import adapters from clients or reporting.',
       from: { path: '^src/invoicing/' },
-      to: { path: '^src/clients/(?!index\\.ts$)' },
+      to: { path: '^src/(clients|reporting)/adapters/' },
     },
     {
-      name: 'no-invoicing-into-reporting-internals',
+      name: 'no-reporting-into-other-adapters',
       severity: 'error',
-      comment: 'invoicing may only import from reporting/index.ts.',
-      from: { path: '^src/invoicing/' },
-      to: { path: '^src/reporting/(?!index\\.ts$)' },
-    },
-    {
-      name: 'no-reporting-into-clients-internals',
-      severity: 'error',
-      comment: 'reporting may only import from clients/index.ts.',
+      comment:
+        'reporting must not import adapters from clients or invoicing.',
       from: { path: '^src/reporting/' },
-      to: { path: '^src/clients/(?!index\\.ts$)' },
-    },
-    {
-      name: 'no-reporting-into-invoicing-internals',
-      severity: 'error',
-      comment: 'reporting may only import from invoicing/index.ts.',
-      from: { path: '^src/reporting/' },
-      to: { path: '^src/invoicing/(?!index\\.ts$)' },
+      to: { path: '^src/(clients|invoicing)/adapters/' },
     },
     {
       name: 'no-shared-into-app',

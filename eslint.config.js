@@ -4,6 +4,7 @@ import tseslint from 'typescript-eslint';
 import importX from 'eslint-plugin-import-x';
 import unicorn from 'eslint-plugin-unicorn';
 import checkFile from 'eslint-plugin-check-file';
+import barrelFiles from 'eslint-plugin-barrel-files';
 
 // Inline rule: filename must match a named export (case-insensitive, ignoring `-` and `_`).
 // No ESLint 10 plugin does this — `eslint-plugin-filename-export` uses the removed
@@ -81,6 +82,7 @@ export default tseslint.config(
       'import-x': importX,
       unicorn,
       'check-file': checkFile,
+      'barrel-files': barrelFiles,
       local: localPlugin,
     },
     languageOptions: {
@@ -130,6 +132,9 @@ export default tseslint.config(
 
       // Filename must match a named export. See inline rule at top of this file for rationale.
       'local/filename-matches-export': 'error',
+
+      // No barrel files (index.ts that only re-export from siblings)
+      'barrel-files/avoid-barrel-files': 'error',
 
     },
   },

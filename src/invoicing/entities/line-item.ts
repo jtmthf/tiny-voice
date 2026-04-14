@@ -1,7 +1,7 @@
 import type { LineItemId } from '@/shared/ids/line-item-id';
 import type { Money } from '@/shared/money/money';
 import { multiply } from '@/shared/money/money';
-import type { Result } from '@/shared/result/result';
+import type { Result } from 'neverthrow';
 import type { MoneyError } from '@/shared/money/money';
 
 export interface LineItem {

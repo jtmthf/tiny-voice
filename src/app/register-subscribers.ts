@@ -2,14 +2,12 @@ import type { EventBus } from '@/shared/events/event-bus';
 import type { Clock } from '@/shared/time/clock';
 import type { Logger } from '@/shared/logger/logger';
 import { Money } from '@/shared/money/money';
-import type {
-  InvoicingEventMap,
-  NotificationSender,
-  InvoiceRepository,
-} from '@/invoicing/index';
-import { outstandingBalance } from '@/invoicing/index';
-import type { RevenueReadModel } from '@/reporting/index';
-import { registerRevenueProjection } from '@/reporting/index';
+import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
+import type { NotificationSender } from '@/invoicing/ports/notification-sender';
+import type { InvoiceRepository } from '@/invoicing/ports/invoice-repository';
+import { outstandingBalance } from '@/invoicing/entities/invoice';
+import type { RevenueReadModel } from '@/reporting/ports/revenue-read-model';
+import { registerRevenueProjection } from '@/reporting/projections/register-revenue-projection';
 
 export interface RegisterSubscribersDeps {
   readonly eventBus: EventBus<InvoicingEventMap>;

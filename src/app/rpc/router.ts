@@ -2,21 +2,17 @@ import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import type { DueDate } from '@/shared/time/due-date';
-import type { TaxRate } from '@/invoicing/index';
-import type { Invoice } from '@/invoicing/index';
-import type { Client } from '@/clients/index';
+import type { TaxRate } from '@/invoicing/value-objects/tax-rate';
+import type { Invoice } from '@/invoicing/entities/invoice';
+import type { Client } from '@/clients/entities/client';
 import type { Money } from '@/shared/money/money';
-import {
-  createClient,
-} from '@/clients/index';
-import {
-  createInvoiceCommand,
-  addLineItemCommand,
-  sendInvoiceCommand,
-  recordPaymentCommand,
-  voidInvoiceCommand,
-  calculateLateFeeCommand,
-} from '@/invoicing/index';
+import { createClient } from '@/clients/commands/create-client';
+import { createInvoice as createInvoiceCommand } from '@/invoicing/commands/create-invoice';
+import { addLineItem as addLineItemCommand } from '@/invoicing/commands/add-line-item';
+import { sendInvoice as sendInvoiceCommand } from '@/invoicing/commands/send-invoice';
+import { recordPayment as recordPaymentCommand } from '@/invoicing/commands/record-payment';
+import { voidInvoice as voidInvoiceCommand } from '@/invoicing/commands/void-invoice';
+import { calculateLateFee as calculateLateFeeCommand } from '@/invoicing/commands/calculate-late-fee';
 import { contract } from './contract';
 import { mapInvoiceError, mapClientError } from './rpc-errors';
 

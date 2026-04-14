@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import type { ORPCErrorConstructorMap } from '@orpc/server';
-import type { InvoiceError } from '@/invoicing/index';
-import type { CreateClientError } from '@/clients/index';
+import type { InvoiceError } from '@/invoicing/errors/invoice-error';
+import type { CreateClientError } from '@/clients/commands/create-client';
 
 /**
  * oRPC typed error definitions.

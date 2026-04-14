@@ -3,7 +3,7 @@ import { cacheTag } from 'next/cache';
 import { app } from '@/app/app';
 import { formatMoney } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/format-date';
-import type { InvoiceStatus } from '@/invoicing/index';
+import type { InvoiceStatus } from '@/invoicing/value-objects/invoice-status';
 import { InvoiceFilter } from './invoice-filter';
 
 async function InvoiceList({ status }: { status: string | undefined }) {

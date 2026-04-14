@@ -2,19 +2,17 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { buildTestApp } from './testing/build-test-app';
 import { buildIntegrationTestApp } from './testing/build-integration-test-app';
 import type { AppDeps } from './app-deps';
-import type { CapturingNotificationSender } from '@/invoicing/index';
-import { createClient } from '@/clients/index';
-import {
-  createInvoiceCommand,
-  addLineItemCommand,
-  sendInvoiceCommand,
-  recordPaymentCommand,
-} from '@/invoicing/index';
+import type { CapturingNotificationSender } from '@/invoicing/adapters/capturing-notification-sender';
+import { createClient } from '@/clients/commands/create-client';
+import { createInvoice as createInvoiceCommand } from '@/invoicing/commands/create-invoice';
+import { addLineItem as addLineItemCommand } from '@/invoicing/commands/add-line-item';
+import { sendInvoice as sendInvoiceCommand } from '@/invoicing/commands/send-invoice';
+import { recordPayment as recordPaymentCommand } from '@/invoicing/commands/record-payment';
 import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import type { DueDate } from '@/shared/time/due-date';
-import type { TaxRate } from '@/invoicing/index';
+import type { TaxRate } from '@/invoicing/value-objects/tax-rate';
 import type { YearMonth } from '@/shared/time/year-month';
 
 describe('buildTestApp', () => {

@@ -7,28 +7,22 @@ import { SqliteOutbox } from '@/shared/events/sqlite-outbox';
 import { SqliteDatabase } from '@/shared/db/sqlite-database';
 import { runMigrations } from '@/shared/db/run-migrations';
 import { resolve } from 'node:path';
-import {
-  SqliteClientRepo,
-  getClient,
-  listClients,
-} from '@/clients/index';
-import {
-  SqliteInvoiceRepo,
-  PdfKitGenerator,
-  StubPdfGenerator,
-  ConsoleNotificationSender,
-  getInvoiceSummary,
-  getInvoiceLineItems,
-  getInvoicePayments,
-  listInvoiceSummaries,
-  getOutstandingByClient,
-} from '@/invoicing/index';
-import type { InvoicingEventMap } from '@/invoicing/index';
-import {
-  SqliteRevenueReadModel,
-  getRevenueByMonth,
-  getRevenueByYear,
-} from '@/reporting/index';
+import { SqliteClientRepo } from '@/clients/adapters/sqlite-client-repo';
+import { getClient } from '@/clients/queries/get-client';
+import { listClients } from '@/clients/queries/list-clients';
+import { SqliteInvoiceRepo } from '@/invoicing/adapters/sqlite-invoice-repo';
+import { PdfKitGenerator } from '@/invoicing/adapters/pdf-kit-generator';
+import { StubPdfGenerator } from '@/invoicing/adapters/stub-pdf-generator';
+import { ConsoleNotificationSender } from '@/invoicing/adapters/console-notification-sender';
+import { getInvoiceSummary } from '@/invoicing/queries/get-invoice-summary';
+import { getInvoiceLineItems } from '@/invoicing/queries/get-invoice-line-items';
+import { getInvoicePayments } from '@/invoicing/queries/get-invoice-payments';
+import { listInvoiceSummaries } from '@/invoicing/queries/list-invoice-summaries';
+import { getOutstandingByClient } from '@/invoicing/queries/get-outstanding-by-client';
+import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
+import { SqliteRevenueReadModel } from '@/reporting/adapters/sqlite-revenue-read-model';
+import { getRevenueByMonth } from '@/reporting/queries/get-revenue-by-month';
+import { getRevenueByYear } from '@/reporting/queries/get-revenue-by-year';
 import { setRpcContext } from './rpc/get-rpc-context';
 import { registerSubscribers } from './register-subscribers';
 import type { AppDeps } from './app-deps';

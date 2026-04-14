@@ -2,7 +2,7 @@ import type { EventBus } from '@/shared/events/event-bus';
 import { Money } from '@/shared/money/money';
 import type { Logger } from '@/shared/logger/logger';
 import { yearMonthOf } from '@/shared/time/year-month';
-import type { InvoicingEventMap } from '@/invoicing/index';
+import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
 import type { RevenueReadModel } from '../ports/revenue-read-model';
 
 /**

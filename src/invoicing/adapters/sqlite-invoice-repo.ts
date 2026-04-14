@@ -1,8 +1,8 @@
 import type { InvoiceId } from '@/shared/ids/invoice-id';
 import type { ClientId } from '@/shared/ids/client-id';
 import type { Database } from '@/shared/db/database';
-import type { Result } from '@/shared/result/result';
-import { ok, err } from '@/shared/result/result';
+import type { Result } from 'neverthrow';
+import { ok, err } from 'neverthrow';
 import { fromDb, toDb } from '@/shared/ids/id';
 import { Money } from '@/shared/money/money';
 import type { Invoice } from '../entities/invoice';

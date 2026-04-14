@@ -1,5 +1,5 @@
-import type { Result } from '@/shared/result/result';
-import { ok } from '@/shared/result/result';
+import type { Result } from 'neverthrow';
+import { ok } from 'neverthrow';
 import type { PdfInput, PdfError, PdfGenerator } from '../ports/pdf-generator';
 
 /**

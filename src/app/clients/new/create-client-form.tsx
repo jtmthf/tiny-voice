@@ -2,7 +2,9 @@
 
 import { useActionState } from 'react';
 import { createClientForm, type FormState } from '@/app/lib/actions/index';
-import { FormField, FormError, SubmitButton } from '@/app/lib/form/index';
+import { FormField } from '@/app/lib/form/form-field';
+import { FormError } from '@/app/lib/form/form-error';
+import { SubmitButton } from '@/app/lib/form/submit-button';
 
 const initialState: FormState = { error: null };
 

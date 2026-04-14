@@ -9,18 +9,17 @@ import type { YearMonth } from '@/shared/time/year-month';
 import type { ClientId } from '@/shared/ids/client-id';
 import type { InvoiceId } from '@/shared/ids/invoice-id';
 import type { Money } from '@/shared/money/money';
-import type { Client, ClientRepository } from '@/clients/index';
-import type {
-  InvoiceRepository,
-  PdfGenerator,
-  NotificationSender,
-  InvoiceSummary,
-  LineItemSummary,
-  PaymentSummary,
-  InvoicingEventMap,
-} from '@/invoicing/index';
-import type { RevenueReadModel, MonthlyRevenue } from '@/reporting/index';
-import type { InvoiceStatus } from '@/invoicing/index';
+import type { Client } from '@/clients/entities/client';
+import type { ClientRepository } from '@/clients/ports/client-repository';
+import type { InvoiceRepository } from '@/invoicing/ports/invoice-repository';
+import type { PdfGenerator } from '@/invoicing/ports/pdf-generator';
+import type { NotificationSender } from '@/invoicing/ports/notification-sender';
+import type { InvoiceSummary } from '@/invoicing/queries/get-invoice-summary';
+import type { LineItemSummary } from '@/invoicing/queries/get-invoice-line-items';
+import type { PaymentSummary } from '@/invoicing/queries/get-invoice-payments';
+import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
+import type { InvoiceStatus } from '@/invoicing/value-objects/invoice-status';
+import type { RevenueReadModel, MonthlyRevenue } from '@/reporting/ports/revenue-read-model';
 
 export interface AppDeps {
   // Infrastructure ports

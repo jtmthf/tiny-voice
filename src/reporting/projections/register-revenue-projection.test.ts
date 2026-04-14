@@ -4,7 +4,8 @@ import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import type { Logger } from '@/shared/logger/logger';
 import type { YearMonth } from '@/shared/time/year-month';
-import type { InvoicingEventMap, InvoicePaymentRecorded } from '@/invoicing/index';
+import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
+import type { InvoicePaymentRecorded } from '@/invoicing/events/invoice-payment-recorded';
 import { InMemoryRevenueReadModel } from '../adapters/in-memory-revenue-read-model';
 import { registerRevenueProjection } from './register-revenue-projection';
 

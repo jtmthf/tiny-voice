@@ -4,7 +4,7 @@ import { cacheTag } from 'next/cache';
 import { app } from '@/app/app';
 import { formatMoney } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/format-date';
-import { lineTotal } from '@/invoicing/index';
+import { lineTotal } from '@/invoicing/entities/line-item';
 import { parseInvoiceId } from '@/shared/ids/invoice-id';
 import { isOverdue as isDueDateOverdue } from '@/shared/time/due-date';
 import type { DueDate } from '@/shared/time/due-date';

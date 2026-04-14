@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { buildTestApp } from './testing/build-test-app';
 import type { AppDeps } from './app-deps';
-import type { CapturingNotificationSender } from '@/invoicing/index';
+import type { CapturingNotificationSender } from '@/invoicing/adapters/capturing-notification-sender';
 import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newClientId } from '@/shared/ids/client-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
-import type { InvoiceSent, InvoicePaymentRecorded, InvoiceVoided } from '@/invoicing/index';
+import type { InvoiceSent } from '@/invoicing/events/invoice-sent';
+import type { InvoicePaymentRecorded } from '@/invoicing/events/invoice-payment-recorded';
+import type { InvoiceVoided } from '@/invoicing/events/invoice-voided';
 
 describe('subscribers', () => {
   let app: AppDeps;

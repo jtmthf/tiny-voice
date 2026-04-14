@@ -1,4 +1,4 @@
-import type { Result } from '@/shared/result/result';
+import type { Result } from 'neverthrow';
 import type { InvoiceId } from '@/shared/ids/invoice-id';
 import type { Money } from '@/shared/money/money';
 

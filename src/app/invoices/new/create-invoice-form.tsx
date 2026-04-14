@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react';
 import { createInvoice, addLineItem } from '@/app/lib/actions/index';
 import { useRouter } from 'next/navigation';
-import { Field, FieldLabel, FieldControl, FieldDescription, FormError } from '@/app/lib/form/index';
+import { Field, FieldLabel, FieldControl, FieldDescription } from '@/app/lib/form/field';
+import { FormError } from '@/app/lib/form/form-error';
 
 interface LineItemInput {
   description: string;

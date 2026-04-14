@@ -1,7 +1,7 @@
 import type { InvoiceId } from '@/shared/ids/invoice-id';
 import type { ClientId } from '@/shared/ids/client-id';
-import type { Result } from '@/shared/result/result';
-import { ok, err } from '@/shared/result/result';
+import type { Result } from 'neverthrow';
+import { ok, err } from 'neverthrow';
 import type { Invoice } from '../entities/invoice';
 import type { InvoiceError } from '../errors/invoice-error';
 import { InvoiceError as IE } from '../errors/invoice-error';

@@ -4,24 +4,21 @@ import { CapturingLogger } from '@/shared/logger/capturing-logger';
 import { InMemoryFeatureFlags } from '@/shared/flags/in-memory-feature-flags';
 import { InProcessEventBus } from '@/shared/events/in-process-event-bus';
 import { InMemoryOutbox } from '@/shared/events/in-memory-outbox';
-import { InMemoryClientRepo } from '@/clients/index';
-import {
-  InMemoryInvoiceRepo,
-  StubPdfGenerator,
-  CapturingNotificationSender,
-  getInvoiceSummary,
-  getInvoiceLineItems,
-  getInvoicePayments,
-  listInvoiceSummaries,
-  getOutstandingByClient,
-} from '@/invoicing/index';
-import type { InvoicingEventMap } from '@/invoicing/index';
-import {
-  InMemoryRevenueReadModel,
-  getRevenueByMonth,
-  getRevenueByYear,
-} from '@/reporting/index';
-import { getClient, listClients } from '@/clients/index';
+import { InMemoryClientRepo } from '@/clients/adapters/in-memory-client-repo';
+import { InMemoryInvoiceRepo } from '@/invoicing/adapters/in-memory-invoice-repo';
+import { StubPdfGenerator } from '@/invoicing/adapters/stub-pdf-generator';
+import { CapturingNotificationSender } from '@/invoicing/adapters/capturing-notification-sender';
+import { getInvoiceSummary } from '@/invoicing/queries/get-invoice-summary';
+import { getInvoiceLineItems } from '@/invoicing/queries/get-invoice-line-items';
+import { getInvoicePayments } from '@/invoicing/queries/get-invoice-payments';
+import { listInvoiceSummaries } from '@/invoicing/queries/list-invoice-summaries';
+import { getOutstandingByClient } from '@/invoicing/queries/get-outstanding-by-client';
+import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
+import { InMemoryRevenueReadModel } from '@/reporting/adapters/in-memory-revenue-read-model';
+import { getRevenueByMonth } from '@/reporting/queries/get-revenue-by-month';
+import { getRevenueByYear } from '@/reporting/queries/get-revenue-by-year';
+import { getClient } from '@/clients/queries/get-client';
+import { listClients } from '@/clients/queries/list-clients';
 import { registerSubscribers } from '../register-subscribers';
 import type { AppDeps } from '../app-deps';
 import type { Database } from '@/shared/db/database';

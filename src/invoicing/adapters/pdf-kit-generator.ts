@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
-import type { Result } from '@/shared/result/result';
-import { ok, err } from '@/shared/result/result';
+import type { Result } from 'neverthrow';
+import { ok, err } from 'neverthrow';
 import type { PdfInput, PdfError, PdfGenerator } from '../ports/pdf-generator';
 import { subtotal, taxAmount, total, outstandingBalance } from '../entities/invoice';
 import { lineTotal } from '../entities/line-item';

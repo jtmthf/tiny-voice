@@ -1,8 +1,8 @@
 import { z } from 'zod/v4';
 import { InvoiceIdSchema } from '@/shared/ids/invoice-id';
 import { LineItemIdSchema } from '@/shared/ids/line-item-id';
-import type { Result } from '@/shared/result/result';
-import { err } from '@/shared/result/result';
+import type { Result } from 'neverthrow';
+import { err } from 'neverthrow';
 import { Money } from '@/shared/money/money';
 import type { Invoice } from '../entities/invoice';
 import { addLineItem as addLineItemPure } from '../entities/invoice';

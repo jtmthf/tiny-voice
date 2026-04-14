@@ -1,4 +1,4 @@
-import type { Result } from '@/shared/result/result';
+import type { Result } from 'neverthrow';
 import type { Invoice } from '../entities/invoice';
 
 export interface PdfInput {

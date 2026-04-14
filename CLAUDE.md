@@ -19,7 +19,8 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 - **Filename matches export** -- ESLint: `local/filename-matches-export` (inline rule in `eslint.config.js`)
 - **No default exports** -- ESLint: `import-x/no-default-export` (relaxed for `src/app/**`, configs, tests)
 - **No circular deps** -- ESLint: `import-x/no-cycle`
-- **Module boundaries** -- dependency-cruiser: cross-module imports only via `index.ts`; six pairwise rules prevent reaching into internals
+- **No barrel files** -- ESLint: `barrel-files/avoid-barrel-files`. No `index.ts` re-export files. Always use direct imports to the source file.
+- **Module boundaries** -- dependency-cruiser: cross-module imports are allowed to any subdirectory *except* `adapters/`. Three rules (`no-clients-into-other-adapters`, `no-invoicing-into-other-adapters`, `no-reporting-into-other-adapters`) enforce this. The app layer has no such restriction.
 - **Domain never imports adapters or app** -- dependency-cruiser: `domain-no-adapters` rule
 - **No next/* outside src/app/** -- dependency-cruiser: `no-next-outside-app` rule. Next.js imports (`next/cache`, `next/navigation`, `next/link`, etc.) are confined to the app layer
 - **RSC read surface** -- TypeScript: `app.ts` exports `AppReadView` (queries + featureFlags + clock only). Repos, event bus, DB, and infrastructure are not on the type. Do not widen `AppReadView` -- mutations go through Server Actions / RPC context
