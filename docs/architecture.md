@@ -52,6 +52,8 @@ All subscribers are registered in `src/app/register-subscribers.ts`.
 | `InvoicePaymentRecorded` | `recordPayment` command handler (`src/invoicing/commands/record-payment.ts`) | 1. `registerRevenueProjection` -> `RevenueReadModel.recordPayment` 2. `NotificationSender.sendPaymentReceived` |
 | `InvoiceVoided` | `voidInvoice` command handler (`src/invoicing/commands/void-invoice.ts`) | _(no subscribers — void is a terminal state)_ |
 
+**Event payload design rule:** Events carry IDs and immutable facts (amounts, timestamps) — never mutable state (names, balances, statuses). Subscribers that need mutable data fetch it fresh from the repository at handling time. This avoids stale snapshots embedded in event payloads.
+
 Cache invalidation is handled directly in Server Actions (`src/app/lib/actions/index.ts`) via `updateTag` from `next/cache`, not through the event bus.
 
 Note: The revenue projection is registered via `registerRevenueProjection` from the reporting module (`src/reporting/projections/register-revenue-projection.ts`), which subscribes to `InvoicePaymentRecorded` and calls `readModel.recordPayment`.
@@ -72,7 +74,7 @@ Note: The revenue projection is registered via `registerRevenueProjection` from 
 
 Returns an `AppDeps` object (defined in `src/app/app-deps.ts`). Accepts `Partial<AppDeps>` overrides so tests can swap any piece.
 
-`src/app/instance.ts` calls `buildApp()` at module scope and exports `app` typed as `AppReadView` — a narrow interface exposing only `queries`, `featureFlags`, and `clock`. RSC pages import from here and can only read data through `app.queries.*`. Repos, event bus, DB, and other infrastructure are not on this type. Mutations go through Server Actions which use the RPC context (`get-rpc-context.ts`), a separate channel with full access to command dependencies. Client components must never import this file.
+`src/app/app.ts` calls `buildApp()` at module scope and exports `app` typed as `AppReadView` — a narrow interface exposing only `queries`, `featureFlags`, and `clock`. RSC pages import from here and can only read data through `app.queries.*`. Repos, event bus, DB, and other infrastructure are not on this type. Mutations go through Server Actions which use the RPC context (`get-rpc-context.ts`), a separate channel with full access to command dependencies. Client components must never import this file.
 
 **Why the read surface is narrow:** Without this constraint, RSC pages drift toward calling repos directly, bypassing the query layer. This breaks data-level `'use cache'` (which works at the query boundary), couples pages to aggregate internals, and makes cache invalidation unpredictable. If a page needs data not currently on `app.queries`, the fix is a new query function — not widening `AppReadView`.
 

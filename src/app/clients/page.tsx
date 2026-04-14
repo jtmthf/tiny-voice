@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { cacheTag } from 'next/cache';
-import { app } from '@/app/instance';
+import { app } from '@/app/app';
 import { formatDate } from '@/app/lib/format-date';
 
 async function ClientList() {

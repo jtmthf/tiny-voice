@@ -89,4 +89,4 @@ export { ConsoleNotificationSender } from './adapters/console-notification-sende
 export { CapturingNotificationSender } from './adapters/capturing-notification-sender';
 
 // --- Testing ---
-export { buildDraftInvoice, buildSentInvoice, buildPaidInvoice, buildLineItem, buildPayment } from './testing/invoice-factory';
+export { buildDraftInvoice, buildSentInvoice, buildPaidInvoice, buildVoidInvoice, buildLineItem, buildPayment } from './testing/invoice-factory';

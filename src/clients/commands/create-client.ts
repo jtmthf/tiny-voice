@@ -12,12 +12,12 @@ import type { EmailError } from '../value-objects/email-address';
  * Input schema for the createClient command.
  * Email is a raw string here — parsed to EmailAddress inside the handler.
  */
-export const CreateClientInput = z.object({
+export const CreateClientInputSchema = z.object({
   name: z.string(),
   email: z.string(),
 });
 
-export type CreateClientInput = z.infer<typeof CreateClientInput>;
+export type CreateClientInput = z.infer<typeof CreateClientInputSchema>;
 
 export type CreateClientError = ClientValidationError | EmailError;
 

@@ -31,14 +31,9 @@ export function runMigrations(
     )
   `);
 
-  let files: string[];
-  try {
-    files = readdirSync(migrationsDir)
-      .filter((f) => f.endsWith('.sql'))
-      .sort();
-  } catch {
-    files = [];
-  }
+  const files = readdirSync(migrationsDir)
+    .filter((f) => f.endsWith('.sql'))
+    .sort();
 
   if (files.length === 0) {
     logger.info('No migration files found — database is up to date.');

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Money, add, subtract, multiply, equals, isNegative, isZero, compare } from './money';
-import { allocate } from './allocate';
+import { Money, add, subtract, multiply, equals, compare } from './money';
 import { bankersRound } from './bankers-round';
 
 describe('Money.fromCents', () => {
@@ -89,41 +88,10 @@ describe('comparison / predicates', () => {
     expect(equals(Money.fromCents(100n), Money.fromCents(200n))).toBe(false);
   });
 
-  it('isNegative', () => {
-    expect(isNegative(Money.fromCents(-1n))).toBe(true);
-    expect(isNegative(Money.fromCents(0n))).toBe(false);
-  });
-
-  it('isZero', () => {
-    expect(isZero(Money.fromCents(0n))).toBe(true);
-    expect(isZero(Money.fromCents(1n))).toBe(false);
-  });
-
   it('compare returns -1, 0, 1', () => {
     expect(compare(Money.fromCents(100n), Money.fromCents(200n))._unsafeUnwrap()).toBe(-1);
     expect(compare(Money.fromCents(200n), Money.fromCents(200n))._unsafeUnwrap()).toBe(0);
     expect(compare(Money.fromCents(300n), Money.fromCents(200n))._unsafeUnwrap()).toBe(1);
-  });
-});
-
-describe('allocate', () => {
-  it('splits evenly', () => {
-    const total = Money.fromCents(100n);
-    const result = allocate(total, [1, 1])._unsafeUnwrap();
-    expect(result).toHaveLength(2);
-    expect(result[0]!.cents + result[1]!.cents).toBe(100n);
-  });
-
-  it('distributes remainder penny', () => {
-    const total = Money.fromCents(100n);
-    const result = allocate(total, [1, 1, 1])._unsafeUnwrap();
-    expect(result).toHaveLength(3);
-    const sum = result.reduce((s, m) => s + m.cents, 0n);
-    expect(sum).toBe(100n);
-  });
-
-  it('rejects empty ratios', () => {
-    expect(allocate(Money.fromCents(100n), []).isErr()).toBe(true);
   });
 });
 

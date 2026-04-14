@@ -14,6 +14,9 @@ let _ctx: RpcContext | null = null;
  * application-wide RPC context. Must be called once at app startup.
  */
 export function setRpcContext(ctx: RpcContext): void {
+  if (_ctx) {
+    throw new Error('setRpcContext() called twice. This indicates a wiring bug in the composition root.');
+  }
   _ctx = ctx;
 }
 

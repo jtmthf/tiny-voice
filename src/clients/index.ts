@@ -17,8 +17,8 @@ export { SqliteClientRepo } from './adapters/sqlite-client-repo';
 export { InMemoryClientRepo } from './adapters/in-memory-client-repo';
 
 // Commands
-export { CreateClientInput, createClient } from './commands/create-client';
-export type { CreateClientError } from './commands/create-client';
+export { CreateClientInputSchema, createClient } from './commands/create-client';
+export type { CreateClientInput, CreateClientError } from './commands/create-client';
 
 // Queries
 export { getClient } from './queries/get-client';

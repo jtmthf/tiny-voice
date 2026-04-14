@@ -36,15 +36,13 @@ export class InProcessEventBus<TEventMap extends Record<string, unknown>> implem
     const list = this.handlers.get(event);
     if (!list || list.length === 0) return;
 
-    const errors: unknown[] = [];
+    const results = await Promise.allSettled(
+      list.map(async (handler) => (handler as (payload: TEventMap[K]) => Promise<void> | void)(payload)),
+    );
 
-    for (const handler of list) {
-      try {
-        await (handler as (payload: TEventMap[K]) => Promise<void> | void)(payload);
-      } catch (e) {
-        errors.push(e);
-      }
-    }
+    const errors = results
+      .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+      .map((r) => r.reason);
 
     if (errors.length > 0) {
       throw new AggregateError(errors, `${errors.length} subscriber(s) failed for event "${event}"`);

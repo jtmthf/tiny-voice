@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cacheTag } from 'next/cache';
-import { app } from '@/app/instance';
+import { app } from '@/app/app';
 import { formatMoney } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/format-date';
+import { lineTotal } from '@/invoicing/index';
 import { parseInvoiceId } from '@/shared/ids/invoice-id';
 import { isOverdue as isDueDateOverdue } from '@/shared/time/due-date';
 import type { DueDate } from '@/shared/time/due-date';
@@ -115,7 +116,7 @@ async function InvoiceLineItems({ id }: { id: string }) {
             <td>{li.description}</td>
             <td>{li.quantity}</td>
             <td>{formatMoney(li.unitPrice)}</td>
-            <td>{formatMoney({ cents: li.unitPrice.cents * BigInt(li.quantity), currency: 'USD' })}</td>
+            <td>{lineTotal(li).match(formatMoney, () => '$—')}</td>
           </tr>
         ))}
       </tbody>

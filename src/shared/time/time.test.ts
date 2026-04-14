@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { SystemClock } from './system-clock';
 import { FixedClock } from './fixed-clock';
 import { dueDateOf, isOverdue, DueDateSchema } from './due-date';
-import { yearMonthOf, compareYearMonth, YearMonthSchema } from './year-month';
+import { yearMonthOf, YearMonthSchema } from './year-month';
 import type { DueDate } from './due-date';
 
 describe('SystemClock', () => {
@@ -72,12 +72,6 @@ describe('DueDate', () => {
 describe('YearMonth', () => {
   it('yearMonthOf formats correctly', () => {
     expect(yearMonthOf(new Date('2025-03-07T10:00:00Z'))).toBe('2025-03');
-  });
-
-  it('compareYearMonth sorts correctly', () => {
-    expect(compareYearMonth('2025-01' as never, '2025-02' as never)).toBe(-1);
-    expect(compareYearMonth('2025-02' as never, '2025-02' as never)).toBe(0);
-    expect(compareYearMonth('2025-03' as never, '2025-02' as never)).toBe(1);
   });
 
   it('YearMonthSchema validates', () => {

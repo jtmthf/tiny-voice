@@ -16,13 +16,3 @@ export const YearMonthSchema = z.string().regex(YEAR_MONTH_REGEX, 'Expected YYYY
 export function yearMonthOf(date: Date): YearMonth {
   return format(date, 'yyyy-MM') as YearMonth;
 }
-
-/**
- * Compares two YearMonth values lexicographically.
- * Returns -1, 0, or 1.
- */
-export function compareYearMonth(a: YearMonth, b: YearMonth): number {
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
-}

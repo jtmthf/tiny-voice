@@ -17,6 +17,7 @@
     "test:watch": "vitest",
     "migrate": "node --import tsx scripts/migrate.ts",
     "seed": "node --import tsx scripts/seed.ts",
+    "prepare": "simple-git-hooks",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
@@ -46,7 +47,6 @@
     "@types/pdfkit": "^0.17.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@types/uuid": "^11.0.0",
     "dependency-cruiser": "^17.3.10",
     "eslint": "^10.2.0",
     "eslint-plugin-check-file": "^3.3.1",

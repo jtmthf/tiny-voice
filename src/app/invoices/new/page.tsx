@@ -1,5 +1,5 @@
 import { cacheTag } from 'next/cache';
-import { app } from '@/app/instance';
+import { app } from '@/app/app';
 import { CreateInvoiceForm } from './create-invoice-form';
 
 async function ClientOptions() {

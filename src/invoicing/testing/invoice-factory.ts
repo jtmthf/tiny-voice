@@ -11,10 +11,12 @@ import {
   addLineItem,
   sendInvoice,
   recordPayment,
+  voidInvoice,
   total,
 } from '../entities/invoice';
 import type { LineItem } from '../entities/line-item';
 import type { Payment } from '../entities/payment';
+import { expectOk } from '@/shared/testing/expect-ok';
 
 const DEFAULT_DATE = new Date('2025-01-15T12:00:00Z');
 const DEFAULT_DUE_DATE = '2025-02-15' as DueDate;
@@ -42,18 +44,16 @@ export function buildDraftInvoice(overrides?: {
   taxRate?: TaxRate;
   dueDate?: DueDate;
 }): Invoice {
-  const result = createInvoice({
+  let invoice = expectOk(createInvoice({
     id: newInvoiceId(),
     clientId: newClientId(),
     taxRate: overrides?.taxRate ?? DEFAULT_TAX_RATE,
     dueDate: overrides?.dueDate ?? DEFAULT_DUE_DATE,
     createdAt: DEFAULT_DATE,
-  });
-  let invoice = result._unsafeUnwrap();
+  }));
 
   for (const item of overrides?.lineItems ?? []) {
-    const r = addLineItem(invoice, item);
-    invoice = r._unsafeUnwrap();
+    invoice = expectOk(addLineItem(invoice, item));
   }
 
   return invoice;
@@ -66,7 +66,7 @@ export function buildSentInvoice(overrides?: {
 }): Invoice {
   const items = overrides?.lineItems ?? [buildLineItem()];
   const draft = buildDraftInvoice({ ...overrides, lineItems: items });
-  return sendInvoice(draft)._unsafeUnwrap();
+  return expectOk(sendInvoice(draft));
 }
 
 export function buildPaidInvoice(overrides?: {
@@ -77,5 +77,14 @@ export function buildPaidInvoice(overrides?: {
   const sent = buildSentInvoice(overrides);
   const fullAmount = total(sent);
   const payment = buildPayment({ amount: fullAmount });
-  return recordPayment(sent, payment)._unsafeUnwrap();
+  return expectOk(recordPayment(sent, payment));
+}
+
+export function buildVoidInvoice(overrides?: {
+  lineItems?: LineItem[];
+  taxRate?: TaxRate;
+  dueDate?: DueDate;
+}): Invoice {
+  const draft = buildDraftInvoice(overrides);
+  return expectOk(voidInvoice(draft));
 }

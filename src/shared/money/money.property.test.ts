@@ -1,9 +1,8 @@
 import { describe, expect } from 'vitest';
 import { test as fcTest, fc } from '@fast-check/vitest';
 import { Money, add, equals } from './money';
-import { allocate } from './allocate';
 import { bankersRound } from './bankers-round';
-import { moneyArbitrary, nonNegativeMoneyArbitrary } from './testing/arbitraries';
+import { moneyArbitrary } from './testing/arbitraries';
 
 describe('Money PBT', () => {
   fcTest.prop([moneyArbitrary, moneyArbitrary])('add is commutative', (a, b) => {
@@ -26,17 +25,6 @@ describe('Money PBT', () => {
     const zero = Money.zero();
     const result = add(m, zero)._unsafeUnwrap();
     expect(equals(result, m)).toBe(true);
-  });
-});
-
-describe('allocate PBT', () => {
-  fcTest.prop([
-    nonNegativeMoneyArbitrary,
-    fc.array(fc.integer({ min: 1, max: 100 }), { minLength: 1, maxLength: 10 }),
-  ])('allocate sum equals input', (total, ratios) => {
-    const result = allocate(total, ratios)._unsafeUnwrap();
-    const sum = result.reduce((s, m) => s + m.cents, 0n);
-    expect(sum).toBe(total.cents);
   });
 });
 

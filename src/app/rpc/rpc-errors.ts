@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import type { ORPCErrorConstructorMap } from '@orpc/server';
 import type { InvoiceError } from '@/invoicing/index';
 import type { CreateClientError } from '@/clients/index';
 
@@ -30,6 +31,8 @@ export const rpcErrors = {
   LATE_FEE_ALREADY_APPLIED: { message: 'Late fee has already been applied to this invoice' },
 } as const;
 
+export type RpcErrors = ORPCErrorConstructorMap<typeof rpcErrors>;
+
 /**
  * Formats a bigint cents value as a dollar string (e.g., 12345n -> "123.45").
  */
@@ -41,56 +44,38 @@ function centsToDollars(cents: bigint): string {
   return `${sign}${whole}.${frac.toString().padStart(2, '0')}`;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ErrorConstructors = Record<string, (opts?: any) => never>;
-
-function throwError(e: ErrorConstructors, code: string, opts?: Record<string, unknown>): never {
-  const ctor = e[code];
-  if (!ctor) throw new Error(`Unknown error code: ${code}`);
-  throw ctor(opts);
-}
-
 /**
  * Maps a domain InvoiceError to the matching oRPC error code + data,
  * ready to be thrown via the `errors` constructor map in a handler.
  */
 export function mapInvoiceError(
   err: InvoiceError,
-  errors: ErrorConstructors,
+  errors: RpcErrors,
 ): never {
   switch (err.kind) {
     case 'InvalidTransition':
-      throwError(errors, 'INVALID_TRANSITION', { data: { from: err.from, to: err.to } });
-      break; // unreachable, satisfies TS
+      throw errors.INVALID_TRANSITION({ data: { from: err.from, to: err.to } });
     case 'Overpayment':
-      throwError(errors, 'OVERPAYMENT', {
+      throw errors.OVERPAYMENT({
         data: {
           attempted: centsToDollars(err.attempted.cents),
           outstanding: centsToDollars(err.outstanding.cents),
         },
       });
-      break;
     case 'AlreadyPaid':
-      throwError(errors, 'ALREADY_PAID');
-      break;
+      throw errors.ALREADY_PAID();
     case 'InvoiceVoided':
-      throwError(errors, 'INVOICE_VOIDED');
-      break;
+      throw errors.INVOICE_VOIDED();
     case 'NoLineItems':
-      throwError(errors, 'NO_LINE_ITEMS');
-      break;
+      throw errors.NO_LINE_ITEMS();
     case 'ConcurrencyConflict':
-      throwError(errors, 'CONCURRENCY_CONFLICT');
-      break;
+      throw errors.CONCURRENCY_CONFLICT();
     case 'InvalidInput':
-      throwError(errors, 'INVALID_INPUT', { data: { reason: err.reason } });
-      break;
+      throw errors.INVALID_INPUT({ data: { reason: err.reason } });
     case 'NotOverdue':
-      throwError(errors, 'NOT_OVERDUE');
-      break;
+      throw errors.NOT_OVERDUE();
     case 'LateFeeAlreadyApplied':
-      throwError(errors, 'LATE_FEE_ALREADY_APPLIED');
-      break;
+      throw errors.LATE_FEE_ALREADY_APPLIED();
   }
 }
 
@@ -99,17 +84,14 @@ export function mapInvoiceError(
  */
 export function mapClientError(
   err: CreateClientError,
-  errors: ErrorConstructors,
+  errors: RpcErrors,
 ): never {
   switch (err.kind) {
     case 'NameTooShort':
-      throwError(errors, 'NAME_TOO_SHORT');
-      break;
+      throw errors.NAME_TOO_SHORT();
     case 'NameTooLong':
-      throwError(errors, 'NAME_TOO_LONG');
-      break;
+      throw errors.NAME_TOO_LONG();
     case 'InvalidEmail':
-      throwError(errors, 'INVALID_EMAIL', { data: { reason: `Invalid email: ${err.raw}` } });
-      break;
+      throw errors.INVALID_EMAIL({ data: { reason: `Invalid email: ${err.raw}` } });
   }
 }

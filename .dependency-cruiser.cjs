@@ -82,6 +82,17 @@ module.exports = {
       to: { path: '^src/invoicing/(?!index\\.ts$)' },
     },
     {
+      name: 'no-shared-into-app',
+      severity: 'error',
+      comment:
+        'Shared kernel must not depend on the app layer.',
+      from: {
+        path: '^src/shared/',
+        pathNot: '\\.test\\.ts$',
+      },
+      to: { path: '^src/app/' },
+    },
+    {
       name: 'no-next-outside-app',
       severity: 'error',
       comment:

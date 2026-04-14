@@ -99,14 +99,6 @@ export function equals(a: Money, b: Money): boolean {
   return a.currency === b.currency && a.cents === b.cents;
 }
 
-export function isNegative(m: Money): boolean {
-  return m.cents < 0n;
-}
-
-export function isZero(m: Money): boolean {
-  return m.cents === 0n;
-}
-
 /**
  * Returns -1, 0, or 1.
  */

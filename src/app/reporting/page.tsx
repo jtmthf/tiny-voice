@@ -1,5 +1,5 @@
 import { cacheTag } from 'next/cache';
-import { app } from '@/app/instance';
+import { app } from '@/app/app';
 import { formatMoney } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/format-date';
 
@@ -59,7 +59,7 @@ async function YearRevenue() {
     <div className="grid-stats">
       <div className="stat-card">
         <div className="label">{currentYear} Revenue</div>
-        <div className="value">${(totalCents / 100n).toString()}.{(totalCents % 100n).toString().padStart(2, '0')}</div>
+        <div className="value">{formatMoney({ cents: totalCents, currency: 'USD' })}</div>
       </div>
       <div className="stat-card">
         <div className="label">{currentYear} Payments</div>

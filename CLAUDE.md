@@ -22,7 +22,7 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 - **Module boundaries** -- dependency-cruiser: cross-module imports only via `index.ts`; six pairwise rules prevent reaching into internals
 - **Domain never imports adapters or app** -- dependency-cruiser: `domain-no-adapters` rule
 - **No next/* outside src/app/** -- dependency-cruiser: `no-next-outside-app` rule. Next.js imports (`next/cache`, `next/navigation`, `next/link`, etc.) are confined to the app layer
-- **RSC read surface** -- TypeScript: `instance.ts` exports `AppReadView` (queries + featureFlags + clock only). Repos, event bus, DB, and infrastructure are not on the type. Do not widen `AppReadView` -- mutations go through Server Actions / RPC context
+- **RSC read surface** -- TypeScript: `app.ts` exports `AppReadView` (queries + featureFlags + clock only). Repos, event bus, DB, and infrastructure are not on the type. Do not widen `AppReadView` -- mutations go through Server Actions / RPC context
 - **TypeScript strict** -- `tsconfig.json`: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`
 - **Conventional commits** -- commitlint via `simple-git-hooks`
 
@@ -40,6 +40,7 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 10. Filename-matches-export: exported symbol name corresponds to kebab-case filename (e.g., `create-invoice.ts` exports `createInvoice` / `CreateInvoiceInput`). Co-located schema + handler is the expected pattern.
 11. Framework cache primitives (`updateTag`, `revalidateTag`, `cacheTag`, `cacheLife`) must be called where Next.js expects them -- `updateTag` in Server Actions, `cacheTag`/`cacheLife` in `'use cache'` scopes. Never wrap them in adapter classes or route through domain events.
 12. Every mutating `.actionable()` procedure in `router.ts` must include `interceptors: [withCacheInvalidation(...tags)]` declaring which cache tags it invalidates. Read-only procedures (e.g. `generatePdf`) omit the interceptor. The `actions/index.ts` file is pure pass-through -- cache invalidation logic must not live there.
+13. Event payloads carry IDs and immutable facts (amounts, timestamps) -- never mutable state (names, balances, statuses). Subscribers that need mutable data fetch it fresh from the repository at handling time.
 
 ## Intentional omissions
 

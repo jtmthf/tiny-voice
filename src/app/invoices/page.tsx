@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { cacheTag } from 'next/cache';
-import { app } from '@/app/instance';
+import { app } from '@/app/app';
 import { formatMoney } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/format-date';
 import type { InvoiceStatus } from '@/invoicing/index';

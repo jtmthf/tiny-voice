@@ -7,5 +7,4 @@ import type { AppReadView } from './app-deps';
  * Repos, event bus, and infrastructure are not exposed. Mutations go
  * through Server Actions / RPC context, not through this singleton.
  */
-export const instance: AppReadView = buildApp();
-export const app: AppReadView = instance;
+export const app: AppReadView = buildApp();

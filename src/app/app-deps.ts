@@ -66,6 +66,6 @@ export interface AppDeps {
 /**
  * Narrow read-only view for RSC pages. Only exposes queries, feature flags,
  * and clock — no repos, event bus, or infrastructure. This is the type
- * exported from `instance.ts` so pages cannot bypass the query layer.
+ * exported from `app.ts` so pages cannot bypass the query layer.
  */
 export type AppReadView = Pick<AppDeps, 'queries' | 'featureFlags' | 'clock'>;

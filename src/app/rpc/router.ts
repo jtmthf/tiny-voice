@@ -19,7 +19,6 @@ import {
 } from '@/invoicing/index';
 import { contract } from './contract';
 import { mapInvoiceError, mapClientError } from './rpc-errors';
-import type { ErrorConstructors } from './rpc-errors';
 
 // ---------------------------------------------------------------------------
 // DTO conversion helpers
@@ -81,7 +80,7 @@ const clientsCreate = contract.clients.create
     );
 
     if (result.isErr()) {
-      mapClientError(result.error, errors as unknown as ErrorConstructors);
+      mapClientError(result.error, errors);
     }
 
     return clientToDto(result.value);
@@ -106,7 +105,7 @@ const invoicingCreate = contract.invoicing.create
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors as unknown as ErrorConstructors);
+      mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -126,7 +125,7 @@ const invoicingAddLineItem = contract.invoicing.addLineItem
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors as unknown as ErrorConstructors);
+      mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -140,7 +139,7 @@ const invoicingSend = contract.invoicing.send
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors as unknown as ErrorConstructors);
+      mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -158,7 +157,7 @@ const invoicingRecordPayment = contract.invoicing.recordPayment
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors as unknown as ErrorConstructors);
+      mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -172,7 +171,7 @@ const invoicingVoid = contract.invoicing.void
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors as unknown as ErrorConstructors);
+      mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -190,7 +189,7 @@ const invoicingCalculateLateFee = contract.invoicing.calculateLateFee
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors as unknown as ErrorConstructors);
+      mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
