@@ -5,7 +5,6 @@ import type { AppDeps } from './app-deps';
 import type { CapturingNotificationSender } from '@/invoicing/adapters/capturing-notification-sender';
 import { createClient } from '@/clients/commands/create-client';
 import { createInvoice as createInvoiceCommand } from '@/invoicing/commands/create-invoice';
-import { addLineItem as addLineItemCommand } from '@/invoicing/commands/add-line-item';
 import { sendInvoice as sendInvoiceCommand } from '@/invoicing/commands/send-invoice';
 import { recordPayment as recordPaymentCommand } from '@/invoicing/commands/record-payment';
 import { expectOk } from '@/shared/testing/expect-ok';
@@ -58,7 +57,7 @@ describe('buildTestApp', () => {
     );
     const client = expectOk(clientResult);
 
-    // 2. Create invoice
+    // 2. Create invoice with line items atomically
     const invoiceId = newInvoiceId();
     const createResult = createInvoiceCommand(
       { repo: app.invoiceRepo, clock: app.clock },
@@ -67,22 +66,17 @@ describe('buildTestApp', () => {
         clientId: client.id,
         taxRate: 0.1 as TaxRate,
         dueDate: '2026-05-13' as DueDate,
+        lineItems: [
+          {
+            id: newLineItemId(),
+            description: 'Consulting',
+            quantity: 2,
+            unitPriceCents: 5000n,
+          },
+        ],
       },
     );
     expect(createResult.isOk()).toBe(true);
-
-    // 3. Add line item
-    const addResult = addLineItemCommand(
-      { repo: app.invoiceRepo },
-      {
-        invoiceId,
-        lineItemId: newLineItemId(),
-        description: 'Consulting',
-        quantity: 2,
-        unitPriceCents: 5000n,
-      },
-    );
-    expect(addResult.isOk()).toBe(true);
 
     // 4. Send invoice
     const sendResult = await sendInvoiceCommand(
@@ -161,7 +155,7 @@ describe('buildIntegrationTestApp', () => {
     );
     const client = expectOk(clientResult);
 
-    // Create invoice
+    // Create invoice with line items atomically
     const invoiceId = newInvoiceId();
     const createResult = createInvoiceCommand(
       { repo: app.invoiceRepo, clock: app.clock },
@@ -170,21 +164,17 @@ describe('buildIntegrationTestApp', () => {
         clientId: client.id,
         taxRate: 0 as TaxRate,
         dueDate: '2026-05-01' as DueDate,
+        lineItems: [
+          {
+            id: newLineItemId(),
+            description: 'Widget',
+            quantity: 1,
+            unitPriceCents: 2500n,
+          },
+        ],
       },
     );
     expect(createResult.isOk()).toBe(true);
-
-    // Add line item
-    addLineItemCommand(
-      { repo: app.invoiceRepo },
-      {
-        invoiceId,
-        lineItemId: newLineItemId(),
-        description: 'Widget',
-        quantity: 1,
-        unitPriceCents: 2500n,
-      },
-    );
 
     // Send
     await sendInvoiceCommand(

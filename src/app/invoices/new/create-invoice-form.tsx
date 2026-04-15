@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useServerAction } from '@orpc/react/hooks';
-import { actions } from '@/app/rpc/actions';
+import { invoicingCreate } from '@/app/rpc/actions/invoicing-create';
 import { Field, FieldLabel, FieldControl, FieldDescription } from '@/app/lib/form/field';
 import { FormError } from '@/app/lib/form/form-error';
 
@@ -21,10 +21,9 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
   ]);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const create = useServerAction(actions.invoicing.create);
-  const addLine = useServerAction(actions.invoicing.addLineItem);
+  const create = useServerAction(invoicingCreate);
 
-  const isPending = create.isPending || addLine.isPending;
+  const isPending = create.isPending;
 
   const updateLineItem = (index: number, field: keyof LineItemInput, value: string | number) => {
     setLineItems((prev) => prev.map((li, i) => (i === index ? { ...li, [field]: value } : li)));
@@ -52,26 +51,21 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
       return;
     }
 
-    // Create the invoice
-    const [createErr, invoiceData] = await create.execute({ clientId, taxRate, dueDate });
+    const [createErr, invoiceData] = await create.execute({
+      clientId,
+      taxRate,
+      dueDate,
+      lineItems: lineItems
+        .filter((li) => li.description.trim())
+        .map((li) => ({
+          description: li.description,
+          quantity: li.quantity,
+          unitPriceCents: String(li.unitPriceCents),
+        })),
+    });
     if (createErr) {
       setSubmitError(createErr.message);
       return;
-    }
-
-    // Add line items sequentially
-    for (const li of lineItems) {
-      if (!li.description.trim()) continue;
-      const [liErr] = await addLine.execute({
-        invoiceId: invoiceData.id,
-        description: li.description,
-        quantity: li.quantity,
-        unitPriceCents: li.unitPriceCents,
-      });
-      if (liErr) {
-        setSubmitError(liErr.message);
-        return;
-      }
     }
 
     router.push(`/invoices/${invoiceData.id}`);
@@ -104,7 +98,7 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
         </Field>
       </div>
 
-      <h3 style={{ margin: '1rem 0 0.5rem' }}>Line Items</h3>
+      <h3 className="my-md">Line Items</h3>
       {lineItems.map((li, i) => (
         <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
           <Field className="form-group" style={{ margin: 0 }}>
@@ -153,7 +147,7 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
           </button>
         </div>
       ))}
-      <button type="button" onClick={addRow} style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
+      <button type="button" onClick={addRow} className="text-sm" style={{ marginBottom: '1rem' }}>
         + Add line item
       </button>
 

@@ -20,8 +20,8 @@ export function InvoiceFilter({ current }: { current: string | undefined }) {
   };
 
   return (
-    <div style={{ margin: '1rem 0' }}>
-      <label htmlFor="status-filter" style={{ marginRight: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>
+    <div className="filter-row">
+      <label htmlFor="status-filter">
         Filter by status:
       </label>
       <select id="status-filter" value={current ?? 'all'} onChange={handleChange}>

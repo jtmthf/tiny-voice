@@ -261,3 +261,32 @@ button:disabled {
   text-align: center;
   padding: 2rem;
 }
+
+/* ---------------------------------------------------------------------------
+   Utility classes
+   --------------------------------------------------------------------------- */
+
+.text-muted { color: var(--color-text-muted); }
+.text-sm { font-size: 0.85rem; }
+.text-xs { font-size: 0.75rem; }
+.font-semibold { font-weight: 600; }
+.mt-sm { margin-top: 0.5rem; }
+.mt-md { margin-top: 1rem; }
+.mt-lg { margin-top: 1.5rem; }
+.my-md { margin: 1rem 0; }
+
+.success-message {
+  color: var(--color-success);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.filter-row {
+  margin: 1rem 0;
+}
+
+.filter-row label {
+  margin-right: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
