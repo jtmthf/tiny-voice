@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import { bankersRound } from '@/shared/money/bankers-round';
-import type { Money } from '@/shared/money/money';
-import { Money as MoneyFactory } from '@/shared/money/money';
+import type { Money as MoneyType } from '@/shared/money/money';
+import { Money } from '@/shared/money/money';
 
 /**
  * Fractional tax rate in range [0, 1].
@@ -19,8 +19,8 @@ export const TaxRateSchema = z
  * Calculates the tax on a subtotal using banker's rounding.
  * Returns tax amount in the same currency as subtotal.
  */
-export function calculateTax(subtotal: Money, rate: TaxRate): Money {
-  if (rate === 0) return MoneyFactory.zero();
+export function calculateTax(subtotal: MoneyType, rate: TaxRate): MoneyType {
+  if (rate === 0) return Money.zero();
   // Multiply cents by rate (as integer numerator / denominator) using banker's rounding.
   // rate is a float in [0,1]. Convert to integer math:
   // tax = subtotal.cents * rate, rounded via banker's rounding.
@@ -29,5 +29,5 @@ export function calculateTax(subtotal: Money, rate: TaxRate): Money {
   const scaledRate = BigInt(Math.round(rate * 1_000_000));
   const rawCents = subtotal.cents * scaledRate;
   const taxCents = bankersRound(rawCents, SCALE);
-  return MoneyFactory.fromCents(taxCents);
+  return Money.fromCents(taxCents);
 }

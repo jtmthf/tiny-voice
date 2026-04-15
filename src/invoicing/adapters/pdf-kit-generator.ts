@@ -1,17 +1,10 @@
 import PDFDocument from 'pdfkit';
 import type { Result } from 'neverthrow';
 import { ok, err } from 'neverthrow';
+import { Money } from '@/shared/money/money';
 import type { PdfInput, PdfError, PdfGenerator } from '../ports/pdf-generator';
 import { subtotal, taxAmount, total, outstandingBalance } from '../entities/invoice';
 import { lineTotal } from '../entities/line-item';
-
-function formatCents(cents: bigint): string {
-  const sign = cents < 0n ? '-' : '';
-  const absCents = cents < 0n ? -cents : cents;
-  const dollars = absCents / 100n;
-  const remainder = absCents % 100n;
-  return `${sign}$${dollars}.${remainder.toString().padStart(2, '0')}`;
-}
 
 export class PdfKitGenerator implements PdfGenerator {
   async generate(input: PdfInput): Promise<Result<Uint8Array, PdfError>> {
@@ -51,18 +44,17 @@ export class PdfKitGenerator implements PdfGenerator {
       // Line items
       doc.font('Helvetica');
       for (const item of invoice.lineItems) {
-        const lt = lineTotal(item);
-        const totalStr = lt.isOk() ? formatCents(lt.value.cents) : 'ERR';
+        const totalStr = Money.toDisplayString(lineTotal(item));
         doc.text(
-          `${item.description}  |  Qty: ${item.quantity}  |  Unit: ${formatCents(item.unitPrice.cents)}  |  Total: ${totalStr}`,
+          `${item.description}  |  Qty: ${item.quantity}  |  Unit: ${Money.toDisplayString(item.unitPrice)}  |  Total: ${totalStr}`,
         );
       }
 
       doc.moveDown();
-      doc.text(`Subtotal: ${formatCents(subtotal(invoice).cents)}`);
-      doc.text(`Tax (${(invoice.taxRate * 100).toFixed(2)}%): ${formatCents(taxAmount(invoice).cents)}`);
-      doc.font('Helvetica-Bold').text(`Total: ${formatCents(total(invoice).cents)}`);
-      doc.font('Helvetica').text(`Outstanding: ${formatCents(outstandingBalance(invoice).cents)}`);
+      doc.text(`Subtotal: ${Money.toDisplayString(subtotal(invoice))}`);
+      doc.text(`Tax (${(invoice.taxRate * 100).toFixed(2)}%): ${Money.toDisplayString(taxAmount(invoice))}`);
+      doc.font('Helvetica-Bold').text(`Total: ${Money.toDisplayString(total(invoice))}`);
+      doc.font('Helvetica').text(`Outstanding: ${Money.toDisplayString(outstandingBalance(invoice))}`);
 
       doc.end();
     });

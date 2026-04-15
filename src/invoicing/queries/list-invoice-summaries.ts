@@ -1,6 +1,5 @@
 import type { ClientId } from '@/shared/ids/client-id';
 import { Money } from '@/shared/money/money';
-import { add, subtract } from '@/shared/money/money';
 import type { InvoiceStatus } from '../value-objects/invoice-status';
 import { calculateTax } from '../value-objects/tax-rate';
 import type { InvoiceRepository } from '../ports/invoice-repository';
@@ -24,9 +23,9 @@ export function listInvoiceSummaries(
   return items.map((item): InvoiceSummary => {
     const sub = Money.fromCents(item.subtotalCents);
     const tax = calculateTax(sub, item.taxRate);
-    const tot = add(sub, tax);
+    const tot = Money.add(sub, tax);
     const paid = Money.fromCents(item.paidAmountCents);
-    const outstanding = subtract(tot, paid);
+    const outstanding = Money.subtract(tot, paid);
 
     return {
       id: item.id,

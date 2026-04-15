@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { cacheTag } from 'next/cache';
 import { app } from '@/app/app';
-import { formatMoney } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/format-date';
 import { Money } from '@/shared/money/money';
 
@@ -33,10 +32,10 @@ async function RecentInvoices() {
       <tbody>
         {recent.map((inv) => (
           <tr key={inv.id}>
-            <td><Link href={`/invoices/${inv.id}`}>{inv.id.slice(0, 8)}...<span className="sr-only">, {inv.status}, {formatMoney(inv.total)}</span></Link></td>
+            <td><Link href={`/invoices/${inv.id}`}>{inv.id.slice(0, 8)}...<span className="sr-only">, {inv.status}, {Money.toDisplayString(inv.total)}</span></Link></td>
             <td><span className={`badge badge-${inv.status}`}>{inv.status}</span></td>
-            <td>{formatMoney(inv.total)}</td>
-            <td>{formatMoney(inv.outstandingBalance)}</td>
+            <td>{Money.toDisplayString(inv.total)}</td>
+            <td>{Money.toDisplayString(inv.outstandingBalance)}</td>
             <td>{formatDate(inv.createdAt)}</td>
           </tr>
         ))}
@@ -73,7 +72,7 @@ async function InvoiceSummary() {
       </div>
       <div className="stat-card">
         <div className="label">Outstanding</div>
-        <div className="value">{formatMoney(totalOutstanding)}</div>
+        <div className="value">{Money.toDisplayString(totalOutstanding)}</div>
       </div>
     </>
   );
@@ -83,11 +82,11 @@ export default function HomePage() {
   return (
     <>
       <h1>Dashboard</h1>
-      <div className="grid-stats" style={{ marginTop: '1rem' }}>
+      <div className="grid-stats mt-md">
         <ClientSummary />
         <InvoiceSummary />
       </div>
-      <h2 style={{ marginTop: '1.5rem' }}>Recent Invoices</h2>
+      <h2 className="mt-lg">Recent Invoices</h2>
       <RecentInvoices />
     </>
   );

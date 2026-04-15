@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { cacheTag } from 'next/cache';
 import { app } from '@/app/app';
 import { formatDate } from '@/app/lib/format-date';
-import { formatMoney } from '@/app/lib/format-money';
+import { Money } from '@/shared/money/money';
 import { parseClientId } from '@/shared/ids/client-id';
 
 async function ClientDetail({ id }: { id: string }) {
@@ -16,8 +16,8 @@ async function ClientDetail({ id }: { id: string }) {
   return (
     <div className="card">
       <h2>{client.name}</h2>
-      <p style={{ color: 'var(--color-text-muted)' }}>{String(client.email)}</p>
-      <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+      <p className="text-muted">{String(client.email)}</p>
+      <p className="text-muted text-sm">
         Created {formatDate(client.createdAt)}
       </p>
     </div>
@@ -48,10 +48,10 @@ async function ClientInvoices({ clientId }: { clientId: string }) {
       <tbody>
         {invoices.map((inv) => (
           <tr key={inv.id}>
-            <td><Link href={`/invoices/${inv.id}`}>{inv.id.slice(0, 8)}...<span className="sr-only">, {inv.status}, {formatMoney(inv.total)}</span></Link></td>
+            <td><Link href={`/invoices/${inv.id}`}>{inv.id.slice(0, 8)}...<span className="sr-only">, {inv.status}, {Money.toDisplayString(inv.total)}</span></Link></td>
             <td><span className={`badge badge-${inv.status}`}>{inv.status}</span></td>
-            <td>{formatMoney(inv.total)}</td>
-            <td>{formatMoney(inv.outstandingBalance)}</td>
+            <td>{Money.toDisplayString(inv.total)}</td>
+            <td>{Money.toDisplayString(inv.outstandingBalance)}</td>
             <td>{inv.dueDate}</td>
           </tr>
         ))}
@@ -69,7 +69,7 @@ async function OutstandingBalance({ clientId }: { clientId: string }) {
   return (
     <div className="stat-card">
       <div className="label">Outstanding Balance</div>
-      <div className="value">{formatMoney(outstanding)}</div>
+      <div className="value">{Money.toDisplayString(outstanding)}</div>
     </div>
   );
 }
@@ -82,13 +82,13 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   return (
     <>
-      <Link href="/clients" style={{ fontSize: '0.85rem' }}>&larr; Back to clients</Link>
-      <div style={{ marginTop: '1rem' }}>
+      <Link href="/clients" className="text-sm">&larr; Back to clients</Link>
+      <div className="mt-md">
         <ClientDetail id={id} />
-        <div className="grid-stats" style={{ marginTop: '1rem' }}>
+        <div className="grid-stats mt-md">
           <OutstandingBalance clientId={id} />
         </div>
-        <h2 style={{ marginTop: '1.5rem' }}>Invoices</h2>
+        <h2 className="mt-lg">Invoices</h2>
         <ClientInvoices clientId={id} />
       </div>
     </>

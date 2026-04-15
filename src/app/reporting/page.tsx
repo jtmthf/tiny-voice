@@ -1,6 +1,6 @@
 import { cacheTag } from 'next/cache';
 import { app } from '@/app/app';
-import { formatMoney } from '@/app/lib/format-money';
+import { Money } from '@/shared/money/money';
 import { formatDate } from '@/app/lib/format-date';
 
 async function AllRevenue() {
@@ -27,7 +27,7 @@ async function AllRevenue() {
         {revenue.map((r) => (
           <tr key={r.month}>
             <td>{r.month}</td>
-            <td>{formatMoney(r.total)}</td>
+            <td>{Money.toDisplayString(r.total)}</td>
             <td>{r.paymentCount}</td>
             <td>{formatDate(r.updatedAt)}</td>
           </tr>
@@ -59,7 +59,7 @@ async function YearRevenue() {
     <div className="grid-stats">
       <div className="stat-card">
         <div className="label">{currentYear} Revenue</div>
-        <div className="value">{formatMoney({ cents: totalCents, currency: 'USD' })}</div>
+        <div className="value">{Money.toDisplayString({ cents: totalCents, currency: 'USD' })}</div>
       </div>
       <div className="stat-card">
         <div className="label">{currentYear} Payments</div>
@@ -73,10 +73,10 @@ export default function ReportingPage() {
   return (
     <>
       <h1>Revenue Reporting</h1>
-      <div style={{ marginTop: '1rem' }}>
+      <div className="mt-md">
         <YearRevenue />
       </div>
-      <h2 style={{ marginTop: '1.5rem' }}>Revenue by Month</h2>
+      <h2 className="mt-lg">Revenue by Month</h2>
       <AllRevenue />
     </>
   );

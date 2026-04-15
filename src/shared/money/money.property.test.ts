@@ -1,30 +1,30 @@
 import { describe, expect } from 'vitest';
 import { test as fcTest, fc } from '@fast-check/vitest';
-import { Money, add, equals } from './money';
+import { Money } from './money';
 import { bankersRound } from './bankers-round';
 import { moneyArbitrary } from './testing/arbitraries';
 
 describe('Money PBT', () => {
   fcTest.prop([moneyArbitrary, moneyArbitrary])('add is commutative', (a, b) => {
-    const ab = add(a, b);
-    const ba = add(b, a);
-    expect(equals(ab, ba)).toBe(true);
+    const ab = Money.add(a, b);
+    const ba = Money.add(b, a);
+    expect(Money.equals(ab, ba)).toBe(true);
   });
 
   fcTest.prop([moneyArbitrary, moneyArbitrary, moneyArbitrary])('add is associative', (a, b, c) => {
-    const ab = add(a, b);
-    const ab_c = add(ab, c);
+    const ab = Money.add(a, b);
+    const ab_c = Money.add(ab, c);
 
-    const bc = add(b, c);
-    const a_bc = add(a, bc);
+    const bc = Money.add(b, c);
+    const a_bc = Money.add(a, bc);
 
-    expect(equals(ab_c, a_bc)).toBe(true);
+    expect(Money.equals(ab_c, a_bc)).toBe(true);
   });
 
   fcTest.prop([moneyArbitrary])('add(m, zero) === m', (m) => {
     const zero = Money.zero();
-    const result = add(m, zero);
-    expect(equals(result, m)).toBe(true);
+    const result = Money.add(m, zero);
+    expect(Money.equals(result, m)).toBe(true);
   });
 });
 
