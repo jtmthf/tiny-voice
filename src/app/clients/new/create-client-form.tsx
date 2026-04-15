@@ -3,14 +3,14 @@
 import { useRouter } from 'next/navigation';
 import { useServerAction } from '@orpc/react/hooks';
 import { onSuccessDeferred } from '@orpc/react';
-import { actions } from '@/app/rpc/actions';
+import { clientsCreate } from '@/app/rpc/actions/clients-create';
 import { FormField } from '@/app/lib/form/form-field';
 import { FormError } from '@/app/lib/form/form-error';
 
 export function CreateClientForm() {
   const router = useRouter();
 
-  const create = useServerAction(actions.clients.create, {
+  const create = useServerAction(clientsCreate, {
     interceptors: [
       onSuccessDeferred((output) => {
         router.push(`/clients/${output.id}`);
