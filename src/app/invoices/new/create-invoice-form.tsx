@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { createInvoice, addLineItem } from '@/app/lib/actions/index';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useServerAction } from '@orpc/react/hooks';
+import { actions } from '@/app/rpc/actions';
 import { Field, FieldLabel, FieldControl, FieldDescription } from '@/app/lib/form/field';
 import { FormError } from '@/app/lib/form/form-error';
 
@@ -14,12 +15,16 @@ interface LineItemInput {
 
 export function CreateInvoiceForm({ clients }: { clients: { id: string; name: string }[] }) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
 
   const [lineItems, setLineItems] = useState<LineItemInput[]>([
     { description: '', quantity: 1, unitPriceCents: 0 },
   ]);
-  const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const create = useServerAction(actions.invoicing.create);
+  const addLine = useServerAction(actions.invoicing.addLineItem);
+
+  const isPending = create.isPending || addLine.isPending;
 
   const updateLineItem = (index: number, field: keyof LineItemInput, value: string | number) => {
     setLineItems((prev) => prev.map((li, i) => (i === index ? { ...li, [field]: value } : li)));
@@ -33,9 +38,9 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
     setLineItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    setSubmitError(null);
 
     const form = new FormData(e.currentTarget);
     const clientId = form.get('clientId') as string;
@@ -43,37 +48,37 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
     const dueDate = form.get('dueDate') as string;
 
     if (!clientId) {
-      setError('Please select a client.');
+      setSubmitError('Please select a client.');
       return;
     }
 
-    startTransition(async () => {
-      try {
-        // 1. Create the invoice
-        const [createErr, invoiceData] = await createInvoice({ clientId, taxRate, dueDate });
-        if (createErr) throw new Error(createErr.message);
+    // Create the invoice
+    const [createErr, invoiceData] = await create.execute({ clientId, taxRate, dueDate });
+    if (createErr) {
+      setSubmitError(createErr.message);
+      return;
+    }
 
-        // 2. Add line items sequentially
-        for (const li of lineItems) {
-          if (!li.description.trim()) continue;
-          const [liErr] = await addLineItem({
-            invoiceId: invoiceData.id,
-            description: li.description,
-            quantity: li.quantity,
-            unitPriceCents: li.unitPriceCents,
-          });
-          if (liErr) throw new Error(liErr.message);
-        }
-
-        router.push(`/invoices/${invoiceData.id}`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+    // Add line items sequentially
+    for (const li of lineItems) {
+      if (!li.description.trim()) continue;
+      const [liErr] = await addLine.execute({
+        invoiceId: invoiceData.id,
+        description: li.description,
+        quantity: li.quantity,
+        unitPriceCents: li.unitPriceCents,
+      });
+      if (liErr) {
+        setSubmitError(liErr.message);
+        return;
       }
-    });
+    }
+
+    router.push(`/invoices/${invoiceData.id}`);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={(e) => void handleSubmit(e)}>
       <div className="form-group">
         <label htmlFor="clientId">Client</label>
         <select id="clientId" name="clientId" required>
@@ -152,7 +157,7 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
         + Add line item
       </button>
 
-      <FormError error={error} />
+      <FormError error={submitError} />
 
       <div className="actions-row">
         <button type="submit" className="btn-primary" disabled={isPending}>

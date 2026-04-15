@@ -1,102 +1,32 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { sendInvoice, recordPayment, voidInvoice, generatePdf, calculateLateFee } from '@/app/lib/actions/index';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useServerAction } from '@orpc/react/hooks';
+import { onSuccessDeferred } from '@orpc/react';
+import { actions } from '@/app/rpc/actions';
 
 export function InvoiceActions({ invoiceId, status, showLateFeeButton }: { invoiceId: string; status: string; showLateFeeButton?: boolean }) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [paymentCents, setPaymentCents] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
 
-  const handleSend = () => {
-    setError(null);
-    setMessage(null);
-    startTransition(async () => {
-      try {
-        const [err] = await sendInvoice({ invoiceId });
-        if (err) throw new Error(err.message);
-        setMessage('Invoice sent.');
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to send invoice.');
-      }
-    });
-  };
+  const refresh = () => { router.refresh(); };
 
-  const handleRecordPayment = () => {
-    setError(null);
-    setMessage(null);
-    const cents = parseInt(paymentCents, 10);
-    if (!cents || cents <= 0) {
-      setError('Enter a valid amount in cents.');
-      return;
-    }
-    startTransition(async () => {
-      try {
-        const [err] = await recordPayment({ invoiceId, amountCents: cents });
-        if (err) throw new Error(err.message);
-        setMessage('Payment recorded.');
-        setPaymentCents('');
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to record payment.');
-      }
-    });
-  };
+  const send = useServerAction(actions.invoicing.send, { interceptors: [onSuccessDeferred(refresh)] });
+  const record = useServerAction(actions.invoicing.recordPayment, { interceptors: [onSuccessDeferred(refresh)] });
+  const voidAction = useServerAction(actions.invoicing.void, { interceptors: [onSuccessDeferred(refresh)] });
+  const lateFee = useServerAction(actions.invoicing.calculateLateFee, { interceptors: [onSuccessDeferred(refresh)] });
+  const pdf = useServerAction(actions.invoicing.generatePdf);
 
-  const handleVoid = () => {
-    setError(null);
-    setMessage(null);
-    startTransition(async () => {
-      try {
-        const [err] = await voidInvoice({ invoiceId });
-        if (err) throw new Error(err.message);
-        setMessage('Invoice voided.');
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to void invoice.');
-      }
-    });
-  };
-
-  const handleCalculateLateFee = () => {
-    setError(null);
-    setMessage(null);
-    startTransition(async () => {
-      try {
-        const [err] = await calculateLateFee({ invoiceId });
-        if (err) throw new Error(err.message);
-        setMessage('Late fee applied.');
-        router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to calculate late fee.');
-      }
-    });
-  };
-
-  const handleGeneratePdf = () => {
-    setError(null);
-    setMessage(null);
-    startTransition(async () => {
-      try {
-        const [err, data] = await generatePdf({ invoiceId });
-        if (err) throw new Error(err.message);
-        setMessage(`PDF generated (${data.size} bytes, magic: ${data.magic}).`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to generate PDF.');
-      }
-    });
-  };
+  const isPending = send.isPending || record.isPending || voidAction.isPending || lateFee.isPending || pdf.isPending;
+  const error = send.error ?? record.error ?? voidAction.error ?? lateFee.error ?? pdf.error;
 
   return (
     <div className="card" style={{ marginTop: '1rem' }}>
       <h3>Actions</h3>
       <div className="actions-row" style={{ flexWrap: 'wrap', alignItems: 'end' }}>
         {status === 'draft' && (
-          <button onClick={handleSend} className="btn-primary" disabled={isPending}>
+          <button onClick={() => void send.execute({ invoiceId })} className="btn-primary" disabled={isPending}>
             Send Invoice
           </button>
         )}
@@ -114,31 +44,44 @@ export function InvoiceActions({ invoiceId, status, showLateFeeButton }: { invoi
                 style={{ width: '120px' }}
               />
             </div>
-            <button onClick={handleRecordPayment} className="btn-primary" disabled={isPending}>
+            <button
+              onClick={() => {
+                const cents = parseInt(paymentCents, 10);
+                if (!cents || cents <= 0) return;
+                void record.execute({ invoiceId, amountCents: cents });
+                setPaymentCents('');
+              }}
+              className="btn-primary"
+              disabled={isPending}
+            >
               Record Payment
             </button>
           </div>
         )}
 
         {showLateFeeButton && (
-          <button onClick={handleCalculateLateFee} disabled={isPending}>
+          <button onClick={() => void lateFee.execute({ invoiceId })} disabled={isPending}>
             Calculate Late Fee
           </button>
         )}
 
         {(status === 'draft' || status === 'sent') && (
-          <button onClick={handleVoid} className="btn-danger" disabled={isPending}>
+          <button onClick={() => void voidAction.execute({ invoiceId })} className="btn-danger" disabled={isPending}>
             Void
           </button>
         )}
 
-        <button onClick={handleGeneratePdf} disabled={isPending}>
+        <button onClick={() => void pdf.execute({ invoiceId })} disabled={isPending}>
           Generate PDF
         </button>
       </div>
 
-      {error && <p className="error-message" role="alert">{error}</p>}
-      {message && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>{message}</p>}
+      {error && <p className="error-message" role="alert">{error.message}</p>}
+      {send.isSuccess && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Invoice sent.</p>}
+      {record.isSuccess && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Payment recorded.</p>}
+      {voidAction.isSuccess && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Invoice voided.</p>}
+      {lateFee.isSuccess && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Late fee applied.</p>}
+      {pdf.isSuccess && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>PDF generated ({pdf.data.size} bytes, magic: {pdf.data.magic}).</p>}
     </div>
   );
 }
