@@ -1,7 +1,7 @@
 import { it } from '@fast-check/vitest';
 import { describe, expect } from 'vitest';
 import fc from 'fast-check';
-import { Money, add, equals } from '@/shared/money/money';
+import { Money } from '@/shared/money/money';
 import type { LineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import {
@@ -27,12 +27,9 @@ describe('Invoice PBT invariants', () => {
     const sub = subtotal(invoice);
     let sum = Money.zero();
     for (const item of invoice.lineItems) {
-      const lt = lineTotal(item);
-      if (lt.isOk()) {
-        sum = add(sum, lt.value);
-      }
+      sum = Money.add(sum, lineTotal(item));
     }
-    expect(equals(sub, sum)).toBe(true);
+    expect(Money.equals(sub, sum)).toBe(true);
   });
 
   // 2. outstandingBalance >= 0 for any invoice
@@ -169,6 +166,7 @@ describe('Invoice PBT invariants', () => {
         description: 'x',
         quantity: 1,
         unitPrice: Money.fromCents(100n),
+        kind: 'regular',
       });
       expect(addResult.isErr()).toBe(true);
       if (addResult.isErr()) expect(addResult.error.kind).toBe('InvoiceVoided');

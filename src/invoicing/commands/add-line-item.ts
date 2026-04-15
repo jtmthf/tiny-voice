@@ -36,6 +36,7 @@ export function addLineItem(
     description: input.description,
     quantity: input.quantity,
     unitPrice: Money.fromCents(input.unitPriceCents),
+    kind: 'regular',
   });
 
   if (result.isErr()) return result;

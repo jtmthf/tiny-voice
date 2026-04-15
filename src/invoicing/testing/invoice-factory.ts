@@ -28,6 +28,7 @@ export function buildLineItem(overrides?: Partial<LineItem>): LineItem {
     description: overrides?.description ?? 'Test item',
     quantity: overrides?.quantity ?? 1,
     unitPrice: overrides?.unitPrice ?? Money.fromCents(10000n),
+    kind: overrides?.kind ?? 'regular',
   };
 }
 
@@ -44,13 +45,13 @@ export function buildDraftInvoice(overrides?: {
   taxRate?: TaxRate;
   dueDate?: DueDate;
 }): Invoice {
-  let invoice = expectOk(createInvoice({
+  let invoice = createInvoice({
     id: newInvoiceId(),
     clientId: newClientId(),
     taxRate: overrides?.taxRate ?? DEFAULT_TAX_RATE,
     dueDate: overrides?.dueDate ?? DEFAULT_DUE_DATE,
     createdAt: DEFAULT_DATE,
-  }));
+  });
 
   for (const item of overrides?.lineItems ?? []) {
     invoice = expectOk(addLineItem(invoice, item));

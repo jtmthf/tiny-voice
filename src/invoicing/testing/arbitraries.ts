@@ -33,6 +33,7 @@ export const arbLineItem: fc.Arbitrary<LineItem> = fc.record({
   description: fc.string({ minLength: 1, maxLength: 50 }),
   quantity: fc.integer({ min: 1, max: 1000 }),
   unitPrice: arbMoney,
+  kind: fc.constant('regular' as const),
 });
 
 export const arbPayment: fc.Arbitrary<Payment> = fc.record({

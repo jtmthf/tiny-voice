@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cacheTag } from 'next/cache';
 import { app } from '@/app/app';
-import { formatMoney } from '@/app/lib/format-money';
+import { Money } from '@/shared/money/money';
 import { formatDate } from '@/app/lib/format-date';
 import { lineTotal } from '@/invoicing/entities/line-item';
 import { parseInvoiceId } from '@/shared/ids/invoice-id';
@@ -46,29 +46,29 @@ async function InvoiceHeader({ id }: { id: string }) {
         <h2>Invoice {summary.id.slice(0, 8)}...</h2>
         <span className={`badge badge-${summary.status}`}>{summary.status}</span>
       </div>
-      <div className="grid-stats" style={{ marginTop: '1rem' }}>
+      <div className="grid-stats mt-md">
         <div>
-          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Subtotal</span>
-          <div style={{ fontWeight: 600 }}>{formatMoney(summary.subtotal)}</div>
+          <span className="text-muted text-sm">Subtotal</span>
+          <div className="font-semibold">{Money.toDisplayString(summary.subtotal)}</div>
         </div>
         <div>
-          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Tax</span>
-          <div style={{ fontWeight: 600 }}>{formatMoney(summary.taxAmount)}</div>
+          <span className="text-muted text-sm">Tax</span>
+          <div className="font-semibold">{Money.toDisplayString(summary.taxAmount)}</div>
         </div>
         <div>
-          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Total</span>
-          <div style={{ fontWeight: 600 }}>{formatMoney(summary.total)}</div>
+          <span className="text-muted text-sm">Total</span>
+          <div className="font-semibold">{Money.toDisplayString(summary.total)}</div>
         </div>
         <div>
-          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Paid</span>
-          <div style={{ fontWeight: 600 }}>{formatMoney(summary.paidAmount)}</div>
+          <span className="text-muted text-sm">Paid</span>
+          <div className="font-semibold">{Money.toDisplayString(summary.paidAmount)}</div>
         </div>
         <div>
-          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Outstanding</span>
-          <div style={{ fontWeight: 600 }}>{formatMoney(summary.outstandingBalance)}</div>
+          <span className="text-muted text-sm">Outstanding</span>
+          <div className="font-semibold">{Money.toDisplayString(summary.outstandingBalance)}</div>
         </div>
       </div>
-      <div style={{ marginTop: '0.5rem', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+      <div className="mt-sm text-muted text-sm">
         Due: {summary.dueDate} &middot; Created: {formatDate(summary.createdAt)} &middot; {summary.lineItemCount} line item{summary.lineItemCount !== 1 ? 's' : ''}
       </div>
     </div>
@@ -83,10 +83,10 @@ async function InvoiceClientInfo({ id }: { id: string }) {
   if (!summary) return null;
 
   const client = await app.queries.clients.getClient(summary.clientId);
-  if (!client) return <p style={{ color: 'var(--color-text-muted)' }}>Client not found</p>;
+  if (!client) return <p className="text-muted">Client not found</p>;
 
   return (
-    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+    <p className="text-muted text-sm">
       Client: <Link href={`/clients/${client.id}`}>{client.name}</Link> ({String(client.email)})
     </p>
   );
@@ -115,8 +115,8 @@ async function InvoiceLineItems({ id }: { id: string }) {
           <tr key={li.id}>
             <td>{li.description}</td>
             <td>{li.quantity}</td>
-            <td>{formatMoney(li.unitPrice)}</td>
-            <td>{lineTotal(li).match(formatMoney, () => '$—')}</td>
+            <td>{Money.toDisplayString(li.unitPrice)}</td>
+            <td>{Money.toDisplayString(lineTotal(li))}</td>
           </tr>
         ))}
       </tbody>
@@ -145,7 +145,7 @@ async function InvoicePayments({ id }: { id: string }) {
         {payments.map((p) => (
           <tr key={p.id}>
             <td>{p.id.slice(0, 8)}...</td>
-            <td>{formatMoney(p.amount)}</td>
+            <td>{Money.toDisplayString(p.amount)}</td>
             <td>{formatDate(p.recordedAt)}</td>
           </tr>
         ))}
@@ -167,17 +167,17 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <Link href="/invoices" style={{ fontSize: '0.85rem' }}>&larr; Back to invoices</Link>
-      <div style={{ marginTop: '1rem' }}>
+      <Link href="/invoices" className="text-sm">&larr; Back to invoices</Link>
+      <div className="mt-md">
         <InvoiceHeader id={id} />
         <InvoiceClientInfo id={id} />
 
         <InvoiceActions invoiceId={id} status={summary.status} showLateFeeButton={showLateFeeButton} />
 
-        <h2 style={{ marginTop: '1.5rem' }}>Line Items</h2>
+        <h2 className="mt-lg">Line Items</h2>
         <InvoiceLineItems id={id} />
 
-        <h2 style={{ marginTop: '1.5rem' }}>Payments</h2>
+        <h2 className="mt-lg">Payments</h2>
         <InvoicePayments id={id} />
       </div>
     </>

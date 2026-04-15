@@ -1,7 +1,7 @@
 import type { InvoiceId } from '@/shared/ids/invoice-id';
 import type { ClientId } from '@/shared/ids/client-id';
-import type { Money } from '@/shared/money/money';
-import { Money as MoneyFactory, add, subtract, equals } from '@/shared/money/money';
+import type { Money as MoneyType } from '@/shared/money/money';
+import { Money } from '@/shared/money/money';
 import type { DueDate } from '@/shared/time/due-date';
 import { isOverdue as isDueDateOverdue } from '@/shared/time/due-date';
 import type { Result } from 'neverthrow';
@@ -14,6 +14,7 @@ import { InvoiceError as IE } from '../errors/invoice-error';
 import type { LineItem } from './line-item';
 import { lineTotal } from './line-item';
 import type { Payment } from './payment';
+
 
 // ---------------------------------------------------------------------------
 // Aggregate root
@@ -35,36 +36,32 @@ export interface Invoice {
 // Derived pure functions
 // ---------------------------------------------------------------------------
 
-export function subtotal(invoice: Invoice): Money {
-  let sum = MoneyFactory.zero();
+export function subtotal(invoice: Invoice): MoneyType {
+  let sum = Money.zero();
   for (const item of invoice.lineItems) {
-    // lineTotal is infallible for valid quantities (integer >= 1)
-    const lt = lineTotal(item);
-    if (lt.isOk()) {
-      sum = add(sum, lt.value);
-    }
+    sum = Money.add(sum, lineTotal(item));
   }
   return sum;
 }
 
-export function taxAmount(invoice: Invoice): Money {
+export function taxAmount(invoice: Invoice): MoneyType {
   return calculateTax(subtotal(invoice), invoice.taxRate);
 }
 
-export function total(invoice: Invoice): Money {
-  return add(subtotal(invoice), taxAmount(invoice));
+export function total(invoice: Invoice): MoneyType {
+  return Money.add(subtotal(invoice), taxAmount(invoice));
 }
 
-export function paidAmount(invoice: Invoice): Money {
-  let sum = MoneyFactory.zero();
+export function paidAmount(invoice: Invoice): MoneyType {
+  let sum = Money.zero();
   for (const p of invoice.payments) {
-    sum = add(sum, p.amount);
+    sum = Money.add(sum, p.amount);
   }
   return sum;
 }
 
-export function outstandingBalance(invoice: Invoice): Money {
-  return subtract(total(invoice), paidAmount(invoice));
+export function outstandingBalance(invoice: Invoice): MoneyType {
+  return Money.subtract(total(invoice), paidAmount(invoice));
 }
 
 export function isOverdue(invoice: Invoice, today: DueDate): boolean {
@@ -83,8 +80,8 @@ export interface CreateInvoiceInput {
   readonly createdAt: Date;
 }
 
-export function createInvoice(input: CreateInvoiceInput): Result<Invoice, InvoiceError> {
-  const invoice: Invoice = {
+export function createInvoice(input: CreateInvoiceInput): Invoice {
+  return {
     id: input.id,
     clientId: input.clientId,
     status: 'draft',
@@ -95,7 +92,6 @@ export function createInvoice(input: CreateInvoiceInput): Result<Invoice, Invoic
     createdAt: input.createdAt,
     version: 1,
   };
-  return ok(invoice);
 }
 
 export function addLineItem(invoice: Invoice, item: LineItem): Result<Invoice, InvoiceError> {
@@ -134,7 +130,7 @@ export function recordPayment(invoice: Invoice, payment: Payment): Result<Invoic
   }
 
   const outstanding = outstandingBalance(invoice);
-  const remaining = subtract(outstanding, payment.amount);
+  const remaining = Money.subtract(outstanding, payment.amount);
   if (remaining.cents < 0n) {
     return err(IE.overpayment(payment.amount, outstanding));
   }
@@ -148,7 +144,7 @@ export function recordPayment(invoice: Invoice, payment: Payment): Result<Invoic
 
   // Check if fully paid
   const newOutstanding = outstandingBalance(updatedInvoice);
-  if (equals(newOutstanding, MoneyFactory.zero())) {
+  if (Money.equals(newOutstanding, Money.zero())) {
     return ok({ ...updatedInvoice, status: 'paid' as const });
   }
 
@@ -162,7 +158,7 @@ export function addLateFee(invoice: Invoice, item: LineItem): Result<Invoice, In
     return err(IE.invalidTransition(invoice.status, 'sent'));
   }
   // Check if a late fee has already been applied
-  if (invoice.lineItems.some((li) => li.description.startsWith('Late fee'))) {
+  if (invoice.lineItems.some((li) => li.kind === 'lateFee')) {
     return err(IE.lateFeeAlreadyApplied());
   }
   return ok({
