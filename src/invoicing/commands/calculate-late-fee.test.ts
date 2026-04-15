@@ -18,6 +18,7 @@ import {
   calculateLateFeeLineItem,
   daysOverdue,
 } from './calculate-late-fee';
+import { expectOk } from '@/shared/testing/expect-ok';
 
 describe('daysOverdue', () => {
   it('returns positive days when today is after due date', () => {
@@ -156,7 +157,7 @@ describe('calculateLateFee command', () => {
   it('rejects voided invoice with InvalidTransition', async () => {
     const repo = new InMemoryInvoiceRepo();
     const sent = buildSentInvoice({ dueDate: '2025-02-15' as DueDate });
-    const voided = voidInvoicePure(sent)._unsafeUnwrap();
+    const voided = expectOk(voidInvoicePure(sent));
     repo.save(voided);
 
     const clock = new FixedClock(new Date('2025-03-15T12:00:00Z'));

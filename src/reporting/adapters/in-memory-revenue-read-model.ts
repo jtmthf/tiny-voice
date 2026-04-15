@@ -14,11 +14,9 @@ export class InMemoryRevenueReadModel implements RevenueReadModel {
     const existing = this.store.get(k);
 
     if (existing) {
-      const sumResult = add(existing.total, input.amount);
-      if (sumResult.isErr()) throw new Error(sumResult.error.message);
       this.store.set(k, {
         month: existing.month,
-        total: sumResult.value,
+        total: add(existing.total, input.amount),
         paymentCount: existing.paymentCount + 1,
         updatedAt: input.at,
       });

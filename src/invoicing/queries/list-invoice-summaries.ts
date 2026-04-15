@@ -24,9 +24,9 @@ export function listInvoiceSummaries(
   return items.map((item): InvoiceSummary => {
     const sub = Money.fromCents(item.subtotalCents);
     const tax = calculateTax(sub, item.taxRate);
-    const tot = add(sub, tax)._unsafeUnwrap();
+    const tot = add(sub, tax);
     const paid = Money.fromCents(item.paidAmountCents);
-    const outstanding = subtract(tot, paid)._unsafeUnwrap();
+    const outstanding = subtract(tot, paid);
 
     return {
       id: item.id,

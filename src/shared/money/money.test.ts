@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { Money, add, subtract, multiply, equals, compare } from './money';
 import { bankersRound } from './bankers-round';
+import { expectOk } from '@/shared/testing/expect-ok';
+import { expectErr } from '@/shared/testing/expect-err';
 
 describe('Money.fromCents', () => {
   it('creates a Money with the given cents', () => {
@@ -13,28 +15,27 @@ describe('Money.fromCents', () => {
 describe('Money.fromDollars', () => {
   it('parses a string with two decimal places', () => {
     const r = Money.fromDollars('12.34');
-    expect(r._unsafeUnwrap().cents).toBe(1234n);
+    expect(expectOk(r).cents).toBe(1234n);
   });
 
   it('parses a string with one decimal place', () => {
     const r = Money.fromDollars('5.1');
-    expect(r._unsafeUnwrap().cents).toBe(510n);
+    expect(expectOk(r).cents).toBe(510n);
   });
 
   it('parses a string with no decimal places', () => {
     const r = Money.fromDollars('100');
-    expect(r._unsafeUnwrap().cents).toBe(10000n);
+    expect(expectOk(r).cents).toBe(10000n);
   });
 
   it('parses a number', () => {
     const r = Money.fromDollars(9.99);
-    expect(r._unsafeUnwrap().cents).toBe(999n);
+    expect(expectOk(r).cents).toBe(999n);
   });
 
   it('rejects too many decimal places', () => {
     const r = Money.fromDollars('12.345');
-    expect(r.isErr()).toBe(true);
-    expect(r._unsafeUnwrapErr().type).toBe('InvalidInput');
+    expect(expectErr(r).type).toBe('InvalidInput');
   });
 
   it('rejects non-numeric strings', () => {
@@ -44,12 +45,12 @@ describe('Money.fromDollars', () => {
 
   it('handles negative dollar strings', () => {
     const r = Money.fromDollars('-5.50');
-    expect(r._unsafeUnwrap().cents).toBe(-550n);
+    expect(expectOk(r).cents).toBe(-550n);
   });
 
   it('handles zero', () => {
     const r = Money.fromDollars('0');
-    expect(r._unsafeUnwrap().cents).toBe(0n);
+    expect(expectOk(r).cents).toBe(0n);
   });
 });
 
@@ -57,20 +58,20 @@ describe('add / subtract', () => {
   it('adds two Money values', () => {
     const a = Money.fromCents(100n);
     const b = Money.fromCents(250n);
-    expect(add(a, b)._unsafeUnwrap().cents).toBe(350n);
+    expect(add(a, b).cents).toBe(350n);
   });
 
   it('subtracts two Money values', () => {
     const a = Money.fromCents(500n);
     const b = Money.fromCents(200n);
-    expect(subtract(a, b)._unsafeUnwrap().cents).toBe(300n);
+    expect(subtract(a, b).cents).toBe(300n);
   });
 });
 
 describe('multiply', () => {
   it('multiplies by a scalar', () => {
     const m = Money.fromCents(100n);
-    expect(multiply(m, 1.5)._unsafeUnwrap().cents).toBe(150n);
+    expect(expectOk(multiply(m, 1.5)).cents).toBe(150n);
   });
 
   it('rejects non-finite scalars', () => {
@@ -89,9 +90,9 @@ describe('comparison / predicates', () => {
   });
 
   it('compare returns -1, 0, 1', () => {
-    expect(compare(Money.fromCents(100n), Money.fromCents(200n))._unsafeUnwrap()).toBe(-1);
-    expect(compare(Money.fromCents(200n), Money.fromCents(200n))._unsafeUnwrap()).toBe(0);
-    expect(compare(Money.fromCents(300n), Money.fromCents(200n))._unsafeUnwrap()).toBe(1);
+    expect(compare(Money.fromCents(100n), Money.fromCents(200n))).toBe(-1);
+    expect(compare(Money.fromCents(200n), Money.fromCents(200n))).toBe(0);
+    expect(compare(Money.fromCents(300n), Money.fromCents(200n))).toBe(1);
   });
 });
 

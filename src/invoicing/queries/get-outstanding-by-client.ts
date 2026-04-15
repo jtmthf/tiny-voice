@@ -16,9 +16,7 @@ export function getOutstandingByClient(
   let sum = MoneyFactory.zero();
   for (const inv of invoices) {
     if (inv.status === 'sent') {
-      const balance = outstandingBalance(inv);
-      const added = add(sum, balance);
-      if (added.isOk()) sum = added.value;
+      sum = add(sum, outstandingBalance(inv));
     }
   }
   return sum;

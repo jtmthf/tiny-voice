@@ -8,6 +8,7 @@ import { createInvoice as createInvoiceCommand } from '@/invoicing/commands/crea
 import { addLineItem as addLineItemCommand } from '@/invoicing/commands/add-line-item';
 import { sendInvoice as sendInvoiceCommand } from '@/invoicing/commands/send-invoice';
 import { recordPayment as recordPaymentCommand } from '@/invoicing/commands/record-payment';
+import { expectOk } from '@/shared/testing/expect-ok';
 import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
@@ -55,8 +56,7 @@ describe('buildTestApp', () => {
       { repo: app.clientRepo, clock: app.clock, logger: app.logger },
       { name: 'Acme Corp', email: 'billing@acme.com' },
     );
-    expect(clientResult.isOk()).toBe(true);
-    const client = clientResult._unsafeUnwrap();
+    const client = expectOk(clientResult);
 
     // 2. Create invoice
     const invoiceId = newInvoiceId();
@@ -159,8 +159,7 @@ describe('buildIntegrationTestApp', () => {
       { repo: app.clientRepo, clock: app.clock, logger: app.logger },
       { name: 'TestCo', email: 'test@testco.com' },
     );
-    expect(clientResult.isOk()).toBe(true);
-    const client = clientResult._unsafeUnwrap();
+    const client = expectOk(clientResult);
 
     // Create invoice
     const invoiceId = newInvoiceId();

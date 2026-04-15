@@ -11,6 +11,7 @@ import {
   buildLineItem,
 } from '../testing/invoice-factory';
 import { addLineItem, recordPayment } from '../entities/invoice';
+import { expectOk } from '@/shared/testing/expect-ok';
 
 describe('SqliteInvoiceRepo', () => {
   let db: Database;
@@ -55,7 +56,7 @@ describe('SqliteInvoiceRepo', () => {
       amount: Money.fromCents(1000n),
       recordedAt: new Date('2025-02-01T10:00:00Z'),
     };
-    const updated = recordPayment(sent, payment)._unsafeUnwrap();
+    const updated = expectOk(recordPayment(sent, payment));
     repo.save(updated);
 
     const found = repo.findById(updated.id);
@@ -73,8 +74,8 @@ describe('SqliteInvoiceRepo', () => {
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);
 
-    const a = addLineItem(invoice, buildLineItem())._unsafeUnwrap();
-    const b = addLineItem(invoice, buildLineItem())._unsafeUnwrap();
+    const a = expectOk(addLineItem(invoice, buildLineItem()));
+    const b = expectOk(addLineItem(invoice, buildLineItem()));
 
     const saveA = repo.save(a);
     expect(saveA.isOk()).toBe(true);
@@ -113,12 +114,12 @@ describe('SqliteInvoiceRepo', () => {
 
     // First payment
     const p1 = { id: newPaymentId(), amount: Money.fromCents(500n), recordedAt: new Date() };
-    const afterP1 = recordPayment(sent, p1)._unsafeUnwrap();
+    const afterP1 = expectOk(recordPayment(sent, p1));
     repo.save(afterP1);
 
     // Second payment
     const p2 = { id: newPaymentId(), amount: Money.fromCents(500n), recordedAt: new Date() };
-    const afterP2 = recordPayment(afterP1, p2)._unsafeUnwrap();
+    const afterP2 = expectOk(recordPayment(afterP1, p2));
     repo.save(afterP2);
 
     const found = repo.findById(sent.id);

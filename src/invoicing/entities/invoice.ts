@@ -41,8 +41,7 @@ export function subtotal(invoice: Invoice): Money {
     // lineTotal is infallible for valid quantities (integer >= 1)
     const lt = lineTotal(item);
     if (lt.isOk()) {
-      const added = add(sum, lt.value);
-      if (added.isOk()) sum = added.value;
+      sum = add(sum, lt.value);
     }
   }
   return sum;
@@ -53,25 +52,19 @@ export function taxAmount(invoice: Invoice): Money {
 }
 
 export function total(invoice: Invoice): Money {
-  const sub = subtotal(invoice);
-  const tax = taxAmount(invoice);
-  const result = add(sub, tax);
-  // Both are USD so add cannot fail
-  return result._unsafeUnwrap();
+  return add(subtotal(invoice), taxAmount(invoice));
 }
 
 export function paidAmount(invoice: Invoice): Money {
   let sum = MoneyFactory.zero();
   for (const p of invoice.payments) {
-    const added = add(sum, p.amount);
-    if (added.isOk()) sum = added.value;
+    sum = add(sum, p.amount);
   }
   return sum;
 }
 
 export function outstandingBalance(invoice: Invoice): Money {
-  const result = subtract(total(invoice), paidAmount(invoice));
-  return result._unsafeUnwrap();
+  return subtract(total(invoice), paidAmount(invoice));
 }
 
 export function isOverdue(invoice: Invoice, today: DueDate): boolean {
@@ -141,8 +134,8 @@ export function recordPayment(invoice: Invoice, payment: Payment): Result<Invoic
   }
 
   const outstanding = outstandingBalance(invoice);
-  const cmp = subtract(outstanding, payment.amount);
-  if (cmp.isOk() && cmp.value.cents < 0n) {
+  const remaining = subtract(outstanding, payment.amount);
+  if (remaining.cents < 0n) {
     return err(IE.overpayment(payment.amount, outstanding));
   }
 

@@ -3,6 +3,8 @@ import { createClient } from './create-client';
 import { InMemoryClientRepo } from '../adapters/in-memory-client-repo';
 import { FixedClock } from '../../shared/time/fixed-clock';
 import { CapturingLogger } from '../../shared/logger/capturing-logger';
+import { expectOk } from '@/shared/testing/expect-ok';
+import { expectErr } from '@/shared/testing/expect-err';
 
 const FIXED_DATE = new Date('2025-01-15T12:00:00.000Z');
 
@@ -19,8 +21,7 @@ describe('createClient', () => {
     const deps = makeDeps();
     const result = await createClient(deps, { name: 'Acme Corp', email: 'acme@example.com' });
 
-    expect(result.isOk()).toBe(true);
-    const client = result._unsafeUnwrap();
+    const client = expectOk(result);
     expect(client.name).toBe('Acme Corp');
     expect(client.email).toBe('acme@example.com');
     expect(client.createdAt).toEqual(FIXED_DATE);
@@ -43,16 +44,14 @@ describe('createClient', () => {
     const deps = makeDeps();
     const result = await createClient(deps, { name: 'Acme Corp', email: 'not-an-email' });
 
-    expect(result.isErr()).toBe(true);
-    expect(result._unsafeUnwrapErr()).toEqual({ kind: 'InvalidEmail', raw: 'not-an-email' });
+    expect(expectErr(result)).toEqual({ kind: 'InvalidEmail', raw: 'not-an-email' });
   });
 
   it('returns NameTooShort for empty name', async () => {
     const deps = makeDeps();
     const result = await createClient(deps, { name: '', email: 'acme@example.com' });
 
-    expect(result.isErr()).toBe(true);
-    expect(result._unsafeUnwrapErr()).toEqual({ kind: 'NameTooShort' });
+    expect(expectErr(result)).toEqual({ kind: 'NameTooShort' });
   });
 
   it('returns NameTooLong for name exceeding 200 characters', async () => {
@@ -62,8 +61,7 @@ describe('createClient', () => {
       email: 'acme@example.com',
     });
 
-    expect(result.isErr()).toBe(true);
-    expect(result._unsafeUnwrapErr()).toEqual({ kind: 'NameTooLong' });
+    expect(expectErr(result)).toEqual({ kind: 'NameTooLong' });
   });
 
   it('does not persist on validation failure', async () => {

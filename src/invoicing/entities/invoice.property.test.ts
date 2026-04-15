@@ -29,8 +29,7 @@ describe('Invoice PBT invariants', () => {
     for (const item of invoice.lineItems) {
       const lt = lineTotal(item);
       if (lt.isOk()) {
-        const added = add(sum, lt.value);
-        if (added.isOk()) sum = added.value;
+        sum = add(sum, lt.value);
       }
     }
     expect(equals(sub, sum)).toBe(true);

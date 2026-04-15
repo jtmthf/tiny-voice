@@ -150,6 +150,20 @@ export default tseslint.config(
         disallowTypeAnnotations: true,
       }],
 
+      // Ban neverthrow's escape hatches — use expectOk/expectErr (tests) or
+      // pattern matching / type-level guarantees (production) instead.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "MemberExpression[property.name='_unsafeUnwrap']",
+          message: "Don't use _unsafeUnwrap. In tests use expectOk from @/shared/testing/expect-ok. In production handle the Result or fix the type design so the operation is infallible.",
+        },
+        {
+          selector: "MemberExpression[property.name='_unsafeUnwrapErr']",
+          message: "Don't use _unsafeUnwrapErr. In tests use expectErr from @/shared/testing/expect-err. In production handle the Result branch explicitly.",
+        },
+      ],
+
     },
   },
 

@@ -5,6 +5,7 @@ import { InMemoryInvoiceRepo } from '../adapters/in-memory-invoice-repo';
 import { buildDraftInvoice, buildSentInvoice, buildPaidInvoice, buildLineItem, buildPayment } from '../testing/invoice-factory';
 import { recordPayment } from '../entities/invoice';
 import { getOutstandingByClient } from './get-outstanding-by-client';
+import { expectOk } from '@/shared/testing/expect-ok';
 
 describe('getOutstandingByClient', () => {
   it('returns zero for a client with no invoices', () => {
@@ -24,7 +25,7 @@ describe('getOutstandingByClient', () => {
     // Sent with partial payment — should be included
     const sent = { ...buildSentInvoice({ lineItems: [buildLineItem({ unitPrice: Money.fromCents(10000n) })] }), clientId };
     const payment = buildPayment({ amount: Money.fromCents(3000n) });
-    const sentWithPayment = recordPayment(sent, payment)._unsafeUnwrap();
+    const sentWithPayment = expectOk(recordPayment(sent, payment));
     repo.save(sentWithPayment);
 
     // Paid — should be excluded (status is 'paid')

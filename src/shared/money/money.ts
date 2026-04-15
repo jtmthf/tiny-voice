@@ -4,12 +4,7 @@ import { ok, err, type Result } from 'neverthrow';
 
 export type MoneyError =
   | { readonly type: 'NegativeAmount'; readonly message: string }
-  | { readonly type: 'CurrencyMismatch'; readonly message: string }
   | { readonly type: 'InvalidInput'; readonly message: string };
-
-function currencyMismatch(message: string): MoneyError {
-  return { type: 'CurrencyMismatch', message };
-}
 
 function invalidInput(message: string): MoneyError {
   return { type: 'InvalidInput', message };
@@ -56,20 +51,15 @@ export const Money = {
 } as const;
 
 // --- Operations ---
+// Single-currency system: `currency: 'USD'` is a literal type, so same-currency
+// operations are infallible at the type level. No Result wrapping needed.
 
-function assertSameCurrency(a: Money, b: Money): Result<void, MoneyError> {
-  if (a.currency !== b.currency) {
-    return err(currencyMismatch(`Cannot combine ${a.currency} and ${b.currency}`));
-  }
-  return ok(undefined);
+export function add(a: Money, b: Money): Money {
+  return fromCents(a.cents + b.cents);
 }
 
-export function add(a: Money, b: Money): Result<Money, MoneyError> {
-  return assertSameCurrency(a, b).map(() => fromCents(a.cents + b.cents));
-}
-
-export function subtract(a: Money, b: Money): Result<Money, MoneyError> {
-  return assertSameCurrency(a, b).map(() => fromCents(a.cents - b.cents));
+export function subtract(a: Money, b: Money): Money {
+  return fromCents(a.cents - b.cents);
 }
 
 export function multiply(m: Money, scalar: number): Result<Money, MoneyError> {
@@ -102,10 +92,8 @@ export function equals(a: Money, b: Money): boolean {
 /**
  * Returns -1, 0, or 1.
  */
-export function compare(a: Money, b: Money): Result<number, MoneyError> {
-  return assertSameCurrency(a, b).map(() => {
-    if (a.cents < b.cents) return -1;
-    if (a.cents > b.cents) return 1;
-    return 0;
-  });
+export function compare(a: Money, b: Money): number {
+  if (a.cents < b.cents) return -1;
+  if (a.cents > b.cents) return 1;
+  return 0;
 }

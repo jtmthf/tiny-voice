@@ -7,6 +7,7 @@ import {
   buildLineItem,
 } from '../testing/invoice-factory';
 import { addLineItem } from '../entities/invoice';
+import { expectOk } from '@/shared/testing/expect-ok';
 
 describe('InMemoryInvoiceRepo', () => {
   let repo: InMemoryInvoiceRepo;
@@ -36,8 +37,8 @@ describe('InMemoryInvoiceRepo', () => {
     repo.save(invoice);
 
     // Two concurrent modifications
-    const a = addLineItem(invoice, buildLineItem())._unsafeUnwrap();
-    const b = addLineItem(invoice, buildLineItem())._unsafeUnwrap();
+    const a = expectOk(addLineItem(invoice, buildLineItem()));
+    const b = expectOk(addLineItem(invoice, buildLineItem()));
 
     const saveA = repo.save(a);
     expect(saveA.isOk()).toBe(true);

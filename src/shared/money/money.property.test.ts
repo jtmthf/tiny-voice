@@ -6,24 +6,24 @@ import { moneyArbitrary } from './testing/arbitraries';
 
 describe('Money PBT', () => {
   fcTest.prop([moneyArbitrary, moneyArbitrary])('add is commutative', (a, b) => {
-    const ab = add(a, b)._unsafeUnwrap();
-    const ba = add(b, a)._unsafeUnwrap();
+    const ab = add(a, b);
+    const ba = add(b, a);
     expect(equals(ab, ba)).toBe(true);
   });
 
   fcTest.prop([moneyArbitrary, moneyArbitrary, moneyArbitrary])('add is associative', (a, b, c) => {
-    const ab = add(a, b)._unsafeUnwrap();
-    const ab_c = add(ab, c)._unsafeUnwrap();
+    const ab = add(a, b);
+    const ab_c = add(ab, c);
 
-    const bc = add(b, c)._unsafeUnwrap();
-    const a_bc = add(a, bc)._unsafeUnwrap();
+    const bc = add(b, c);
+    const a_bc = add(a, bc);
 
     expect(equals(ab_c, a_bc)).toBe(true);
   });
 
   fcTest.prop([moneyArbitrary])('add(m, zero) === m', (m) => {
     const zero = Money.zero();
-    const result = add(m, zero)._unsafeUnwrap();
+    const result = add(m, zero);
     expect(equals(result, m)).toBe(true);
   });
 });

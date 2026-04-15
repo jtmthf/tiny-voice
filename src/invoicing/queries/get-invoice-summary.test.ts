@@ -5,6 +5,7 @@ import { buildSentInvoice, buildLineItem, buildPayment } from '../testing/invoic
 import { Money } from '@/shared/money/money';
 import { recordPayment, subtotal, taxAmount, total, paidAmount, outstandingBalance } from '../entities/invoice';
 import { getInvoiceSummary } from './get-invoice-summary';
+import { expectOk } from '@/shared/testing/expect-ok';
 
 describe('getInvoiceSummary', () => {
   it('returns null for unknown invoice', () => {
@@ -21,7 +22,7 @@ describe('getInvoiceSummary', () => {
     ];
     const sent = buildSentInvoice({ lineItems: items });
     const payment = buildPayment({ amount: Money.fromCents(2000n) });
-    const withPayment = recordPayment(sent, payment)._unsafeUnwrap();
+    const withPayment = expectOk(recordPayment(sent, payment));
     repo.save(withPayment);
 
     const summary = getInvoiceSummary({ repo }, withPayment.id);

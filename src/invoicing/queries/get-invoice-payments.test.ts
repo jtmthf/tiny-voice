@@ -5,6 +5,7 @@ import { InMemoryInvoiceRepo } from '../adapters/in-memory-invoice-repo';
 import { buildSentInvoice, buildPayment } from '../testing/invoice-factory';
 import { recordPayment } from '../entities/invoice';
 import { getInvoicePayments } from './get-invoice-payments';
+import { expectOk } from '@/shared/testing/expect-ok';
 
 describe('getInvoicePayments', () => {
   it('returns null for unknown invoice', () => {
@@ -26,7 +27,7 @@ describe('getInvoicePayments', () => {
     const repo = new InMemoryInvoiceRepo();
     const sent = buildSentInvoice();
     const payment = buildPayment({ amount: Money.fromCents(5000n), recordedAt: new Date('2025-03-01T10:00:00Z') });
-    const withPayment = recordPayment(sent, payment)._unsafeUnwrap();
+    const withPayment = expectOk(recordPayment(sent, payment));
     repo.save(withPayment);
 
     const result = getInvoicePayments({ repo }, withPayment.id);

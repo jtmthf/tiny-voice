@@ -4,6 +4,7 @@ import { SqliteClientRepo } from './sqlite-client-repo';
 import { testClient } from '../testing/client-factory';
 import { newClientId } from '../../shared/ids/client-id';
 import { emailAddress } from '../value-objects/email-address';
+import { expectOk } from '@/shared/testing/expect-ok';
 import type { Database } from '../../shared/db/database';
 
 let db: Database;
@@ -46,7 +47,7 @@ describe('SqliteClientRepo', () => {
     const updated = {
       ...client,
       name: 'Updated Name',
-      email: emailAddress('updated@example.com')._unsafeUnwrap(),
+      email: expectOk(emailAddress('updated@example.com')),
     };
     repo.save(updated);
 
