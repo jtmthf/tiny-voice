@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { InvoiceIdSchema } from '@/shared/ids/invoice-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import type { Clock } from '@/shared/time/clock';
@@ -32,10 +33,7 @@ export interface CalculateLateFeeDeps {
  * Returns a positive integer when `today` is after `dueDate`.
  */
 export function daysOverdue(dueDate: DueDate, today: DueDate): number {
-  const due = new Date(dueDate + 'T00:00:00Z');
-  const now = new Date(today + 'T00:00:00Z');
-  const diffMs = now.getTime() - due.getTime();
-  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return differenceInCalendarDays(parseISO(today), parseISO(dueDate));
 }
 
 /**
@@ -59,6 +57,7 @@ export function calculateLateFeeLineItem(
     description: `Late fee (${days} days overdue)`,
     quantity: 1,
     unitPrice: Money.fromCents(feeCents),
+    kind: 'lateFee',
   };
 }
 

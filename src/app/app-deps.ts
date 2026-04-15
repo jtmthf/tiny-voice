@@ -28,7 +28,7 @@ export interface AppDeps {
   readonly logger: Logger;
   readonly featureFlags: FeatureFlags;
   readonly eventBus: EventBus<InvoicingEventMap>;
-  readonly outbox: Outbox;
+  readonly outbox: Outbox<InvoicingEventMap>;
   readonly db: Database;
 
   // Domain ports

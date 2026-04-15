@@ -16,7 +16,7 @@ export interface RpcContext {
   readonly invoiceRepo: InvoiceRepository;
   readonly pdfGenerator: PdfGenerator;
   readonly notifications: NotificationSender;
-  readonly outbox: Outbox;
+  readonly outbox: Outbox<InvoicingEventMap>;
   readonly eventBus: EventBus<InvoicingEventMap>;
   readonly clock: Clock;
   readonly logger: Logger;

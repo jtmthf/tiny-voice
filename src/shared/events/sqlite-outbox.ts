@@ -7,22 +7,22 @@ interface OutboxRow {
   payload: string;
 }
 
-export class SqliteOutbox implements Outbox {
+export class SqliteOutbox<TEventMap extends object = object> implements Outbox<TEventMap> {
   constructor(private readonly db: Database) {}
 
-  enqueue(eventName: string, payload: unknown): void {
+  enqueue<K extends keyof TEventMap & string>(eventName: K, payload: TEventMap[K]): void {
     this.db
       .prepare('INSERT INTO outbox (event_name, payload) VALUES (?, ?)')
       .run(eventName, JSON.stringify(payload));
   }
 
-  async drain(handler: (eventName: string, payload: unknown) => Promise<void>): Promise<void> {
+  async drain(handler: (eventName: keyof TEventMap & string, payload: TEventMap[keyof TEventMap]) => Promise<void>): Promise<void> {
     const rows = this.db
       .prepare<OutboxRow>('SELECT id, event_name, payload FROM outbox ORDER BY id')
       .all();
 
     for (const row of rows) {
-      await handler(row.event_name, JSON.parse(row.payload));
+      await handler(row.event_name as keyof TEventMap & string, JSON.parse(row.payload) as TEventMap[keyof TEventMap]);
       this.db.prepare('DELETE FROM outbox WHERE id = ?').run(row.id);
     }
   }
