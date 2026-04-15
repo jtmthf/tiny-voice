@@ -9,7 +9,7 @@ type Handler = (payload: never) => Promise<void> | void;
  * of individual failures. Errors are aggregated and thrown after all
  * subscribers complete, so callers can detect failures.
  */
-export class InProcessEventBus<TEventMap extends Record<string, unknown>> implements EventBus<TEventMap> {
+export class InProcessEventBus<TEventMap extends object> implements EventBus<TEventMap> {
   private readonly handlers = new Map<string, Handler[]>();
 
   subscribe<K extends keyof TEventMap & string>(

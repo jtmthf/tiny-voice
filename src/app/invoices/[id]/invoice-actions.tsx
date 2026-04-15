@@ -1,28 +1,56 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useServerAction } from '@orpc/react/hooks';
 import { onSuccessDeferred } from '@orpc/react';
-import { actions } from '@/app/rpc/actions';
+import { invoicingSend } from '@/app/rpc/actions/invoicing-send';
+import { invoicingRecordPayment } from '@/app/rpc/actions/invoicing-record-payment';
+import { invoicingVoid } from '@/app/rpc/actions/invoicing-void';
+import { invoicingCalculateLateFee } from '@/app/rpc/actions/invoicing-calculate-late-fee';
+import { invoicingGeneratePdf } from '@/app/rpc/actions/invoicing-generate-pdf';
+
+function triggerDownload(bytesBase64: string, contentType: string, filename: string): void {
+  const raw = atob(bytesBase64);
+  const bytes = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) {
+    bytes[i] = raw.charCodeAt(i);
+  }
+  const blob = new Blob([bytes], { type: contentType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 export function InvoiceActions({ invoiceId, status, showLateFeeButton }: { invoiceId: string; status: string; showLateFeeButton?: boolean }) {
   const router = useRouter();
   const [paymentCents, setPaymentCents] = useState('');
 
-  const refresh = () => { router.refresh(); };
+  const refresh = useCallback(() => { router.refresh(); }, [router]);
 
-  const send = useServerAction(actions.invoicing.send, { interceptors: [onSuccessDeferred(refresh)] });
-  const record = useServerAction(actions.invoicing.recordPayment, { interceptors: [onSuccessDeferred(refresh)] });
-  const voidAction = useServerAction(actions.invoicing.void, { interceptors: [onSuccessDeferred(refresh)] });
-  const lateFee = useServerAction(actions.invoicing.calculateLateFee, { interceptors: [onSuccessDeferred(refresh)] });
-  const pdf = useServerAction(actions.invoicing.generatePdf);
+  const send = useServerAction(invoicingSend, { interceptors: [onSuccessDeferred(refresh)] });
+  const record = useServerAction(invoicingRecordPayment, { interceptors: [onSuccessDeferred(refresh)] });
+  const voidAction = useServerAction(invoicingVoid, { interceptors: [onSuccessDeferred(refresh)] });
+  const lateFee = useServerAction(invoicingCalculateLateFee, { interceptors: [onSuccessDeferred(refresh)] });
+  const pdf = useServerAction(invoicingGeneratePdf);
 
-  const isPending = send.isPending || record.isPending || voidAction.isPending || lateFee.isPending || pdf.isPending;
-  const error = send.error ?? record.error ?? voidAction.error ?? lateFee.error ?? pdf.error;
+  useEffect(() => {
+    if (pdf.isSuccess && pdf.data) {
+      triggerDownload(pdf.data.bytesBase64, pdf.data.contentType, pdf.data.filenameSuggestion);
+    }
+  }, [pdf.isSuccess, pdf.data]);
+
+  const allActions = { send, record, voidAction, lateFee, pdf };
+  const isPending = Object.values(allActions).some(a => a.isPending);
+  const error = Object.values(allActions).map(a => a.error).find(Boolean) ?? null;
 
   return (
-    <div className="card" style={{ marginTop: '1rem' }}>
+    <div className="card mt-md">
       <h3>Actions</h3>
       <div className="actions-row" style={{ flexWrap: 'wrap', alignItems: 'end' }}>
         {status === 'draft' && (
@@ -34,7 +62,7 @@ export function InvoiceActions({ invoiceId, status, showLateFeeButton }: { invoi
         {(status === 'sent') && (
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'end' }}>
             <div className="form-group" style={{ margin: 0 }}>
-              <label htmlFor="paymentCents" style={{ fontSize: '0.75rem' }}>Amount (cents)</label>
+              <label htmlFor="paymentCents" className="text-xs">Amount (cents)</label>
               <input
                 id="paymentCents"
                 type="number"
@@ -48,7 +76,7 @@ export function InvoiceActions({ invoiceId, status, showLateFeeButton }: { invoi
               onClick={() => {
                 const cents = parseInt(paymentCents, 10);
                 if (!cents || cents <= 0) return;
-                void record.execute({ invoiceId, amountCents: cents });
+                void record.execute({ invoiceId, amountCents: String(cents) });
                 setPaymentCents('');
               }}
               className="btn-primary"
@@ -77,11 +105,11 @@ export function InvoiceActions({ invoiceId, status, showLateFeeButton }: { invoi
       </div>
 
       {error && <p className="error-message" role="alert">{error.message}</p>}
-      {send.isSuccess && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Invoice sent.</p>}
-      {record.isSuccess && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Payment recorded.</p>}
-      {voidAction.isSuccess && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Invoice voided.</p>}
-      {lateFee.isSuccess && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Late fee applied.</p>}
-      {pdf.isSuccess && <p role="status" style={{ color: 'var(--color-success)', fontSize: '0.875rem', marginTop: '0.5rem' }}>PDF generated ({pdf.data.size} bytes, magic: {pdf.data.magic}).</p>}
+      {send.isSuccess && <p role="status" className="success-message">Invoice sent.</p>}
+      {record.isSuccess && <p role="status" className="success-message">Payment recorded.</p>}
+      {voidAction.isSuccess && <p role="status" className="success-message">Invoice voided.</p>}
+      {lateFee.isSuccess && <p role="status" className="success-message">Late fee applied.</p>}
+      {pdf.isSuccess && <p role="status" className="success-message">PDF downloaded.</p>}
     </div>
   );
 }

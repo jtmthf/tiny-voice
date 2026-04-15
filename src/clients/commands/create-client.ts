@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import type { Result } from 'neverthrow';
+import { err, type Result } from 'neverthrow';
 import type { ClientRepository } from '../ports/client-repository';
 import type { Clock } from '../../shared/time/clock';
 import type { Logger } from '../../shared/logger/logger';
@@ -30,7 +30,7 @@ export function createClient(
 ): Result<Client, CreateClientError> {
   const emailResult = emailAddress(input.email);
   if (emailResult.isErr()) {
-    return emailResult.map(() => undefined as never);
+    return err(emailResult.error);
   }
 
   const clientResult = makeClient({

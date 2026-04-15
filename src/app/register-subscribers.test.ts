@@ -5,6 +5,7 @@ import type { CapturingNotificationSender } from '@/invoicing/adapters/capturing
 import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newClientId } from '@/shared/ids/client-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
+import { testClient } from '@/clients/testing/client-factory';
 import type { InvoiceSent } from '@/invoicing/events/invoice-sent';
 import type { InvoicePaymentRecorded } from '@/invoicing/events/invoice-payment-recorded';
 import type { InvoiceVoided } from '@/invoicing/events/invoice-voided';
@@ -21,7 +22,27 @@ describe('subscribers', () => {
   });
 
   describe('InvoiceSent', () => {
-    it('sends invoice notification', async () => {
+    it('sends invoice notification with real client name', async () => {
+      const clientId = newClientId();
+      const client = testClient({ id: clientId, name: 'Acme Corp' });
+      app.clientRepo.save(client);
+
+      const event: InvoiceSent = {
+        invoiceId: newInvoiceId(),
+        clientId,
+        totalCents: '10000',
+        sentAt: '2026-04-13T00:00:00.000Z',
+      };
+
+      await app.eventBus.publish('InvoiceSent', event);
+
+      expect(notifications.sent).toHaveLength(1);
+      expect(notifications.sent[0]!.type).toBe('invoiceSent');
+      const notification = notifications.sent[0]!.input as { clientName: string };
+      expect(notification.clientName).toBe('Acme Corp');
+    });
+
+    it('falls back to "Unknown Client" when client is missing', async () => {
       const event: InvoiceSent = {
         invoiceId: newInvoiceId(),
         clientId: newClientId(),
@@ -32,7 +53,8 @@ describe('subscribers', () => {
       await app.eventBus.publish('InvoiceSent', event);
 
       expect(notifications.sent).toHaveLength(1);
-      expect(notifications.sent[0]!.type).toBe('invoiceSent');
+      const notification = notifications.sent[0]!.input as { clientName: string };
+      expect(notification.clientName).toBe('Unknown Client');
     });
   });
 

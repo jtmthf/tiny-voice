@@ -6,6 +6,7 @@ import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
 import type { NotificationSender } from '@/invoicing/ports/notification-sender';
 import type { InvoiceRepository } from '@/invoicing/ports/invoice-repository';
 import { outstandingBalance } from '@/invoicing/entities/invoice';
+import type { ClientRepository } from '@/clients/ports/client-repository';
 import type { RevenueReadModel } from '@/reporting/ports/revenue-read-model';
 import { registerRevenueProjection } from '@/reporting/projections/register-revenue-projection';
 
@@ -14,6 +15,7 @@ export interface RegisterSubscribersDeps {
   readonly revenueReadModel: RevenueReadModel;
   readonly notifications: NotificationSender;
   readonly invoiceRepo: InvoiceRepository;
+  readonly clientRepo: ClientRepository;
   readonly logger: Logger;
   readonly clock: Clock;
 }
@@ -43,8 +45,11 @@ export function registerSubscribers(deps: RegisterSubscribersDeps): () => void {
   unsubs.push(
     deps.eventBus.subscribe('InvoiceSent', async (payload) => {
       // Look up client name for the notification
-      const invoice = deps.invoiceRepo.findById(payload.invoiceId);
-      const clientName = invoice ? `Client ${String(invoice.clientId).slice(0, 8)}` : 'Unknown';
+      const client = deps.clientRepo.findById(payload.clientId);
+      if (!client) {
+        deps.logger.warn('notification.client_not_found', { clientId: payload.clientId });
+      }
+      const clientName = client?.name ?? 'Unknown Client';
 
       await deps.notifications.sendInvoiceSent({
         invoiceId: payload.invoiceId,

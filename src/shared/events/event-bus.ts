@@ -7,7 +7,7 @@
  * thrown as an AggregateError. This ensures reliable delivery while
  * still surfacing failures.
  */
-export interface EventBus<TEventMap extends Record<string, unknown>> {
+export interface EventBus<TEventMap extends object> {
   publish<K extends keyof TEventMap & string>(event: K, payload: TEventMap[K]): Promise<void>;
   subscribe<K extends keyof TEventMap & string>(event: K, handler: (payload: TEventMap[K]) => Promise<void> | void): () => void;
 }

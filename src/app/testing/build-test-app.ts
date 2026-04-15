@@ -49,7 +49,7 @@ export function buildTestApp(overrides: Partial<AppDeps> = {}): TestAppResult {
   const featureFlags = overrides.featureFlags ?? new InMemoryFeatureFlags({ lateFees: false });
   const eventBus = overrides.eventBus ?? new InProcessEventBus<InvoicingEventMap>();
   const db = overrides.db ?? STUB_DB;
-  const outbox = overrides.outbox ?? new InMemoryOutbox();
+  const outbox = overrides.outbox ?? new InMemoryOutbox<InvoicingEventMap>();
 
   const clientRepo = overrides.clientRepo ?? new InMemoryClientRepo();
   const invoiceRepo = overrides.invoiceRepo ?? new InMemoryInvoiceRepo();
@@ -62,6 +62,7 @@ export function buildTestApp(overrides: Partial<AppDeps> = {}): TestAppResult {
     revenueReadModel,
     notifications,
     invoiceRepo,
+    clientRepo,
     logger,
     clock,
   });

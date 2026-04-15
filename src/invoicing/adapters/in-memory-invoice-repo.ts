@@ -9,21 +9,11 @@ import type { InvoiceStatus } from '../value-objects/invoice-status';
 import type { InvoiceRepository, InvoiceListItem } from '../ports/invoice-repository';
 import { subtotal, paidAmount } from '../entities/invoice';
 
-function clone(invoice: Invoice): Invoice {
-  return {
-    ...invoice,
-    lineItems: invoice.lineItems.map((li) => ({ ...li, unitPrice: { ...li.unitPrice } })),
-    payments: invoice.payments.map((p) => ({ ...p, amount: { ...p.amount }, recordedAt: new Date(p.recordedAt.getTime()) })),
-    createdAt: new Date(invoice.createdAt.getTime()),
-  };
-}
-
 export class InMemoryInvoiceRepo implements InvoiceRepository {
   private readonly store = new Map<InvoiceId, Invoice>();
 
   findById(id: InvoiceId): Invoice | null {
-    const inv = this.store.get(id);
-    return inv ? clone(inv) : null;
+    return this.store.get(id) ?? null;
   }
 
   save(invoice: Invoice): Result<void, InvoiceError> {
@@ -34,7 +24,7 @@ export class InMemoryInvoiceRepo implements InvoiceRepository {
         return err(IE.concurrencyConflict());
       }
     }
-    this.store.set(invoice.id, clone(invoice));
+    this.store.set(invoice.id, invoice);
     return ok(undefined);
   }
 
@@ -46,7 +36,7 @@ export class InMemoryInvoiceRepo implements InvoiceRepository {
     if (filters?.clientId) {
       results = results.filter((inv) => inv.clientId === filters.clientId);
     }
-    return results.map(clone);
+    return results;
   }
 
   listSummaries(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly InvoiceListItem[] {

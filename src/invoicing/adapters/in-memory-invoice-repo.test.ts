@@ -48,13 +48,13 @@ describe('InMemoryInvoiceRepo', () => {
     if (saveB.isErr()) expect(saveB.error.kind).toBe('ConcurrencyConflict');
   });
 
-  it('clones on save to prevent aliasing', async () => {
+  it('returns the same reference on repeated findById (readonly contract, no defensive copy)', async () => {
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);
 
     const found = repo.findById(invoice.id);
     const found2 = repo.findById(invoice.id);
-    expect(found).not.toBe(found2); // different object references
+    expect(found).toBe(found2);
   });
 
   it('lists with status filter', async () => {
