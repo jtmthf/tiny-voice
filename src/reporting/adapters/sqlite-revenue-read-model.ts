@@ -1,6 +1,7 @@
 import type { Database } from '@/shared/db/database';
 import type { Money } from '@/shared/money/money';
 import type { YearMonth } from '@/shared/time/year-month';
+import { YearMonthSchema } from '@/shared/time/year-month';
 import type { MonthlyRevenue, RevenueReadModel } from '../ports/revenue-read-model';
 
 interface RevenueRow {
@@ -13,7 +14,7 @@ interface RevenueRow {
 
 function rowToMonthlyRevenue(row: RevenueRow): MonthlyRevenue {
   return {
-    month: row.month as YearMonth,
+    month: YearMonthSchema.parse(row.month),
     total: { cents: BigInt(row.total_cents), currency: 'USD' } satisfies Money,
     paymentCount: row.payment_count,
     updatedAt: new Date(row.updated_at),

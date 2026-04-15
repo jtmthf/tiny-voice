@@ -7,12 +7,14 @@ import { fromDb, toDb } from '@/shared/ids/id';
 import { Money } from '@/shared/money/money';
 import type { Invoice } from '../entities/invoice';
 import type { LineItem } from '../entities/line-item';
+import type { LineItemKind } from '../entities/line-item';
 import type { Payment } from '../entities/payment';
 import type { InvoiceError } from '../errors/invoice-error';
 import { InvoiceError as IE } from '../errors/invoice-error';
 import type { InvoiceStatus } from '../value-objects/invoice-status';
-import type { TaxRate } from '../value-objects/tax-rate';
-import type { DueDate } from '@/shared/time/due-date';
+import { InvoiceStatusSchema } from '../value-objects/invoice-status';
+import { TaxRateSchema } from '../value-objects/tax-rate';
+import { DueDateSchema } from '@/shared/time/due-date';
 import type { InvoiceRepository, InvoiceListItem } from '../ports/invoice-repository';
 
 interface InvoiceRow {
@@ -42,6 +44,7 @@ interface LineItemRow {
   description: string;
   quantity: number;
   unit_price_cents: string; // bigint stored as TEXT
+  kind: string;
 }
 
 interface PaymentRow {
@@ -51,12 +54,18 @@ interface PaymentRow {
   recorded_at: string;
 }
 
+function parseLineItemKind(raw: string): LineItemKind {
+  if (raw === 'lateFee') return 'lateFee';
+  return 'regular';
+}
+
 function toLineItem(row: LineItemRow): LineItem {
   return {
     id: fromDb('li', row.id),
     description: row.description,
     quantity: row.quantity,
     unitPrice: Money.fromCents(BigInt(row.unit_price_cents)),
+    kind: parseLineItemKind(row.kind),
   };
 }
 
@@ -72,11 +81,11 @@ function toInvoice(row: InvoiceRow, lineItems: LineItem[], payments: Payment[]):
   return {
     id: fromDb('inv', row.id),
     clientId: fromDb('client', row.client_id),
-    status: row.status as InvoiceStatus,
+    status: InvoiceStatusSchema.parse(row.status),
     lineItems,
     payments,
-    taxRate: row.tax_rate as TaxRate,
-    dueDate: row.due_date as DueDate,
+    taxRate: TaxRateSchema.parse(row.tax_rate),
+    dueDate: DueDateSchema.parse(row.due_date),
     createdAt: new Date(row.created_at),
     version: row.version,
   };
@@ -152,10 +161,10 @@ export class SqliteInvoiceRepo implements InvoiceRepository {
       // Delete and re-insert line items
       this.db.prepare('DELETE FROM line_items WHERE invoice_id = ?').run(rawId);
       const insertLineItem = this.db.prepare(
-        'INSERT INTO line_items (id, invoice_id, description, quantity, unit_price_cents) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO line_items (id, invoice_id, description, quantity, unit_price_cents, kind) VALUES (?, ?, ?, ?, ?, ?)',
       );
       for (const li of invoice.lineItems) {
-        insertLineItem.run(toDb(li.id), rawId, li.description, li.quantity, li.unitPrice.cents.toString());
+        insertLineItem.run(toDb(li.id), rawId, li.description, li.quantity, li.unitPrice.cents.toString(), li.kind);
       }
 
       // Insert only new payments (append-only).
@@ -202,7 +211,7 @@ export class SqliteInvoiceRepo implements InvoiceRepository {
         (SELECT json_group_array(json_object(
           'id', li.id, 'invoice_id', li.invoice_id,
           'description', li.description, 'quantity', li.quantity,
-          'unit_price_cents', li.unit_price_cents
+          'unit_price_cents', li.unit_price_cents, 'kind', li.kind
         )) FROM line_items li WHERE li.invoice_id = i.id) AS line_items_json,
         (SELECT json_group_array(json_object(
           'id', p.id, 'invoice_id', p.invoice_id,
@@ -252,9 +261,9 @@ export class SqliteInvoiceRepo implements InvoiceRepository {
     return rows.map((row): InvoiceListItem => ({
       id: fromDb('inv', row.id),
       clientId: fromDb('client', row.client_id),
-      status: row.status as InvoiceStatus,
-      taxRate: row.tax_rate as TaxRate,
-      dueDate: row.due_date as DueDate,
+      status: InvoiceStatusSchema.parse(row.status),
+      taxRate: TaxRateSchema.parse(row.tax_rate),
+      dueDate: DueDateSchema.parse(row.due_date),
       createdAt: new Date(row.created_at),
       lineItemCount: row.line_item_count,
       subtotalCents: BigInt(row.subtotal_cents ?? '0'),
