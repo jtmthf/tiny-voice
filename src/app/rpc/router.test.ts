@@ -136,7 +136,7 @@ describe('RPC router', () => {
 
       const invoice = await callWithContext<{ id: string; status: string; clientId: string }>(
         router.invoicing.create,
-        { clientId: client.id, taxRate: 0.1, dueDate: '2025-04-01' },
+        { clientId: client.id, taxRate: 0.1, dueDate: '2025-04-01', lineItems: [] },
         ctx,
       );
 
@@ -148,7 +148,7 @@ describe('RPC router', () => {
       try {
         await callWithContext(
           router.invoicing.create,
-          { clientId: 'client_00000000-0000-0000-0000-000000000000', taxRate: 0.1, dueDate: '2025-04-01' },
+          { clientId: 'client_00000000-0000-0000-0000-000000000000', taxRate: 0.1, dueDate: '2025-04-01', lineItems: [] },
           ctx,
         );
         expect.fail('Should have thrown');
@@ -170,13 +170,13 @@ describe('RPC router', () => {
       );
       const inv = await callWithContext<{ id: string }>(
         router.invoicing.create,
-        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01' },
+        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01', lineItems: [] },
         ctx,
       );
 
       const updated = await callWithContext<{ lineItems: unknown[] }>(
         router.invoicing.addLineItem,
-        { invoiceId: inv.id, description: 'Widget', quantity: 2, unitPriceCents: 1000 },
+        { invoiceId: inv.id, description: 'Widget', quantity: 2, unitPriceCents: '1000' },
         ctx,
       );
 
@@ -187,7 +187,7 @@ describe('RPC router', () => {
       try {
         await callWithContext(
           router.invoicing.addLineItem,
-          { invoiceId: 'inv_00000000-0000-0000-0000-000000000000', description: 'X', quantity: 1, unitPriceCents: 100 },
+          { invoiceId: 'inv_00000000-0000-0000-0000-000000000000', description: 'X', quantity: 1, unitPriceCents: '100' },
           ctx,
         );
         expect.fail('Should have thrown');
@@ -209,12 +209,12 @@ describe('RPC router', () => {
       );
       const inv = await callWithContext<{ id: string }>(
         router.invoicing.create,
-        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01' },
+        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01', lineItems: [] },
         ctx,
       );
       await callWithContext(
         router.invoicing.addLineItem,
-        { invoiceId: inv.id, description: 'Widget', quantity: 1, unitPriceCents: 5000 },
+        { invoiceId: inv.id, description: 'Widget', quantity: 1, unitPriceCents: '5000' },
         ctx,
       );
 
@@ -233,7 +233,7 @@ describe('RPC router', () => {
       );
       const inv = await callWithContext<{ id: string }>(
         router.invoicing.create,
-        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01' },
+        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01', lineItems: [] },
         ctx,
       );
 
@@ -258,12 +258,12 @@ describe('RPC router', () => {
       );
       const inv = await callWithContext<{ id: string }>(
         router.invoicing.create,
-        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01' },
+        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01', lineItems: [] },
         c,
       );
       await callWithContext(
         router.invoicing.addLineItem,
-        { invoiceId: inv.id, description: 'Widget', quantity: 1, unitPriceCents: 10000 },
+        { invoiceId: inv.id, description: 'Widget', quantity: 1, unitPriceCents: '10000' },
         c,
       );
       await callWithContext(router.invoicing.send, { invoiceId: inv.id }, c);
@@ -275,7 +275,7 @@ describe('RPC router', () => {
 
       const result = await callWithContext<{ status: string; payments: unknown[] }>(
         router.invoicing.recordPayment,
-        { invoiceId: inv.id, amountCents: 5000 },
+        { invoiceId: inv.id, amountCents: '5000' },
         ctx,
       );
 
@@ -288,7 +288,7 @@ describe('RPC router', () => {
 
       const result = await callWithContext<{ status: string }>(
         router.invoicing.recordPayment,
-        { invoiceId: inv.id, amountCents: 10000 },
+        { invoiceId: inv.id, amountCents: '10000' },
         ctx,
       );
 
@@ -301,7 +301,7 @@ describe('RPC router', () => {
       try {
         await callWithContext(
           router.invoicing.recordPayment,
-          { invoiceId: inv.id, amountCents: 999999 },
+          { invoiceId: inv.id, amountCents: '999999' },
           ctx,
         );
         expect.fail('Should have thrown');
@@ -315,14 +315,14 @@ describe('RPC router', () => {
       const inv = await createSentInvoice(ctx);
       await callWithContext(
         router.invoicing.recordPayment,
-        { invoiceId: inv.id, amountCents: 10000 },
+        { invoiceId: inv.id, amountCents: '10000' },
         ctx,
       );
 
       try {
         await callWithContext(
           router.invoicing.recordPayment,
-          { invoiceId: inv.id, amountCents: 100 },
+          { invoiceId: inv.id, amountCents: '100' },
           ctx,
         );
         expect.fail('Should have thrown');
@@ -344,7 +344,7 @@ describe('RPC router', () => {
       );
       const inv = await callWithContext<{ id: string }>(
         router.invoicing.create,
-        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01' },
+        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01', lineItems: [] },
         ctx,
       );
 
@@ -363,7 +363,7 @@ describe('RPC router', () => {
       );
       const inv = await callWithContext<{ id: string }>(
         router.invoicing.create,
-        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01' },
+        { clientId: client.id, taxRate: 0, dueDate: '2025-06-01', lineItems: [] },
         ctx,
       );
       await callWithContext(router.invoicing.void, { invoiceId: inv.id }, ctx);
@@ -389,18 +389,23 @@ describe('RPC router', () => {
       );
       const inv = await callWithContext<{ id: string }>(
         router.invoicing.create,
-        { clientId: client.id, taxRate: 0.1, dueDate: '2025-06-01' },
+        { clientId: client.id, taxRate: 0.1, dueDate: '2025-06-01', lineItems: [] },
         ctx,
       );
 
-      const pdf = await callWithContext<{ size: number; magic: string }>(
+      const pdf = await callWithContext<{ filenameSuggestion: string; bytesBase64: string; contentType: string }>(
         router.invoicing.generatePdf,
         { invoiceId: inv.id },
         ctx,
       );
 
-      expect(pdf.size).toBeGreaterThan(0);
-      expect(pdf.magic).toBe('25504446'); // %PDF in hex
+      expect(pdf.contentType).toBe('application/pdf');
+      expect(pdf.filenameSuggestion).toMatch(/^invoice-.+\.pdf$/);
+      expect(pdf.bytesBase64.length).toBeGreaterThan(0);
+      // Decode first 4 bytes and verify %PDF magic
+      const raw = atob(pdf.bytesBase64);
+      const magic = Array.from({ length: 4 }, (_, i) => raw.charCodeAt(i).toString(16).padStart(2, '0')).join('');
+      expect(magic).toBe('25504446');
     });
 
     it('returns INVOICE_NOT_FOUND for nonexistent invoice', async () => {
@@ -429,12 +434,12 @@ describe('RPC router', () => {
       );
       const inv = await callWithContext<{ id: string }>(
         router.invoicing.create,
-        { clientId: client.id, taxRate: 0, dueDate: '2025-01-01' },
+        { clientId: client.id, taxRate: 0, dueDate: '2025-01-01', lineItems: [] },
         c,
       );
       await callWithContext(
         router.invoicing.addLineItem,
-        { invoiceId: inv.id, description: 'Widget', quantity: 1, unitPriceCents: 100000 },
+        { invoiceId: inv.id, description: 'Widget', quantity: 1, unitPriceCents: '100000' },
         c,
       );
       await callWithContext(router.invoicing.send, { invoiceId: inv.id }, c);
@@ -481,12 +486,12 @@ describe('RPC router', () => {
       );
       const inv = await callWithContext<{ id: string }>(
         router.invoicing.create,
-        { clientId: client.id, taxRate: 0, dueDate: '2025-12-01' },
+        { clientId: client.id, taxRate: 0, dueDate: '2025-12-01', lineItems: [] },
         ctxFlagOn,
       );
       await callWithContext(
         router.invoicing.addLineItem,
-        { invoiceId: inv.id, description: 'Widget', quantity: 1, unitPriceCents: 10000 },
+        { invoiceId: inv.id, description: 'Widget', quantity: 1, unitPriceCents: '10000' },
         ctxFlagOn,
       );
       await callWithContext(router.invoicing.send, { invoiceId: inv.id }, ctxFlagOn);

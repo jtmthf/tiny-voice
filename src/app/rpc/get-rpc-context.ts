@@ -1,34 +1,24 @@
 import type { RpcContext } from './rpc-context';
 
-/**
- * Holder for the lazily-initialized RPC context singleton.
- * Task 8 (composition root) will call `setRpcContext()` with the real deps.
- *
- * Until then, `getRpcContext()` throws a clear error directing the developer
- * to wire up `buildApp()`.
- */
-let _ctx: RpcContext | null = null;
+let _ctxProvider: (() => RpcContext) | null = null;
 
 /**
- * Called by the composition root (task 8's `buildApp()`) to provide the
- * application-wide RPC context. Must be called once at app startup.
+ * Called by the composition root (`buildApp()`) to register a lazy provider
+ * for the RPC context. Replaces any previously registered provider.
  */
-export function setRpcContext(ctx: RpcContext): void {
-  if (_ctx) {
-    throw new Error('setRpcContext() called twice. This indicates a wiring bug in the composition root.');
-  }
-  _ctx = ctx;
+export function setRpcContextProvider(provider: () => RpcContext): void {
+  _ctxProvider = provider;
 }
 
 /**
- * Returns the current RPC context.
- * Throws if `setRpcContext` has not been called yet.
+ * Returns the current RPC context via the registered provider.
+ * Throws if `setRpcContextProvider` has not been called yet.
  */
 export function getRpcContext(): RpcContext {
-  if (!_ctx) {
+  if (!_ctxProvider) {
     throw new Error(
-      'RPC context not initialized. Call setRpcContext() from buildApp() (task 8).',
+      'RPC context provider not set. Ensure buildApp() has run before handling a request.',
     );
   }
-  return _ctx;
+  return _ctxProvider();
 }

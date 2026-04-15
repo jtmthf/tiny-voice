@@ -5,7 +5,8 @@ import type { DueDate } from '@/shared/time/due-date';
 import type { TaxRate } from '@/invoicing/value-objects/tax-rate';
 import type { Invoice } from '@/invoicing/entities/invoice';
 import type { Client } from '@/clients/entities/client';
-import type { Money } from '@/shared/money/money';
+import type { Money as MoneyType } from '@/shared/money/money';
+import { Money } from '@/shared/money/money';
 import { createClient } from '@/clients/commands/create-client';
 import { createInvoice as createInvoiceCommand } from '@/invoicing/commands/create-invoice';
 import { addLineItem as addLineItemCommand } from '@/invoicing/commands/add-line-item';
@@ -20,16 +21,8 @@ import { mapInvoiceError, mapClientError } from './rpc-errors';
 // DTO conversion helpers
 // ---------------------------------------------------------------------------
 
-function centsToDollars(cents: bigint): string {
-  const sign = cents < 0n ? '-' : '';
-  const abs = cents < 0n ? -cents : cents;
-  const whole = abs / 100n;
-  const frac = abs % 100n;
-  return `${sign}${whole}.${frac.toString().padStart(2, '0')}`;
-}
-
-function moneyToDto(m: Money) {
-  return { amount: centsToDollars(m.cents), currency: m.currency };
+function moneyToDto(m: MoneyType) {
+  return { amount: Money.toDollarString(m), currency: m.currency };
 }
 
 function clientToDto(c: Client) {
@@ -76,7 +69,7 @@ const clientsCreate = contract.clients.create
     );
 
     if (result.isErr()) {
-      mapClientError(result.error, errors);
+      throw mapClientError(result.error, errors);
     }
 
     return clientToDto(result.value);
@@ -97,11 +90,17 @@ const invoicingCreate = contract.invoicing.create
         clientId: input.clientId,
         taxRate: input.taxRate as TaxRate,
         dueDate: input.dueDate as DueDate,
+        lineItems: input.lineItems.map((li) => ({
+          id: newLineItemId(),
+          description: li.description,
+          quantity: li.quantity,
+          unitPriceCents: BigInt(li.unitPriceCents),
+        })),
       },
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors);
+      throw mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -121,7 +120,7 @@ const invoicingAddLineItem = contract.invoicing.addLineItem
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors);
+      throw mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -135,7 +134,7 @@ const invoicingSend = contract.invoicing.send
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors);
+      throw mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -153,7 +152,7 @@ const invoicingRecordPayment = contract.invoicing.recordPayment
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors);
+      throw mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -167,7 +166,7 @@ const invoicingVoid = contract.invoicing.void
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors);
+      throw mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -185,7 +184,7 @@ const invoicingCalculateLateFee = contract.invoicing.calculateLateFee
     );
 
     if (result.isErr()) {
-      mapInvoiceError(result.error, errors);
+      throw mapInvoiceError(result.error, errors);
     }
 
     return invoiceToDto(result.value);
@@ -209,12 +208,11 @@ const invoicingGeneratePdf = contract.invoicing.generatePdf
     }
 
     const bytes = pdfResult.value;
-    // Return size and first 4 bytes as hex "magic" to prove generation worked
-    const magic = Array.from(bytes.slice(0, 4))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-
-    return { size: bytes.length, magic };
+    return {
+      filenameSuggestion: `invoice-${invoice.id.slice(0, 8)}.pdf`,
+      bytesBase64: Buffer.from(bytes).toString('base64'),
+      contentType: 'application/pdf' as const,
+    };
   });
 
 // ---------------------------------------------------------------------------
@@ -235,4 +233,3 @@ export const router = {
     generatePdf: invoicingGeneratePdf,
   },
 };
-
