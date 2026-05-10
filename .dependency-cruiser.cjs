@@ -74,20 +74,20 @@ module.exports = {
       to: { path: '^src/app/' },
     },
     {
-      name: 'no-next-outside-app',
+      name: 'no-framework-outside-app',
       severity: 'error',
       comment:
-        'next/* imports are framework concerns and must stay in src/app/. Domain modules and shared kernel must not depend on Next.js.',
+        'TanStack framework imports must stay in src/app/. Domain modules and shared kernel must not depend on them.',
       from: {
         path: '^src/(clients|invoicing|reporting|shared)/',
         pathNot: '\\.test\\.ts$',
       },
-      to: { path: '^next/' },
+      to: { path: '^@tanstack/' },
     },
   ],
   options: {
     doNotFollow: {
-      path: 'node_modules',
+      path: ['node_modules', 'src/app/routeTree\\.gen\\.ts$'],
     },
     tsPreCompilationDeps: true,
     tsConfig: {

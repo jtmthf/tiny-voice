@@ -12,7 +12,7 @@ Three domain modules:
 - **invoicing** — draft → sent → paid / void, line items, payments, late fees, PDF generation
 - **reporting** — revenue by month / year, projected from payment events
 
-Next.js App Router UI on top, SQLite for storage, oRPC for the RPC layer.
+TanStack Start + TanStack Router UI on top, SQLite for storage, TanStack Start server functions for the RPC layer.
 
 ## Shape
 
@@ -24,7 +24,7 @@ Hexagonal modular monolith with CQRS-lite:
 - **Ports/adapters** for every IO boundary (`Clock`, `Database`, `ClientRepository`, `PdfGenerator`, …) with real + test implementations.
 - **One composition root** in `src/app/build-app.ts` wires the whole graph.
 
-Mutations go through Server Actions / oRPC. RSC pages read through a narrow `AppReadView` that exposes only `queries`, `featureFlags`, and `clock` — repos and infrastructure are deliberately off the type so pages can't drift into calling them directly.
+Mutations go through TanStack Start server functions (`createServerFn`). Route components fetch via `useSuspenseQuery` against a narrow `AppReadView` that exposes only `queries`, `featureFlags`, and `clock` — repos and infrastructure are deliberately off the type so server functions can't drift into calling them directly.
 
 ## What's enforced by tooling
 
@@ -34,8 +34,8 @@ Rather than prose conventions, the rules live in linters and type-checkers:
 - No default exports (except app layer), no barrel files, no import cycles (ESLint)
 - Module boundaries: cross-module imports allowed to public surface but not into `adapters/` (dependency-cruiser)
 - Domain never imports adapters or app (dependency-cruiser)
-- `next/*` imports confined to `src/app/**` (dependency-cruiser)
-- Narrow RSC read surface — `AppReadView` excludes repos, event bus, DB (TypeScript)
+- TanStack framework imports confined to `src/app/**` (dependency-cruiser)
+- Narrow read surface — `AppReadView` excludes repos, event bus, DB (TypeScript)
 - `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` (TypeScript)
 - Conventional commits (commitlint + simple-git-hooks)
 
@@ -49,7 +49,7 @@ Requires Node 24+ and pnpm 9.15+.
 pnpm install
 pnpm migrate     # apply SQL migrations to tiny-voice.db
 pnpm seed        # optional: seed sample data
-pnpm dev         # Next.js dev server
+pnpm dev         # TanStack Start dev server (Vite)
 ```
 
 Other scripts:
@@ -71,7 +71,7 @@ src/
   clients/       client entity + repo + commands/queries
   invoicing/     Invoice aggregate, state machine, commands, events, PDF
   reporting/     revenue read model + queries
-  app/           buildApp, oRPC contract/router, Next.js pages, subscribers
+  app/           buildApp, server functions (fns/), TanStack Router routes, subscribers
 docs/            architecture.md, domain-terms.md
 migrations/      append-only numbered SQL files
 scripts/         migrate.ts, seed.ts

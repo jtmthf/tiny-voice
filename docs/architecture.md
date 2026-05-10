@@ -54,7 +54,7 @@ All subscribers are registered in `src/app/register-subscribers.ts`.
 
 **Event payload design rule:** Events carry IDs and immutable facts (amounts, timestamps) — never mutable state (names, balances, statuses). Subscribers that need mutable data fetch it fresh from the repository at handling time. This avoids stale snapshots embedded in event payloads.
 
-Cache invalidation is handled directly in Server Actions (`src/app/lib/actions/index.ts`) via `updateTag` from `next/cache`, not through the event bus.
+Cache invalidation is handled by TanStack Query: mutation server functions redirect or return on success; the calling component calls `queryClient.invalidateQueries()` in `onSuccess`. This is not routed through the event bus.
 
 Note: The revenue projection is registered via `registerRevenueProjection` from the reporting module (`src/reporting/projections/register-revenue-projection.ts`), which subscribes to `InvoicePaymentRecorded` and calls `readModel.recordPayment`.
 
@@ -70,13 +70,12 @@ Note: The revenue projection is registered via `registerRevenueProjection` from 
 6. **Event bus** -- `InProcessEventBus<InvoicingEventMap>`
 7. **Subscribers** -- `registerSubscribers()` wires revenue projection and notification handlers
 8. **Queries** -- Closures over repos/read model, exposed as `AppDeps.queries.{clients,invoicing,reporting}`
-9. **RPC context** -- `setRpcContext()` stores deps for the oRPC handler to access
 
 Returns an `AppDeps` object (defined in `src/app/app-deps.ts`). Accepts `Partial<AppDeps>` overrides so tests can swap any piece.
 
-`src/app/app.ts` calls `buildApp()` at module scope and exports `app` typed as `AppReadView` — a narrow interface exposing only `queries`, `featureFlags`, and `clock`. RSC pages import from here and can only read data through `app.queries.*`. Repos, event bus, DB, and other infrastructure are not on this type. Mutations go through Server Actions which use the RPC context (`get-rpc-context.ts`), a separate channel with full access to command dependencies. Client components must never import this file.
+`src/app/instance.ts` exports `getAppInstance` and `getAppReadView` — both wrapped with `createServerOnlyFn` so the client bundle receives a stub that throws if a client component imports them. `getAppReadView` returns `AppReadView`, a narrow interface exposing only `queries`, `featureFlags`, and `clock`. Query server functions in `src/app/fns/` call `getAppReadView()` and return data; mutation server functions call `getAppInstance()` and have full access. Client components use `useSuspenseQuery` with `queryOptions` to fetch, and `useMutation` + `queryClient.invalidateQueries` to mutate.
 
-**Why the read surface is narrow:** Without this constraint, RSC pages drift toward calling repos directly, bypassing the query layer. This breaks data-level `'use cache'` (which works at the query boundary), couples pages to aggregate internals, and makes cache invalidation unpredictable. If a page needs data not currently on `app.queries`, the fix is a new query function — not widening `AppReadView`.
+**Why the read surface is narrow:** Without this constraint, server functions drift toward calling repos directly, bypassing the query layer. This couples server functions to aggregate internals and makes cache invalidation unpredictable. If a route needs data not currently on `app.queries`, the fix is a new query function — not widening `AppReadView`.
 
 ## How to add a new feature
 
@@ -84,8 +83,8 @@ Example: "Add a CSV export of monthly revenue."
 
 1. **Create a query** in the appropriate module: `src/reporting/queries/export-revenue-csv.ts`. Export the handler function and a Zod input schema (co-located).
 2. **Add to module index**: Re-export from `src/reporting/index.ts`.
-3. **If it's a mutation**: Wire through `src/app/rpc/contract.ts` as a new procedure with `.actionable()` in `src/app/rpc/router.ts`.
-4. **If it's a query**: Add to `AppDeps.queries` in `src/app/app-deps.ts` and `src/app/build-app.ts` (and `build-test-app.ts`). Call from an RSC with `'use cache'` + `cacheTag`. RSC pages access data only through `app.queries.*` — never import repos or call `findById` directly from a page component.
+3. **If it's a mutation**: Create a server function in `src/app/fns/` using `createServerFn({ method: 'POST' })`. Call `getAppInstance()` to access the full `AppDeps`. Call `queryClient.invalidateQueries` in the component's `onSuccess`.
+4. **If it's a query**: Add to `AppDeps.queries` in `src/app/app-deps.ts` and `src/app/build-app.ts` (and `build-test-app.ts`). Expose it via a server function in `src/app/fns/`. Add `queryOptions` in `src/app/queries/`. Fetch in route components via `useSuspenseQuery`. Route files access data only through `app.queries.*` via server functions — never import repos or call `findById` directly from a route file.
 5. **If it needs a new port** (new IO boundary): Define the port interface in the module's `ports/` directory. Implement real + test adapters in `adapters/`. Wire in `buildApp`.
 6. **If it emits events**: Define event type + Zod schema in the module's `events/` directory. Add to `InvoicingEventMap` (or create a new event map). Register subscribers in `src/app/register-subscribers.ts`.
 7. **Write tests**: Property-based tests for domain invariants (fast-check), example tests for happy/sad paths, integration test via `buildIntegrationTestApp()` for SQL-backed flows.

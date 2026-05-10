@@ -38,7 +38,7 @@ export interface AppDeps {
   readonly pdfGenerator: PdfGenerator;
   readonly notifications: NotificationSender;
 
-  // Bundled query callers for the RSC layer
+  // Bundled query callers for server functions
   readonly queries: {
     readonly clients: {
       getClient(id: ClientId): Client | null;
@@ -63,8 +63,8 @@ export interface AppDeps {
 }
 
 /**
- * Narrow read-only view for RSC pages. Only exposes queries, feature flags,
- * and clock — no repos, event bus, or infrastructure. This is the type
- * exported from `app.ts` so pages cannot bypass the query layer.
+ * Narrow read-only view for query server functions. Only exposes queries,
+ * feature flags, and clock — no repos, event bus, or infrastructure. This
+ * ensures query server functions cannot bypass the query layer.
  */
 export type AppReadView = Pick<AppDeps, 'queries' | 'featureFlags' | 'clock'>;
