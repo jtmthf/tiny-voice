@@ -1,6 +1,7 @@
 node_modules/
-.next/
+.output/
 dist/
+src/app/routeTree.gen.ts
 *.db
 *.db-shm
 *.db-wal
@@ -10,3 +11,7 @@ dist/
 .DS_Store
 *.tsbuildinfo
 .claude/
+.grepai/
+.playwright-cli/
+.serena/
+.mcp.json

@@ -18,6 +18,7 @@ import { InMemoryRevenueReadModel } from '@/reporting/adapters/in-memory-revenue
 import { getRevenueByMonth } from '@/reporting/queries/get-revenue-by-month';
 import { getRevenueByYear } from '@/reporting/queries/get-revenue-by-year';
 import { getClient } from '@/clients/queries/get-client';
+import type { ClientId } from '@/shared/ids/client-id';
 import { listClients } from '@/clients/queries/list-clients';
 import { registerSubscribers } from '../register-subscribers';
 import type { AppDeps } from '../app-deps';
@@ -62,7 +63,7 @@ export function buildTestApp(overrides: Partial<AppDeps> = {}): TestAppResult {
     revenueReadModel,
     notifications,
     invoiceRepo,
-    clientRepo,
+    getClient: (id: ClientId) => getClient({ repo: clientRepo }, id),
     logger,
     clock,
   });

@@ -23,7 +23,6 @@ import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
 import { SqliteRevenueReadModel } from '@/reporting/adapters/sqlite-revenue-read-model';
 import { getRevenueByMonth } from '@/reporting/queries/get-revenue-by-month';
 import { getRevenueByYear } from '@/reporting/queries/get-revenue-by-year';
-import { setRpcContextProvider } from './rpc/get-rpc-context';
 import { registerSubscribers } from './register-subscribers';
 import type { AppDeps } from './app-deps';
 import type { Config } from '@/shared/config/config';
@@ -38,6 +37,7 @@ import type { NotificationSender } from '@/invoicing/ports/notification-sender';
 import type { EventBus } from '@/shared/events/event-bus';
 import type { Outbox } from '@/shared/events/outbox';
 import type { RevenueReadModel } from '@/reporting/ports/revenue-read-model';
+import type { ClientId } from '@/shared/ids/client-id';
 
 function createInfrastructure(overrides: Partial<AppDeps>): {
   config: Config;
@@ -103,12 +103,18 @@ function createEventingAndSubscribers(
 ): { eventBus: EventBus<InvoicingEventMap>; outbox: Outbox<InvoicingEventMap>; unsubscribe: () => void } {
   const eventBus = overrides.eventBus ?? new InProcessEventBus<InvoicingEventMap>();
   const outbox = overrides.outbox ?? new SqliteOutbox<InvoicingEventMap>(deps.db);
+
+  // Cross-module wiring: bind clients query for invoicing's notification subscriber
+  const invoicingImports = {
+    getClient: (id: ClientId) => getClient({ repo: deps.clientRepo }, id),
+  };
+
   const unsubscribe = overrides.unsubscribe ?? registerSubscribers({
     eventBus,
     revenueReadModel: deps.revenueReadModel,
     notifications: deps.notifications,
     invoiceRepo: deps.invoiceRepo,
-    clientRepo: deps.clientRepo,
+    getClient: invoicingImports.getClient,
     logger: deps.logger,
     clock: deps.clock,
   });
@@ -163,11 +169,6 @@ export function buildApp(overrides: Partial<AppDeps> = {}): AppDeps {
     db, revenueReadModel, notifications, invoiceRepo, clientRepo, logger, clock,
   });
   const queries = createQueries(overrides, { clientRepo, invoiceRepo, revenueReadModel });
-
-  setRpcContextProvider(() => ({
-    db, clientRepo, invoiceRepo, pdfGenerator, notifications,
-    outbox, eventBus, clock, logger, featureFlags,
-  }));
 
   return {
     config, clock, logger, featureFlags,

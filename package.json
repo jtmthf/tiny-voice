@@ -18,23 +18,25 @@
     "migrate": "node --import tsx scripts/migrate.ts",
     "seed": "node --import tsx scripts/seed.ts",
     "prepare": "simple-git-hooks",
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "@orpc/client": "^1.13.14",
-    "@orpc/react": "^1.13.14",
-    "@orpc/server": "^1.13.14",
+    "@tanstack/react-query": "^5.100.9",
+    "@tanstack/react-router": "^1.169.1",
+    "@tanstack/react-start": "^1.167.63",
+    "@vitejs/plugin-react": "^6.0.1",
     "better-sqlite3": "^12.9.0",
     "date-fns": "^4.1.0",
     "neverthrow": "^8.2.0",
-    "next": "^16.2.3",
+    "nitro": "3.0.260429-beta",
     "pdfkit": "^0.18.0",
     "react": "19",
     "react-dom": "19",
     "server-only": "^0.0.1",
     "uuid": "^13.0.0",
+    "vite": "^8.0.10",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -59,6 +61,7 @@
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.2",
+    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.4"
   },
   "simple-git-hooks": {

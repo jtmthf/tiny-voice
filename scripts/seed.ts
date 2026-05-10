@@ -1,5 +1,13 @@
+import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { faker } from '@faker-js/faker';
+
+for (const envFile of ['.env.local', '.env']) {
+  if (existsSync(envFile)) {
+    process.loadEnvFile(envFile);
+    break;
+  }
+}
 import { EnvConfig } from '../src/shared/config/env-config.js';
 import { ConsoleLogger } from '../src/shared/logger/console-logger.js';
 import { SqliteDatabase } from '../src/shared/db/sqlite-database.js';
@@ -264,7 +272,7 @@ try {
       for (const [month, data] of revenueAccumulator) {
         db.prepare(
           'INSERT INTO revenue_by_month (month, currency, total_cents, payment_count, updated_at) VALUES (?, ?, ?, ?, ?)',
-        ).run(month, 'USD', Number(data.totalCents), data.count, now);
+        ).run(month, 'USD', data.totalCents.toString(), data.count, now);
       }
       logger.info(`  -> ${revenueAccumulator.size} months of revenue data`);
     });

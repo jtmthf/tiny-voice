@@ -1,9 +1,7 @@
-'use client';
-
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useServerAction } from '@orpc/react/hooks';
-import { invoicingCreate } from '@/app/rpc/actions/invoicing-create';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createInvoiceFn } from '@/app/fns/create-invoice';
+import { parseBracketNotation } from '@/app/fns/parse-bracket-notation';
 import { Field, FieldLabel, FieldControl, FieldDescription } from '@/app/lib/form/field';
 import { FormError } from '@/app/lib/form/form-error';
 
@@ -14,16 +12,15 @@ interface LineItemInput {
 }
 
 export function CreateInvoiceForm({ clients }: { clients: { id: string; name: string }[] }) {
-  const router = useRouter();
-
   const [lineItems, setLineItems] = useState<LineItemInput[]>([
     { description: '', quantity: 1, unitPriceCents: 0 },
   ]);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const create = useServerAction(invoicingCreate);
-
-  const isPending = create.isPending;
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: (formData: FormData) => createInvoiceFn({ data: parseBracketNotation(formData) }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+  });
 
   const updateLineItem = (index: number, field: keyof LineItemInput, value: string | number) => {
     setLineItems((prev) => prev.map((li, i) => (i === index ? { ...li, [field]: value } : li)));
@@ -37,42 +34,15 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
     setLineItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitError(null);
-
-    const form = new FormData(e.currentTarget);
-    const clientId = form.get('clientId') as string;
-    const taxRate = parseFloat(form.get('taxRate') as string) / 100;
-    const dueDate = form.get('dueDate') as string;
-
-    if (!clientId) {
-      setSubmitError('Please select a client.');
-      return;
-    }
-
-    const [createErr, invoiceData] = await create.execute({
-      clientId,
-      taxRate,
-      dueDate,
-      lineItems: lineItems
-        .filter((li) => li.description.trim())
-        .map((li) => ({
-          description: li.description,
-          quantity: li.quantity,
-          unitPriceCents: String(li.unitPriceCents),
-        })),
-    });
-    if (createErr) {
-      setSubmitError(createErr.message);
-      return;
-    }
-
-    router.push(`/invoices/${invoiceData.id}`);
-  };
-
   return (
-    <form onSubmit={(e) => void handleSubmit(e)}>
+    <form
+      action={createInvoiceFn.url}
+      method="POST"
+      onSubmit={(e) => {
+        e.preventDefault();
+        mutation.mutate(new FormData(e.currentTarget));
+      }}
+    >
       <div className="form-group">
         <label htmlFor="clientId">Client</label>
         <select id="clientId" name="clientId" required>
@@ -106,6 +76,7 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
             <FieldControl render={(props) => (
               <input
                 {...props}
+                name={`lineItems[${i}][description]`}
                 value={li.description}
                 onChange={(e) => updateLineItem(i, 'description', e.target.value)}
                 placeholder="Description"
@@ -118,6 +89,7 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
             <FieldControl render={(props) => (
               <input
                 {...props}
+                name={`lineItems[${i}][quantity]`}
                 type="number"
                 min="1"
                 value={li.quantity}
@@ -131,6 +103,7 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
             <FieldControl render={(props) => (
               <input
                 {...props}
+                name={`lineItems[${i}][unitPriceCents]`}
                 type="number"
                 min="1"
                 value={li.unitPriceCents}
@@ -151,11 +124,11 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
         + Add line item
       </button>
 
-      <FormError error={submitError} />
+      <FormError error={mutation.error instanceof Error ? mutation.error.message : null} />
 
       <div className="actions-row">
-        <button type="submit" className="btn-primary" disabled={isPending}>
-          {isPending ? 'Creating...' : 'Create Invoice'}
+        <button type="submit" className="btn-primary" disabled={mutation.isPending}>
+          {mutation.isPending ? 'Creating...' : 'Create Invoice'}
         </button>
       </div>
     </form>

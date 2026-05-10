@@ -43,12 +43,16 @@ const filenameMatchesExport = {
       'Program:exit'(node) {
         const file = context.filename;
         const base = path.basename(file).replace(/\.(test|property\.test|spec)\.[tj]sx?$/, '').replace(/\.[tj]sx?$/, '');
-        // Skip index files, Next.js reserved filenames, type-only declaration files.
-        const skip = ['index', 'layout', 'page', 'route', 'loading', 'error', 'not-found', 'middleware'];
+        // Skip index files, reserved filenames, type-only declaration files.
+        const skip = ['index', 'layout', 'page', 'route', 'loading', 'error', 'not-found', 'middleware', 'router', 'instance', 'dto', 'error-messages'];
         if (skip.includes(base)) return;
         if (file.endsWith('.d.ts')) return;
         // Skip test-support collection files under **/testing/ (factories.ts, arbitraries.ts, fixtures.ts).
         if (/[/\\]testing[/\\]/.test(file)) return;
+        // Skip TanStack Router route files and generated routeTree
+        if (file.includes('/routes/') || file.endsWith('routeTree.gen.ts')) return;
+        // Skip server-function and query grouping directories
+        if (/[/\\]fns[/\\]/.test(file) || /[/\\]queries[/\\]/.test(file)) return;
         if (exportNames.length === 0) return; // nothing to compare against
         const want = normalize(base);
         const hit = exportNames.some((n) => normalize(n) === want);
@@ -68,7 +72,7 @@ const localPlugin = { rules: { 'filename-matches-export': filenameMatchesExport 
 export default tseslint.config(
   // Global ignores
   {
-    ignores: ['.next/**', 'node_modules/**', 'dist/**', '*.cjs'],
+    ignores: ['.output/**', 'node_modules/**', 'dist/**', '*.cjs', 'src/app/routeTree.gen.ts'],
   },
 
   // Base TypeScript strict + stylistic
@@ -88,7 +92,7 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['*.config.ts', '*.config.js'],
+          allowDefaultProject: ['vitest.config.ts', '*.config.js'],
         },
         tsconfigRootDir: import.meta.dirname,
       },
@@ -101,25 +105,20 @@ export default tseslint.config(
       'import-x/no-default-export': 'error',
       'import-x/no-cycle': 'error',
 
-      // unicorn filename convention — kebab-case with leading underscore allowed
+      // unicorn filename convention — kebab-case with TanStack Router conventions allowed
       'unicorn/filename-case': [
         'error',
         {
           case: 'kebabCase',
           ignore: [
-            // Next.js conventional files
-            'layout\\.tsx$',
-            'page\\.tsx$',
-            'route\\.ts$',
-            'loading\\.tsx$',
-            'error\\.tsx$',
-            'not-found\\.tsx$',
-            'next-env\\.d\\.ts$',
+            '__root\\.tsx$',
+            '\\$[a-z]',
+            'routeTree\\.gen\\.ts$',
           ],
         },
       ],
 
-      // Enforce kebab-case filenames via check-file (replaces filenames-simple which needs ESLint <9)
+      // Enforce kebab-case filenames via check-file
       'check-file/filename-naming-convention': [
         'error',
         { '**/*.{ts,tsx}': 'KEBAB_CASE' },
@@ -127,7 +126,7 @@ export default tseslint.config(
       ],
       'check-file/folder-naming-convention': [
         'error',
-        { 'src/**/': 'NEXT_JS_APP_ROUTER_CASE' },
+        { 'src/**/': 'KEBAB_CASE' },
       ],
 
       // Filename must match a named export. See inline rule at top of this file for rationale.
@@ -175,11 +174,19 @@ export default tseslint.config(
     },
   },
 
-  // Relax rules for Next.js App Router files (they require default exports)
+  // Relax rules for TanStack Router route files and app layer (Route const export)
   {
     files: ['src/app/**/*.tsx', 'src/app/**/*.ts'],
     rules: {
       'import-x/no-default-export': 'off',
+    },
+  },
+
+  // TanStack Router special filenames (__root.tsx, $id.tsx) aren't kebab-case
+  {
+    files: ['src/app/routes/**/__root.{ts,tsx}', 'src/app/routes/**/$*.{ts,tsx}'],
+    rules: {
+      'check-file/filename-naming-convention': 'off',
     },
   },
 

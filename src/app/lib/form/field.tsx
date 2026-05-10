@@ -1,5 +1,3 @@
-'use client';
-
 import { createContext, useContext, useId, type ReactElement } from 'react';
 
 interface FieldContext {
