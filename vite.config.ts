@@ -35,6 +35,13 @@ export default defineConfig({
   ssr: {
     external: ['better-sqlite3', 'pdfkit'],
   },
+  server: {
+    port: 5173,
+    strictPort: true,
+    watch: {
+      ignored: ['**/data/**'],
+    },
+  },
   plugins: [
     tsconfigPaths(),
     nitro(),

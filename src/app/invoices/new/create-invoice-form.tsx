@@ -1,37 +1,30 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useServerFn } from '@tanstack/react-start';
 import { createInvoiceFn } from '@/app/fns/create-invoice';
 import { parseBracketNotation } from '@/app/fns/parse-bracket-notation';
 import { Field, FieldLabel, FieldControl, FieldDescription } from '@/app/lib/form/field';
 import { FormError } from '@/app/lib/form/form-error';
 
-interface LineItemInput {
-  description: string;
-  quantity: number;
-  unitPriceCents: number;
-}
-
 export function CreateInvoiceForm({ clients }: { clients: { id: string; name: string }[] }) {
-  const [lineItems, setLineItems] = useState<LineItemInput[]>([
-    { description: '', quantity: 1, unitPriceCents: 0 },
-  ]);
+  const [lineItemCount, setLineItemCount] = useState(1);
 
   const queryClient = useQueryClient();
+  const createInvoice = useServerFn(createInvoiceFn);
   const mutation = useMutation({
-    mutationFn: (formData: FormData) => createInvoiceFn({ data: parseBracketNotation(formData) }),
+    mutationFn: (formData: FormData) => createInvoice({ data: parseBracketNotation(formData) }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['invoices'] }),
   });
 
-  const updateLineItem = (index: number, field: keyof LineItemInput, value: string | number) => {
-    setLineItems((prev) => prev.map((li, i) => (i === index ? { ...li, [field]: value } : li)));
-  };
-
-  const addRow = () => {
-    setLineItems((prev) => [...prev, { description: '', quantity: 1, unitPriceCents: 0 }]);
-  };
-
+  const addRow = () => setLineItemCount((n) => n + 1);
   const removeRow = (index: number) => {
-    setLineItems((prev) => prev.filter((_, i) => i !== index));
+    // Removing a row shifts the indices of later rows in the DOM, which would
+    // misalign their name attributes (lineItems[i]) with their values.
+    // For this demo app we require at least one row and only support removing
+    // the last row to keep indices stable.
+    if (lineItemCount > 1 && index === lineItemCount - 1) {
+      setLineItemCount((n) => n - 1);
+    }
   };
 
   return (
@@ -69,7 +62,7 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
       </div>
 
       <h3 className="my-md">Line Items</h3>
-      {lineItems.map((li, i) => (
+      {Array.from({ length: lineItemCount }, (_, i) => (
         <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
           <Field className="form-group" style={{ margin: 0 }}>
             <FieldLabel hidden={i > 0}>Description</FieldLabel>
@@ -77,8 +70,8 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
               <input
                 {...props}
                 name={`lineItems[${i}][description]`}
-                value={li.description}
-                onChange={(e) => updateLineItem(i, 'description', e.target.value)}
+                type="text"
+                defaultValue=""
                 placeholder="Description"
                 required
               />
@@ -92,8 +85,7 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
                 name={`lineItems[${i}][quantity]`}
                 type="number"
                 min="1"
-                value={li.quantity}
-                onChange={(e) => updateLineItem(i, 'quantity', parseInt(e.target.value) || 1)}
+                defaultValue="1"
                 required
               />
             )} />
@@ -106,14 +98,13 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
                 name={`lineItems[${i}][unitPriceCents]`}
                 type="number"
                 min="1"
-                value={li.unitPriceCents}
-                onChange={(e) => updateLineItem(i, 'unitPriceCents', parseInt(e.target.value) || 0)}
+                defaultValue=""
                 required
               />
             )} />
             {i === 0 && <FieldDescription className="form-hint">e.g. 5000 = $50.00</FieldDescription>}
           </Field>
-          <button type="button" onClick={() => removeRow(i)} disabled={lineItems.length <= 1}
+          <button type="button" onClick={() => removeRow(i)} disabled={lineItemCount <= 1 || i !== lineItemCount - 1}
             aria-label={`Remove line item ${i + 1}`}
             style={{ marginBottom: i === 0 ? 0 : undefined }}>
             <span aria-hidden="true">&times;</span>

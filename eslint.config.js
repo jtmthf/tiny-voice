@@ -44,7 +44,7 @@ const filenameMatchesExport = {
         const file = context.filename;
         const base = path.basename(file).replace(/\.(test|property\.test|spec)\.[tj]sx?$/, '').replace(/\.[tj]sx?$/, '');
         // Skip index files, reserved filenames, type-only declaration files.
-        const skip = ['index', 'layout', 'page', 'route', 'loading', 'error', 'not-found', 'middleware', 'router', 'instance', 'dto', 'error-messages'];
+        const skip = ['index', 'layout', 'page', 'route', 'loading', 'error', 'not-found', 'middleware', 'router', 'instance', 'dto', 'error-messages', 'fixtures'];
         if (skip.includes(base)) return;
         if (file.endsWith('.d.ts')) return;
         // Skip test-support collection files under **/testing/ (factories.ts, arbitraries.ts, fixtures.ts).
@@ -72,7 +72,7 @@ const localPlugin = { rules: { 'filename-matches-export': filenameMatchesExport 
 export default tseslint.config(
   // Global ignores
   {
-    ignores: ['.output/**', 'node_modules/**', 'dist/**', '*.cjs', 'src/app/routeTree.gen.ts'],
+    ignores: ['.output/**', 'node_modules/**', 'dist/**', '*.cjs', 'src/app/routeTree.gen.ts', '.agents/**', '.opencode/**', 'playwright-report/**', 'test-results/**'],
   },
 
   // Base TypeScript strict + stylistic
@@ -166,9 +166,9 @@ export default tseslint.config(
     },
   },
 
-  // Relax rules for config files and scripts at root
+  // Relax rules for config files, scripts, and e2e infrastructure
   {
-    files: ['*.config.ts', '*.config.js', 'scripts/**'],
+    files: ['*.config.ts', '*.config.js', 'scripts/**', 'e2e/**/*.config.ts', 'e2e/global-setup.ts'],
     rules: {
       'import-x/no-default-export': 'off',
     },
@@ -192,7 +192,7 @@ export default tseslint.config(
 
   // Relax rules for test files
   {
-    files: ['**/*.test.ts', '**/*.property.test.ts'],
+    files: ['**/*.test.ts', '**/*.property.test.ts', '**/*.spec.ts'],
     rules: {
       'import-x/no-default-export': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',

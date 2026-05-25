@@ -40,7 +40,7 @@ function InvoiceDetailPage() {
         <div className="card">
           <div className="flex-between">
             <h2>Invoice {summary.id.slice(0, 8)}...</h2>
-            <span className={`badge badge-${summary.status}`}>{summary.status}</span>
+            <span role="status" className={`badge badge-${summary.status}`}>{summary.status}</span>
           </div>
           <div className="grid-stats mt-md">
             <div>

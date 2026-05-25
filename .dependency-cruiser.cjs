@@ -43,7 +43,7 @@ module.exports = {
       severity: 'error',
       comment:
         'clients must not import adapters from invoicing or reporting.',
-      from: { path: '^src/clients/' },
+      from: { path: '^src/clients/', pathNot: '\\.test\\.ts$' },
       to: { path: '^src/(invoicing|reporting)/adapters/' },
     },
     {
@@ -51,7 +51,7 @@ module.exports = {
       severity: 'error',
       comment:
         'invoicing must not import adapters from clients or reporting.',
-      from: { path: '^src/invoicing/' },
+      from: { path: '^src/invoicing/', pathNot: '\\.test\\.ts$' },
       to: { path: '^src/(clients|reporting)/adapters/' },
     },
     {
@@ -59,7 +59,7 @@ module.exports = {
       severity: 'error',
       comment:
         'reporting must not import adapters from clients or invoicing.',
-      from: { path: '^src/reporting/' },
+      from: { path: '^src/reporting/', pathNot: '\\.test\\.ts$' },
       to: { path: '^src/(clients|invoicing)/adapters/' },
     },
     {

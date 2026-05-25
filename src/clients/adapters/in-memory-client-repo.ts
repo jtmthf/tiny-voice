@@ -26,4 +26,8 @@ export class InMemoryClientRepo implements ClientRepository {
   save(client: Client): void {
     this.clients.set(client.id, client);
   }
+
+  delete(id: ClientId): void {
+    this.clients.delete(id);
+  }
 }

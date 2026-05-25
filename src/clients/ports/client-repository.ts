@@ -8,4 +8,5 @@ export interface ClientRepository {
   findById(id: ClientId): Client | null;
   list(): readonly Client[];
   save(client: Client): void;
+  delete(id: ClientId): void;
 }

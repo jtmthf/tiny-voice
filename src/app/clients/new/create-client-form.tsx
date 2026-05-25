@@ -1,12 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useServerFn } from '@tanstack/react-start';
 import { createClientFn } from '@/app/fns/create-client';
 import { FormField } from '@/app/lib/form/form-field';
 import { FormError } from '@/app/lib/form/form-error';
 
 export function CreateClientForm() {
   const queryClient = useQueryClient();
+  const createClient = useServerFn(createClientFn);
   const mutation = useMutation({
-    mutationFn: (data: { name: string; email: string }) => createClientFn({ data }),
+    mutationFn: (data: { name: string; email: string }) => createClient({ data }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['clients'] }),
   });
 

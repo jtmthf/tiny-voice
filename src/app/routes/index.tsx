@@ -27,16 +27,16 @@ function HomePage() {
       <h1>Dashboard</h1>
       <div className="grid-stats mt-md">
         <div className="stat-card">
-          <div className="label">Clients</div>
-          <div className="value">{clients.length}</div>
+          <div id="stat-clients-label" className="label">Clients</div>
+          <output aria-labelledby="stat-clients-label" className="value">{clients.length}</output>
         </div>
         <div className="stat-card">
-          <div className="label">Total Invoices</div>
-          <div className="value">{invoices.length}</div>
+          <div id="stat-invoices-label" className="label">Total Invoices</div>
+          <output aria-labelledby="stat-invoices-label" className="value">{invoices.length}</output>
         </div>
         <div className="stat-card">
-          <div className="label">Outstanding</div>
-          <div className="value">{Money.toDisplayString(totalOutstanding)}</div>
+          <div id="stat-outstanding-label" className="label">Outstanding</div>
+          <output aria-labelledby="stat-outstanding-label" className="value">{Money.toDisplayString(totalOutstanding)}</output>
         </div>
       </div>
       <h2 className="mt-lg">Recent Invoices</h2>
@@ -47,7 +47,7 @@ function HomePage() {
 
 function RecentInvoices({ invoices }: { invoices: InvoiceSummaryDto[] }) {
   if (invoices.length === 0) {
-    return <p className="empty">No invoices yet. <Link to="/invoices/new">Create one</Link>.</p>;
+    return <p role="status" className="empty">No invoices yet. <Link to="/invoices/new">Create one</Link>.</p>;
   }
   return (
     <table>

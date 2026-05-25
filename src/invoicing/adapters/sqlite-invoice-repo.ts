@@ -270,4 +270,13 @@ export class SqliteInvoiceRepo implements InvoiceRepository {
       paidAmountCents: BigInt(row.paid_amount_cents ?? '0'),
     }));
   }
+
+  delete(id: InvoiceId): void {
+    const rawId = toDb(id);
+    this.db.transaction(() => {
+      this.db.prepare('DELETE FROM payments WHERE invoice_id = ?').run(rawId);
+      this.db.prepare('DELETE FROM line_items WHERE invoice_id = ?').run(rawId);
+      this.db.prepare('DELETE FROM invoices WHERE id = ?').run(rawId);
+    });
+  }
 }

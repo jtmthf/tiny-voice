@@ -27,7 +27,7 @@ function InvoicesPage() {
       </div>
       <InvoiceFilter current={status} />
       {invoices.length === 0 ? (
-        <p className="empty">No invoices found.</p>
+        <p role="status" className="empty">No invoices found.</p>
       ) : (
         <table>
           <thead>
@@ -49,7 +49,7 @@ function InvoicesPage() {
                     {inv.id.slice(0, 8)}...<span className="sr-only">, {inv.status}, {Money.toDisplayString(Money.fromCents(BigInt(inv.total.cents)))}</span>
                   </Link>
                 </td>
-                <td><span className={`badge badge-${inv.status}`}>{inv.status}</span></td>
+                <td><strong className={`badge badge-${inv.status}`}>{inv.status}</strong></td>
                 <td>{inv.lineItemCount}</td>
                 <td>{Money.toDisplayString(Money.fromCents(BigInt(inv.total.cents)))}</td>
                 <td>{Money.toDisplayString(Money.fromCents(BigInt(inv.outstandingBalance.cents)))}</td>

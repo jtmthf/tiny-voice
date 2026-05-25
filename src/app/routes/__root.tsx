@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { createRootRouteWithContext, HeadContent, Link, Outlet, Scripts } from '@tanstack/react-router';
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 
@@ -31,6 +31,9 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { readonly children: ReactNode }) {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
+
   return (
     <html lang="en">
       <head><HeadContent /></head>
@@ -42,7 +45,7 @@ function RootDocument({ children }: { readonly children: ReactNode }) {
           <Link to="/invoices" search={{ status: undefined }}>Invoices</Link>
           <Link to="/reporting">Reporting</Link>
         </nav>
-        <main id="main-content">{children}</main>
+        <main id="main-content" data-hydrated={hydrated}>{children}</main>
         <Scripts />
       </body>
     </html>

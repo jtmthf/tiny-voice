@@ -54,4 +54,8 @@ export class SqliteClientRepo implements ClientRepository {
       )
       .run(toDb(client.id), client.name, client.email, client.createdAt.toISOString());
   }
+
+  delete(id: ClientId): void {
+    this.db.prepare('DELETE FROM clients WHERE id = ?').run(toDb(id));
+  }
 }

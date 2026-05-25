@@ -10,7 +10,8 @@ export type InvoiceError =
   | { readonly kind: 'ConcurrencyConflict' }
   | { readonly kind: 'InvalidInput'; readonly reason: string }
   | { readonly kind: 'NotOverdue' }
-  | { readonly kind: 'LateFeeAlreadyApplied' };
+  | { readonly kind: 'LateFeeAlreadyApplied' }
+  | { readonly kind: 'NotFound' };
 
 export const InvoiceError = {
   invalidTransition: (from: InvoiceStatus, to: InvoiceStatus): InvoiceError => ({
@@ -30,4 +31,5 @@ export const InvoiceError = {
   invalidInput: (reason: string): InvoiceError => ({ kind: 'InvalidInput', reason }),
   notOverdue: (): InvoiceError => ({ kind: 'NotOverdue' }),
   lateFeeAlreadyApplied: (): InvoiceError => ({ kind: 'LateFeeAlreadyApplied' }),
+  notFound: (): InvoiceError => ({ kind: 'NotFound' }),
 } as const;

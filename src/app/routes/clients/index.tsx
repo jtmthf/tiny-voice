@@ -18,7 +18,7 @@ function ClientsPage() {
         <Link to="/clients/new" className="btn btn-primary">New Client</Link>
       </div>
       {clients.length === 0 ? (
-        <p className="empty">No clients yet. <Link to="/clients/new">Add one</Link>.</p>
+        <p role="status" className="empty">No clients yet. <Link to="/clients/new">Add one</Link>.</p>
       ) : (
         <table>
           <thead>

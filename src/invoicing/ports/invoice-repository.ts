@@ -23,6 +23,7 @@ export interface InvoiceListItem {
 export interface InvoiceRepository {
   findById(id: InvoiceId): Invoice | null;
   save(invoice: Invoice): Result<void, InvoiceError>;
+  delete(id: InvoiceId): void;
   list(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly Invoice[];
   listSummaries(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly InvoiceListItem[];
 }

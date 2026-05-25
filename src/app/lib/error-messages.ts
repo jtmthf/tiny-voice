@@ -22,6 +22,8 @@ export function invoiceErrorMessage(err: InvoiceError): string {
       return 'Invoice is not yet overdue';
     case 'LateFeeAlreadyApplied':
       return 'Late fee has already been applied';
+    case 'NotFound':
+      return 'Invoice not found';
   }
 }
 
