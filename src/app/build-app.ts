@@ -118,6 +118,16 @@ function createEventingAndSubscribers(
     logger: deps.logger,
     clock: deps.clock,
   });
+
+  // Recover any events left in the outbox from a crash between commit and
+  // drain on a previous run. Fire-and-forget: startup must not block on this.
+  void outbox
+    .drain(
+      (eventName, payload) => eventBus.publish(eventName, payload),
+      (eventName, error) => deps.logger.warn('outbox.recovery.failed', { eventName, error }),
+    )
+    .catch((error) => deps.logger.warn('outbox.recovery.error', { error }));
+
   return { eventBus, outbox, unsubscribe };
 }
 
