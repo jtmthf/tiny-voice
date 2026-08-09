@@ -135,6 +135,7 @@ export function addLineItem(
   item: LineItem,
 ): Result<InvoiceOutcome, InvoiceError> {
   if (invoice.status === 'void') return err(IE.invoiceVoided());
+  if (invoice.status === 'paid') return err(IE.alreadyPaid());
   if (invoice.status !== 'draft') {
     return err(IE.invalidTransition(invoice.status, 'draft'));
   }

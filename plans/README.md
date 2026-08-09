@@ -27,7 +27,7 @@ your row when done.
 | 002 | Patch vulnerable start-server-core; clean manifest (undici override, drop server-only, nitro pin decision) | P1 | S | — | DONE |
 | 003 | Outbox characterization tests (+ fix InMemoryOutbox event loss) | P1 | M | — | DONE |
 | 004 | Outbox reliability: idempotent revenue projection, per-row drain isolation, startup recovery, decoupled post-commit failures | P1 | M–L | 003 | DONE |
-| 005 | Invoice state-machine guard test matrix (+ align addLineItem paid → AlreadyPaid) | P1 | S | — | TODO |
+| 005 | Invoice state-machine guard test matrix (+ align addLineItem paid → AlreadyPaid) | P1 | S | — | DONE |
 | 006 | Fix actively-wrong docs; CI e2e gate; drop duplicate lint cell; .nvmrc; pre-commit hook | P2 | S–M | — | TODO |
 | 007 | db.transaction rolls back on returned Err Result | P2 | S | — | TODO |
 | 008 | Consolidate query wiring into shared wireQueries factory | P2 | M | — | TODO |
