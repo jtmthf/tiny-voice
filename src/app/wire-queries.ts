@@ -3,6 +3,7 @@ import { listClients } from '@/clients/queries/list-clients';
 import { getInvoiceSummary } from '@/invoicing/queries/get-invoice-summary';
 import { getInvoiceLineItems } from '@/invoicing/queries/get-invoice-line-items';
 import { getInvoicePayments } from '@/invoicing/queries/get-invoice-payments';
+import { getInvoiceDetail } from '@/invoicing/queries/get-invoice-detail';
 import { listInvoiceSummaries } from '@/invoicing/queries/list-invoice-summaries';
 import { getOutstandingByClient } from '@/invoicing/queries/get-outstanding-by-client';
 import { getRevenueByMonth } from '@/reporting/queries/get-revenue-by-month';
@@ -28,6 +29,7 @@ export function wireQueries(deps: WireQueriesDeps): AppDeps['queries'] {
       getInvoiceSummary: (id) => getInvoiceSummary({ repo: deps.invoiceRepo }, id),
       getInvoiceLineItems: (id) => getInvoiceLineItems({ repo: deps.invoiceRepo }, id),
       getInvoicePayments: (id) => getInvoicePayments({ repo: deps.invoiceRepo }, id),
+      getInvoiceDetail: (id) => getInvoiceDetail({ repo: deps.invoiceRepo }, id),
       listInvoices: (filters) => listInvoiceSummaries({ repo: deps.invoiceRepo }, filters),
       getOutstandingByClient: (clientId) =>
         getOutstandingByClient({ repo: deps.invoiceRepo }, clientId),
