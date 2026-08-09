@@ -29,7 +29,7 @@ your row when done.
 | 004  | Outbox reliability: idempotent revenue projection, per-row drain isolation, startup recovery, decoupled post-commit failures | P1       | M–L    | 003        | DONE   |
 | 005  | Invoice state-machine guard test matrix (+ align addLineItem paid → AlreadyPaid)                                             | P1       | S      | —          | DONE   |
 | 006  | Fix actively-wrong docs; CI e2e gate; drop duplicate lint cell; .nvmrc; pre-commit hook                                      | P2       | S–M    | —          | DONE   |
-| 007  | db.transaction rolls back on returned Err Result                                                                             | P2       | S      | —          | TODO   |
+| 007  | db.transaction rolls back on returned Err Result                                                                             | P2       | S      | —          | DONE   |
 | 008  | Consolidate query wiring into shared wireQueries factory                                                                     | P2       | M      | —          | TODO   |
 | 009  | Read-path efficiency: single-load invoice detail, summary-derived outstanding, delete dead list-invoices                     | P2       | M      | 008        | TODO   |
 | 010  | Property-based SQLite ↔ in-memory adapter parity tests                                                                       | P3       | M      | —          | TODO   |

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { ok, err } from 'neverthrow';
 import { SqliteDatabase } from './sqlite-database';
 import type { Database } from './database';
 
@@ -49,6 +50,51 @@ describe('SqliteDatabase', () => {
 
     const rows = db.prepare('SELECT * FROM test').all();
     expect(rows).toHaveLength(0);
+  });
+
+  it('rolls back transaction and returns the Err when the callback returns an Err Result', () => {
+    db.exec('CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)');
+
+    const errResult = err('domain failure');
+    const returned = db.transaction(() => {
+      db.prepare('INSERT INTO test (name) VALUES (?)').run('Alice');
+      return errResult;
+    });
+
+    expect(returned).toBe(errResult);
+    const rows = db.prepare('SELECT * FROM test').all();
+    expect(rows).toHaveLength(0);
+  });
+
+  it('commits transaction when the callback returns an Ok Result', () => {
+    db.exec('CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)');
+
+    const returned = db.transaction(() => {
+      db.prepare('INSERT INTO test (name) VALUES (?)').run('Alice');
+      return ok(undefined);
+    });
+
+    expect(returned.isOk()).toBe(true);
+    const rows = db.prepare('SELECT * FROM test').all();
+    expect(rows).toHaveLength(1);
+  });
+
+  it('rolls back nested transaction when the inner callback returns an Err, outer commits its own writes', () => {
+    db.exec('CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)');
+
+    const returned = db.transaction(() => {
+      db.prepare('INSERT INTO test (name) VALUES (?)').run('RowA');
+      const innerResult = db.transaction(() => {
+        db.prepare('INSERT INTO test (name) VALUES (?)').run('RowB');
+        return err('inner failure');
+      });
+      expect(innerResult.isErr()).toBe(true);
+      return ok(undefined);
+    });
+
+    expect(returned.isOk()).toBe(true);
+    const rows = db.prepare<{ name: string }>('SELECT * FROM test').all();
+    expect(rows.map((r) => r.name)).toEqual(['RowA']);
   });
 
   it('enforces foreign keys', () => {

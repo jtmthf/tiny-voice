@@ -1,5 +1,22 @@
 import BetterSqlite3 from 'better-sqlite3';
+import type { Result } from 'neverthrow';
 import type { Database, Statement, RunResult } from './database';
+
+function isErrResult(value: unknown): value is Result<unknown, unknown> & { isErr(): true } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'isErr' in value &&
+    typeof (value as { isErr: unknown }).isErr === 'function' &&
+    (value as { isErr(): boolean }).isErr()
+  );
+}
+
+class RollbackSignal<T> extends Error {
+  constructor(readonly result: T) {
+    super('rollback');
+  }
+}
 
 /**
  * Real adapter: wraps better-sqlite3 behind the Database port.
@@ -35,7 +52,16 @@ export class SqliteDatabase implements Database {
   }
 
   transaction<T>(fn: () => T): T {
-    return this.db.transaction(fn)();
+    try {
+      return this.db.transaction(() => {
+        const result = fn();
+        if (isErrResult(result)) throw new RollbackSignal(result);
+        return result;
+      })();
+    } catch (e) {
+      if (e instanceof RollbackSignal) return e.result as T;
+      throw e;
+    }
   }
 
   close(): void {
