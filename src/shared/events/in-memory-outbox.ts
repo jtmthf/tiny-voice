@@ -12,12 +12,20 @@ export class InMemoryOutbox<TEventMap extends object = object> implements Outbox
     this.pending.push({ eventName, payload });
   }
 
-  async drain(handler: (eventName: keyof TEventMap & string, payload: TEventMap[keyof TEventMap]) => Promise<void>): Promise<void> {
-    let event = this.pending[0];
-    while (event) {
-      await handler(event.eventName, event.payload);
-      this.pending.shift();
-      event = this.pending[0];
+  async drain(
+    handler: (eventName: keyof TEventMap & string, payload: TEventMap[keyof TEventMap]) => Promise<void>,
+    onError?: (eventName: string, error: unknown) => void,
+  ): Promise<void> {
+    const survivors: PendingEvent<TEventMap>[] = [];
+    for (const event of this.pending) {
+      try {
+        await handler(event.eventName, event.payload);
+      } catch (error) {
+        onError?.(event.eventName, error);
+        survivors.push(event);
+      }
     }
+    this.pending.length = 0;
+    this.pending.push(...survivors);
   }
 }

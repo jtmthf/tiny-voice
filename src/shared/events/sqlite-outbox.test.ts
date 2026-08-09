@@ -93,4 +93,30 @@ describe('SqliteOutbox', () => {
     const rowsAfterSuccessfulDrain = db.prepare<OutboxRow>('SELECT event_name FROM outbox').all();
     expect(rowsAfterSuccessfulDrain).toHaveLength(0);
   });
+
+  it('isolates a failing row: other rows still deliver, the failing row is retained, onError fires, drain resolves', async () => {
+    outbox.enqueue('Foo', { value: 1 });
+    outbox.enqueue('Bar', { value: 2 });
+    outbox.enqueue('Baz', { value: 3 });
+
+    const received: string[] = [];
+    const errors: { eventName: string; error: unknown }[] = [];
+
+    await outbox.drain(
+      async (eventName) => {
+        if (eventName === 'Bar') throw new Error('boom');
+        received.push(eventName);
+      },
+      (eventName, error) => {
+        errors.push({ eventName, error });
+      },
+    );
+
+    expect(received).toEqual(['Foo', 'Baz']);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.eventName).toBe('Bar');
+
+    const remaining = db.prepare<OutboxRow>('SELECT event_name FROM outbox').all();
+    expect(remaining).toEqual([{ event_name: 'Bar' }]);
+  });
 });
