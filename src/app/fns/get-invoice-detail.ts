@@ -18,20 +18,18 @@ export const getInvoiceDetailFn = createServerFn({ method: 'GET' })
   .validator((data: unknown) => Input.parse(data))
   .handler(async ({ data }): Promise<InvoiceDetailDto> => {
     const app = getAppReadView();
-    const summary = app.queries.invoicing.getInvoiceSummary(data.invoiceId);
-    const lineItems = app.queries.invoicing.getInvoiceLineItems(data.invoiceId);
-    const payments = app.queries.invoicing.getInvoicePayments(data.invoiceId);
+    const detail = app.queries.invoicing.getInvoiceDetail(data.invoiceId);
 
     let clientName: string | null = null;
-    if (summary) {
-      const client = app.queries.clients.getClient(summary.clientId);
+    if (detail) {
+      const client = app.queries.clients.getClient(detail.summary.clientId);
       clientName = client?.name ?? null;
     }
 
     return {
-      summary: summary ? invoiceSummaryToDto(summary) : null,
-      lineItems: lineItems ? lineItems.map(lineItemToDto) : null,
-      payments: payments ? payments.map(paymentToDto) : null,
+      summary: detail ? invoiceSummaryToDto(detail.summary) : null,
+      lineItems: detail ? detail.lineItems.map(lineItemToDto) : null,
+      payments: detail ? detail.payments.map(paymentToDto) : null,
       clientName,
     };
   });
