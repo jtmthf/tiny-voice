@@ -24,7 +24,7 @@ your row when done.
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
 | 001 | Fix prototype pollution in bracket-notation parser | P1 | S | — | DONE |
-| 002 | Patch vulnerable start-server-core; clean manifest (undici override, drop server-only, nitro pin decision) | P1 | S | — | TODO |
+| 002 | Patch vulnerable start-server-core; clean manifest (undici override, drop server-only, nitro pin decision) | P1 | S | — | DONE |
 | 003 | Outbox characterization tests (+ fix InMemoryOutbox event loss) | P1 | M | — | TODO |
 | 004 | Outbox reliability: idempotent revenue projection, per-row drain isolation, startup recovery, decoupled post-commit failures | P1 | M–L | 003 | TODO |
 | 005 | Invoice state-machine guard test matrix (+ align addLineItem paid → AlreadyPaid) | P1 | S | — | TODO |
