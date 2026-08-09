@@ -25,7 +25,7 @@ describe('getOutstandingByClient', () => {
     // Sent with partial payment — should be included
     const sent = { ...buildSentInvoice({ lineItems: [buildLineItem({ unitPrice: Money.fromCents(10000n) })] }), clientId };
     const payment = buildPayment({ amount: Money.fromCents(3000n) });
-    const sentWithPayment = expectOk(recordPayment(sent, payment));
+    const sentWithPayment = expectOk(recordPayment(sent, payment)).aggregate;
     repo.save(sentWithPayment);
 
     // Paid — should be excluded (status is 'paid')

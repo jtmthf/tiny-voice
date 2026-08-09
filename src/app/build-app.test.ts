@@ -5,8 +5,9 @@ import type { AppDeps } from './app-deps';
 import type { CapturingNotificationSender } from '@/invoicing/adapters/capturing-notification-sender';
 import { createClient } from '@/clients/commands/create-client';
 import { createInvoice as createInvoiceCommand } from '@/invoicing/commands/create-invoice';
-import { sendInvoice as sendInvoiceCommand } from '@/invoicing/commands/send-invoice';
-import { recordPayment as recordPaymentCommand } from '@/invoicing/commands/record-payment';
+import { applyInvoiceCommand } from '@/invoicing/commands/apply-invoice-command';
+import { recordPayment, sendInvoice } from '@/invoicing/entities/invoice';
+import { Money } from '@/shared/money/money';
 import { expectOk } from '@/shared/testing/expect-ok';
 import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
@@ -79,9 +80,10 @@ describe('buildTestApp', () => {
     expect(createResult.isOk()).toBe(true);
 
     // 4. Send invoice
-    const sendResult = await sendInvoiceCommand(
-      { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, clock: app.clock, eventBus: app.eventBus },
+    const sendResult = await applyInvoiceCommand(
+      { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
       { invoiceId },
+      (invoice) => sendInvoice(invoice, app.clock.now()),
     );
     expect(sendResult.isOk()).toBe(true);
 
@@ -89,13 +91,14 @@ describe('buildTestApp', () => {
     expect(notifications.sent.some((s) => s.type === 'invoiceSent')).toBe(true);
 
     // 5. Record payment (full amount: 2 * $50.00 = $100.00 + 10% tax = $110.00 = 11000 cents)
-    const payResult = await recordPaymentCommand(
-      { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, clock: app.clock, eventBus: app.eventBus },
-      {
-        invoiceId,
-        paymentId: newPaymentId(),
-        amountCents: 11000n,
-      },
+    const payResult = await applyInvoiceCommand(
+      { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
+      { invoiceId },
+      (invoice) => recordPayment(invoice, {
+        id: newPaymentId(),
+        amount: Money.fromCents(11000n),
+        recordedAt: app.clock.now(),
+      }),
     );
     expect(payResult.isOk()).toBe(true);
 
@@ -177,19 +180,21 @@ describe('buildIntegrationTestApp', () => {
     expect(createResult.isOk()).toBe(true);
 
     // Send
-    await sendInvoiceCommand(
-      { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, clock: app.clock, eventBus: app.eventBus },
+    await applyInvoiceCommand(
+      { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
       { invoiceId },
+      (invoice) => sendInvoice(invoice, app.clock.now()),
     );
 
     // Record payment
-    await recordPaymentCommand(
-      { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, clock: app.clock, eventBus: app.eventBus },
-      {
-        invoiceId,
-        paymentId: newPaymentId(),
-        amountCents: 2500n,
-      },
+    await applyInvoiceCommand(
+      { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
+      { invoiceId },
+      (invoice) => recordPayment(invoice, {
+        id: newPaymentId(),
+        amount: Money.fromCents(2500n),
+        recordedAt: app.clock.now(),
+      }),
     );
 
     // Verify through queries

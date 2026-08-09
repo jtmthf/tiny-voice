@@ -1,9 +1,11 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod/v4';
 import { getAppInstance } from '@/app/instance';
-import { recordPayment } from '@/invoicing/commands/record-payment';
+import { applyInvoiceCommand } from '@/invoicing/commands/apply-invoice-command';
+import { recordPayment } from '@/invoicing/entities/invoice';
 import { InvoiceIdSchema } from '@/shared/ids/invoice-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
+import { Money } from '@/shared/money/money';
 import { invoiceErrorMessage } from '@/app/lib/error-messages';
 
 export const RecordPaymentInput = z.object({
@@ -19,9 +21,14 @@ export function parseRecordPaymentInput(data: unknown): RecordPaymentInput {
 
 export async function recordPaymentHandler(data: RecordPaymentInput): Promise<{ error: string | null }> {
   const app = getAppInstance();
-  const result = await recordPayment(
-    { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, clock: app.clock, eventBus: app.eventBus },
-    { invoiceId: data.invoiceId, paymentId: newPaymentId(), amountCents: data.amountCents },
+  const result = await applyInvoiceCommand(
+    { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
+    { invoiceId: data.invoiceId },
+    (invoice) => recordPayment(invoice, {
+      id: newPaymentId(),
+      amount: Money.fromCents(data.amountCents),
+      recordedAt: app.clock.now(),
+    }),
   );
   if (result.isErr()) return { error: invoiceErrorMessage(result.error) };
   return { error: null };

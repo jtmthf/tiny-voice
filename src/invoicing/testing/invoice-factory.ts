@@ -54,7 +54,7 @@ export function buildDraftInvoice(overrides?: {
   });
 
   for (const item of overrides?.lineItems ?? []) {
-    invoice = expectOk(addLineItem(invoice, item));
+    invoice = expectOk(addLineItem(invoice, item)).aggregate;
   }
 
   return invoice;
@@ -67,7 +67,7 @@ export function buildSentInvoice(overrides?: {
 }): Invoice {
   const items = overrides?.lineItems ?? [buildLineItem()];
   const draft = buildDraftInvoice({ ...overrides, lineItems: items });
-  return expectOk(sendInvoice(draft));
+  return expectOk(sendInvoice(draft, DEFAULT_DATE)).aggregate;
 }
 
 export function buildPaidInvoice(overrides?: {
@@ -78,7 +78,7 @@ export function buildPaidInvoice(overrides?: {
   const sent = buildSentInvoice(overrides);
   const fullAmount = total(sent);
   const payment = buildPayment({ amount: fullAmount });
-  return expectOk(recordPayment(sent, payment));
+  return expectOk(recordPayment(sent, payment)).aggregate;
 }
 
 export function buildVoidInvoice(overrides?: {
@@ -87,5 +87,5 @@ export function buildVoidInvoice(overrides?: {
   dueDate?: DueDate;
 }): Invoice {
   const draft = buildDraftInvoice(overrides);
-  return expectOk(voidInvoice(draft));
+  return expectOk(voidInvoice(draft, DEFAULT_DATE)).aggregate;
 }

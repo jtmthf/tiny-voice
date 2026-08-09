@@ -37,8 +37,8 @@ describe('InMemoryInvoiceRepo', () => {
     repo.save(invoice);
 
     // Two concurrent modifications
-    const a = expectOk(addLineItem(invoice, buildLineItem()));
-    const b = expectOk(addLineItem(invoice, buildLineItem()));
+    const a = expectOk(addLineItem(invoice, buildLineItem())).aggregate;
+    const b = expectOk(addLineItem(invoice, buildLineItem())).aggregate;
 
     const saveA = repo.save(a);
     expect(saveA.isOk()).toBe(true);

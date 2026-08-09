@@ -54,7 +54,7 @@ export function createInvoice(
       kind: 'regular',
     });
     if (itemResult.isErr()) return err(itemResult.error);
-    invoice = itemResult.value;
+    invoice = itemResult.value.aggregate;
   }
 
   const saveResult = deps.repo.save(invoice);

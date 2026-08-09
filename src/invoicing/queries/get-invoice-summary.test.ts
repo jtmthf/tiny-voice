@@ -22,7 +22,7 @@ describe('getInvoiceSummary', () => {
     ];
     const sent = buildSentInvoice({ lineItems: items });
     const payment = buildPayment({ amount: Money.fromCents(2000n) });
-    const withPayment = expectOk(recordPayment(sent, payment));
+    const withPayment = expectOk(recordPayment(sent, payment)).aggregate;
     repo.save(withPayment);
 
     const summary = getInvoiceSummary({ repo }, withPayment.id);

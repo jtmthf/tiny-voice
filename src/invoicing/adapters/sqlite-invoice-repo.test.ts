@@ -56,7 +56,7 @@ describe('SqliteInvoiceRepo', () => {
       amount: Money.fromCents(1000n),
       recordedAt: new Date('2025-02-01T10:00:00Z'),
     };
-    const updated = expectOk(recordPayment(sent, payment));
+    const updated = expectOk(recordPayment(sent, payment)).aggregate;
     repo.save(updated);
 
     const found = repo.findById(updated.id);
@@ -74,8 +74,8 @@ describe('SqliteInvoiceRepo', () => {
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);
 
-    const a = expectOk(addLineItem(invoice, buildLineItem()));
-    const b = expectOk(addLineItem(invoice, buildLineItem()));
+    const a = expectOk(addLineItem(invoice, buildLineItem())).aggregate;
+    const b = expectOk(addLineItem(invoice, buildLineItem())).aggregate;
 
     const saveA = repo.save(a);
     expect(saveA.isOk()).toBe(true);
@@ -114,12 +114,12 @@ describe('SqliteInvoiceRepo', () => {
 
     // First payment
     const p1 = { id: newPaymentId(), amount: Money.fromCents(500n), recordedAt: new Date() };
-    const afterP1 = expectOk(recordPayment(sent, p1));
+    const afterP1 = expectOk(recordPayment(sent, p1)).aggregate;
     repo.save(afterP1);
 
     // Second payment
     const p2 = { id: newPaymentId(), amount: Money.fromCents(500n), recordedAt: new Date() };
-    const afterP2 = expectOk(recordPayment(afterP1, p2));
+    const afterP2 = expectOk(recordPayment(afterP1, p2)).aggregate;
     repo.save(afterP2);
 
     const found = repo.findById(sent.id);

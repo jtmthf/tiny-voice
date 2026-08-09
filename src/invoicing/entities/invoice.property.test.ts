@@ -21,6 +21,8 @@ import {
 } from '../testing/arbitraries';
 import { buildPaidInvoice } from '../testing/invoice-factory';
 
+const NOW = new Date('2025-01-20T10:00:00Z');
+
 describe('Invoice PBT invariants', () => {
   // 1. subtotal equals sum of line item totals
   it.prop([arbDraftInvoice])('subtotal equals sum of line item totals', (invoice) => {
@@ -45,13 +47,17 @@ describe('Invoice PBT invariants', () => {
 
   // 3. State machine: draft can only transition to sent (with items) or void
   it.prop([arbDraftInvoice])('draft invoice: send succeeds iff has line items', (invoice) => {
-    const result = sendInvoice(invoice);
+    const result = sendInvoice(invoice, NOW);
     if (invoice.lineItems.length === 0) {
       expect(result.isErr()).toBe(true);
       if (result.isErr()) expect(result.error.kind).toBe('NoLineItems');
     } else {
       expect(result.isOk()).toBe(true);
-      if (result.isOk()) expect(result.value.status).toBe('sent');
+      if (result.isOk()) {
+        expect(result.value.aggregate.status).toBe('sent');
+        expect(result.value.events).toHaveLength(1);
+        expect(result.value.events[0]!.type).toBe('InvoiceSent');
+      }
     }
   });
 
@@ -59,8 +65,9 @@ describe('Invoice PBT invariants', () => {
     const result = addLineItem(invoice, item);
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      expect(result.value.lineItems.length).toBe(invoice.lineItems.length + 1);
-      expect(result.value.status).toBe('draft');
+      expect(result.value.aggregate.lineItems.length).toBe(invoice.lineItems.length + 1);
+      expect(result.value.aggregate.status).toBe('draft');
+      expect(result.value.events).toEqual([]);
     }
   });
 
@@ -76,16 +83,20 @@ describe('Invoice PBT invariants', () => {
       const invoiceTotal = total(invoice);
       if (invoiceTotal.cents <= 0n) return; // skip zero-total invoices
 
-      // Pay in full with a single payment
       const payment = {
         id: newPaymentId(),
         amount: invoiceTotal,
-        recordedAt: new Date(),
+        recordedAt: NOW,
       };
       const result = recordPayment(invoice, payment);
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {
-        expect(result.value.status).toBe('paid');
+        expect(result.value.aggregate.status).toBe('paid');
+        const event = result.value.events[0];
+        expect(event?.type).toBe('InvoicePaymentRecorded');
+        if (event?.type === 'InvoicePaymentRecorded') {
+          expect(event.payload.becamePaid).toBe(true);
+        }
       }
     },
   );
@@ -99,7 +110,6 @@ describe('Invoice PBT invariants', () => {
     if (invoiceTotal.cents <= 0n) return;
     if (invoiceTotal.cents < BigInt(numPayments)) return; // can't split into payments smaller than 1 cent
 
-    // Simple split: first N-1 payments get floor(total/N), last gets remainder
     const perPayment = invoiceTotal.cents / BigInt(numPayments);
     if (perPayment <= 0n) return;
 
@@ -108,15 +118,14 @@ describe('Invoice PBT invariants', () => {
       const payment = {
         id: newPaymentId(),
         amount: Money.fromCents(perPayment),
-        recordedAt: new Date(),
+        recordedAt: NOW,
       };
       const result = recordPayment(current, payment);
       expect(result.isOk()).toBe(true);
       if (result.isErr()) return;
-      current = result.value;
+      current = result.value.aggregate;
     }
 
-    // Last payment: the remainder
     const remainder = outstandingBalance(current);
     if (remainder.cents <= 0n) {
       expect(current.status).toBe('paid');
@@ -126,12 +135,12 @@ describe('Invoice PBT invariants', () => {
     const lastPayment = {
       id: newPaymentId(),
       amount: remainder,
-      recordedAt: new Date(),
+      recordedAt: NOW,
     };
     const finalResult = recordPayment(current, lastPayment);
     expect(finalResult.isOk()).toBe(true);
     if (finalResult.isOk()) {
-      expect(finalResult.value.status).toBe('paid');
+      expect(finalResult.value.aggregate.status).toBe('paid');
     }
   });
 
@@ -142,7 +151,7 @@ describe('Invoice PBT invariants', () => {
     const payment = {
       id: newPaymentId(),
       amount: overAmount,
-      recordedAt: new Date(),
+      recordedAt: NOW,
     };
     const result = recordPayment(invoice, payment);
     expect(result.isErr()).toBe(true);
@@ -154,13 +163,12 @@ describe('Invoice PBT invariants', () => {
   // 6. Voided invoice rejects all transitions
   describe('voided invoice rejects all transitions', () => {
     it.prop([arbDraftInvoice])('void draft then reject all transitions', (draft) => {
-      const voided = voidInvoice(draft);
+      const voided = voidInvoice(draft, NOW);
       expect(voided.isOk()).toBe(true);
       if (voided.isErr()) return;
 
-      const voidedInv = voided.value;
+      const voidedInv = voided.value.aggregate;
 
-      // Try to add line item
       const addResult = addLineItem(voidedInv, {
         id: newPaymentId() as unknown as LineItemId,
         description: 'x',
@@ -171,22 +179,19 @@ describe('Invoice PBT invariants', () => {
       expect(addResult.isErr()).toBe(true);
       if (addResult.isErr()) expect(addResult.error.kind).toBe('InvoiceVoided');
 
-      // Try to send
-      const sendResult = sendInvoice(voidedInv);
+      const sendResult = sendInvoice(voidedInv, NOW);
       expect(sendResult.isErr()).toBe(true);
       if (sendResult.isErr()) expect(sendResult.error.kind).toBe('InvoiceVoided');
 
-      // Try to record payment
       const payResult = recordPayment(voidedInv, {
         id: newPaymentId(),
         amount: Money.fromCents(100n),
-        recordedAt: new Date(),
+        recordedAt: NOW,
       });
       expect(payResult.isErr()).toBe(true);
       if (payResult.isErr()) expect(payResult.error.kind).toBe('InvoiceVoided');
 
-      // Try to void again
-      const voidAgain = voidInvoice(voidedInv);
+      const voidAgain = voidInvoice(voidedInv, NOW);
       expect(voidAgain.isErr()).toBe(true);
       if (voidAgain.isErr()) expect(voidAgain.error.kind).toBe('InvoiceVoided');
     });
@@ -198,7 +203,7 @@ describe('Invoice PBT invariants', () => {
     const payment = {
       id: newPaymentId(),
       amount: Money.fromCents(100n),
-      recordedAt: new Date(),
+      recordedAt: NOW,
     };
     const result = recordPayment(paid, payment);
     expect(result.isErr()).toBe(true);
@@ -208,7 +213,7 @@ describe('Invoice PBT invariants', () => {
   // paid invoice rejects void
   it('paid invoice rejects void', () => {
     const paid = buildPaidInvoice();
-    const result = voidInvoice(paid);
+    const result = voidInvoice(paid, NOW);
     expect(result.isErr()).toBe(true);
     if (result.isErr()) expect(result.error.kind).toBe('AlreadyPaid');
   });

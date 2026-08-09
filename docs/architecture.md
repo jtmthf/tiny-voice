@@ -48,15 +48,43 @@ All subscribers are registered in `src/app/register-subscribers.ts`.
 
 | Event | Emitted by | Subscribers |
 |---|---|---|
-| `InvoiceSent` | `sendInvoice` command handler (`src/invoicing/commands/send-invoice.ts`) | 1. `NotificationSender.sendInvoiceSent` |
-| `InvoicePaymentRecorded` | `recordPayment` command handler (`src/invoicing/commands/record-payment.ts`) | 1. `registerRevenueProjection` -> `RevenueReadModel.recordPayment` 2. `NotificationSender.sendPaymentReceived` |
-| `InvoiceVoided` | `voidInvoice` command handler (`src/invoicing/commands/void-invoice.ts`) | _(no subscribers — void is a terminal state)_ |
+| `InvoiceSent` | `sendInvoice` transition (`src/invoicing/entities/invoice.ts`), dispatched by `applyInvoiceCommand` | 1. `NotificationSender.sendInvoiceSent` |
+| `InvoicePaymentRecorded` | `recordPayment` transition (`src/invoicing/entities/invoice.ts`), dispatched by `applyInvoiceCommand` | 1. `registerRevenueProjection` -> `RevenueReadModel.recordPayment` 2. `NotificationSender.sendPaymentReceived` |
+| `InvoiceVoided` | `voidInvoice` transition (`src/invoicing/entities/invoice.ts`), dispatched by `applyInvoiceCommand` | _(no subscribers — void is a terminal state)_ |
 
 **Event payload design rule:** Events carry IDs and immutable facts (amounts, timestamps) — never mutable state (names, balances, statuses). Subscribers that need mutable data fetch it fresh from the repository at handling time. This avoids stale snapshots embedded in event payloads.
 
 Cache invalidation is handled by TanStack Query: mutation server functions redirect or return on success; the calling component calls `queryClient.invalidateQueries()` in `onSuccess`. This is not routed through the event bus.
 
 Note: The revenue projection is registered via `registerRevenueProjection` from the reporting module (`src/reporting/projections/register-revenue-projection.ts`), which subscribes to `InvoicePaymentRecorded` and calls `readModel.recordPayment`.
+
+## Invoice command dispatch
+
+Most invoice mutations follow the same shape:
+
+1. Load the aggregate by ID
+2. Apply a pure transition (from `src/invoicing/entities/invoice.ts`)
+3. Save the result inside a transaction
+4. Enqueue every event the transition emitted in the outbox
+5. Drain the outbox after commit
+
+Transitions on the `Invoice` aggregate return an `Outcome<Invoice, InvoiceDomainEvent>` — the new aggregate state paired with the domain events the transition emitted. The envelope type lives in `src/shared/outcome/outcome.ts`; the discriminated union of events lives in `src/invoicing/events/invoice-domain-event.ts`. Transitions that change state without publishing (e.g. `addLineItem`, `addLateFee`) return `events: []`.
+
+`applyInvoiceCommand` (`src/invoicing/commands/apply-invoice-command.ts`) is the single interface that performs this dispatch. It accepts a closure of type `InvoiceTransition = (invoice: Invoice) => Result<InvoiceOutcome, InvoiceError>` and owns the rest: load, transaction, outbox enqueue per event, and post-commit drain.
+
+Server functions in `src/app/fns/` parse input, construct any IDs/timestamps they need, and pass an inline transition closure to the dispatcher:
+
+```ts
+const result = await applyInvoiceCommand(
+  { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
+  { invoiceId: input.invoiceId },
+  (invoice) => sendInvoice(invoice, app.clock.now()),
+);
+```
+
+Transitions that need wall-clock data accept a `now: Date` (or `today: DueDate`) primitive — passing a value rather than the `Clock` port keeps the entity free of dependencies on infrastructure while still letting tests fix time.
+
+`createInvoice` (insert) and `deleteInvoice` (hard delete) do **not** go through `applyInvoiceCommand` — they have different shapes (insert assembles a new aggregate; delete touches multiple tables with no transition). See [ADR-0001](adr/0001-invoice-command-dispatch-scope.md).
 
 ## Composition root tour
 
@@ -83,7 +111,9 @@ Example: "Add a CSV export of monthly revenue."
 
 1. **Create a query** in the appropriate module: `src/reporting/queries/export-revenue-csv.ts`. Export the handler function and a Zod input schema (co-located).
 2. **Add to module index**: Re-export from `src/reporting/index.ts`.
-3. **If it's a mutation**: Create a server function in `src/app/fns/` using `createServerFn({ method: 'POST' })`. Call `getAppInstance()` to access the full `AppDeps`. Call `queryClient.invalidateQueries` in the component's `onSuccess`.
+3. **If it's a mutation**: Create a server function in `src/app/fns/` using `createServerFn({ method: 'POST' })`. Define the input schema (Zod) in the fn module — that's the HTTP boundary. Call `getAppInstance()` to access the full `AppDeps`. Call `queryClient.invalidateQueries` in the component's `onSuccess`.
+   - **For an invoice load → mutate → save mutation**: add a pure transition to `src/invoicing/entities/invoice.ts` returning `Result<InvoiceOutcome, InvoiceError>` — the new aggregate plus any `InvoiceDomainEvent`s the transition publishes. If the transition publishes a new event variant, add it to `InvoiceDomainEvent` and `InvoicingEventMap` (with the matching Zod schema in `src/invoicing/events/`). Then dispatch via `applyInvoiceCommand` from the fn, passing an inline closure. See [Invoice command dispatch](#invoice-command-dispatch).
+   - **For an insert (like `createInvoice`) or hard delete (like `deleteInvoice`)**: skip the dispatcher and call the repo directly from a dedicated command function. ADR-0001 explains why.
 4. **If it's a query**: Add to `AppDeps.queries` in `src/app/app-deps.ts` and `src/app/build-app.ts` (and `build-test-app.ts`). Expose it via a server function in `src/app/fns/`. Add `queryOptions` in `src/app/queries/`. Fetch in route components via `useSuspenseQuery`. Route files access data only through `app.queries.*` via server functions — never import repos or call `findById` directly from a route file.
 5. **If it needs a new port** (new IO boundary): Define the port interface in the module's `ports/` directory. Implement real + test adapters in `adapters/`. Wire in `buildApp`.
 6. **If it emits events**: Define event type + Zod schema in the module's `events/` directory. Add to `InvoicingEventMap` (or create a new event map). Register subscribers in `src/app/register-subscribers.ts`.

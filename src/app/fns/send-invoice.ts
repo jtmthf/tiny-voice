@@ -1,7 +1,8 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod/v4';
 import { getAppInstance } from '@/app/instance';
-import { sendInvoice } from '@/invoicing/commands/send-invoice';
+import { applyInvoiceCommand } from '@/invoicing/commands/apply-invoice-command';
+import { sendInvoice } from '@/invoicing/entities/invoice';
 import { InvoiceIdSchema } from '@/shared/ids/invoice-id';
 import { invoiceErrorMessage } from '@/app/lib/error-messages';
 
@@ -15,9 +16,10 @@ export function parseSendInvoiceInput(data: unknown): SendInvoiceInput {
 
 export async function sendInvoiceHandler(data: SendInvoiceInput): Promise<{ error: string | null }> {
   const app = getAppInstance();
-  const result = await sendInvoice(
-    { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, clock: app.clock, eventBus: app.eventBus },
+  const result = await applyInvoiceCommand(
+    { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
     { invoiceId: data.invoiceId },
+    (invoice) => sendInvoice(invoice, app.clock.now()),
   );
   if (result.isErr()) return { error: invoiceErrorMessage(result.error) };
   return { error: null };
