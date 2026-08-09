@@ -12,7 +12,6 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "deps": "depcruise src",
-    "check:filenames": "pnpm lint",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test --config e2e/playwright.config.ts",
@@ -68,6 +67,7 @@
     "vitest": "^4.1.4"
   },
   "simple-git-hooks": {
-    "commit-msg": "pnpm commitlint --edit $1"
+    "commit-msg": "pnpm commitlint --edit $1",
+    "pre-commit": "pnpm format"
   }
 }
