@@ -1,0 +1,96 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import type { Database } from '@/shared/db/database';
+import { setupDb } from '@/shared/testing/db-fixture';
+import { SqliteOutbox } from './sqlite-outbox';
+
+interface TestEventMap {
+  Foo: { value: number };
+  Bar: { value: number };
+  Baz: { value: number };
+}
+
+interface OutboxRow {
+  event_name: string;
+}
+
+describe('SqliteOutbox', () => {
+  let db: Database;
+  let teardown: () => void;
+  let outbox: SqliteOutbox<TestEventMap>;
+
+  beforeEach(() => {
+    const fixture = setupDb();
+    db = fixture.db;
+    teardown = fixture.teardown;
+    outbox = new SqliteOutbox<TestEventMap>(db);
+  });
+
+  afterEach(() => {
+    teardown();
+  });
+
+  it('enqueues a row and drains it via the handler, deleting on success', async () => {
+    outbox.enqueue('Foo', { value: 42 });
+
+    const rowsBeforeDrain = db.prepare<OutboxRow>('SELECT event_name FROM outbox ORDER BY id').all();
+    expect(rowsBeforeDrain).toHaveLength(1);
+
+    const received: { name: string; value: number }[] = [];
+    await outbox.drain(async (eventName, payload) => {
+      received.push({ name: eventName, value: (payload as { value: number }).value });
+    });
+
+    expect(received).toEqual([{ name: 'Foo', value: 42 }]);
+    const rowsAfterDrain = db.prepare<OutboxRow>('SELECT event_name FROM outbox ORDER BY id').all();
+    expect(rowsAfterDrain).toHaveLength(0);
+  });
+
+  it('drains events in FIFO (id) order', async () => {
+    outbox.enqueue('Foo', { value: 1 });
+    outbox.enqueue('Bar', { value: 2 });
+    outbox.enqueue('Baz', { value: 3 });
+
+    const received: string[] = [];
+    await outbox.drain(async (eventName) => {
+      received.push(eventName);
+    });
+
+    expect(received).toEqual(['Foo', 'Bar', 'Baz']);
+  });
+
+  it('rolls back the enqueue when the enclosing transaction throws', () => {
+    expect(() => {
+      db.transaction(() => {
+        outbox.enqueue('Foo', { value: 1 });
+        throw new Error('boom');
+      });
+    }).toThrow('boom');
+
+    const rows = db.prepare<OutboxRow>('SELECT event_name FROM outbox').all();
+    expect(rows).toHaveLength(0);
+  });
+
+  it('retains the row when the handler throws, and delivers it on a later drain', async () => {
+    outbox.enqueue('Foo', { value: 1 });
+
+    await outbox
+      .drain(async () => {
+        throw new Error('boom');
+      })
+      .catch(() => {
+        /* deliberately not asserting reject/resolve here — see plan 004 */
+      });
+
+    const rowsAfterFailedDrain = db.prepare<OutboxRow>('SELECT event_name FROM outbox').all();
+    expect(rowsAfterFailedDrain).toHaveLength(1);
+
+    const received: string[] = [];
+    await outbox.drain(async (eventName) => {
+      received.push(eventName);
+    });
+
+    expect(received).toEqual(['Foo']);
+    const rowsAfterSuccessfulDrain = db.prepare<OutboxRow>('SELECT event_name FROM outbox').all();
+    expect(rowsAfterSuccessfulDrain).toHaveLength(0);
+  });
+});
