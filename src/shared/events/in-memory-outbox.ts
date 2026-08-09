@@ -13,10 +13,11 @@ export class InMemoryOutbox<TEventMap extends object = object> implements Outbox
   }
 
   async drain(handler: (eventName: keyof TEventMap & string, payload: TEventMap[keyof TEventMap]) => Promise<void>): Promise<void> {
-    let event = this.pending.shift();
+    let event = this.pending[0];
     while (event) {
       await handler(event.eventName, event.payload);
-      event = this.pending.shift();
+      this.pending.shift();
+      event = this.pending[0];
     }
   }
 }
