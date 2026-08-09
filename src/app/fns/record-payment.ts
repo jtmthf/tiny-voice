@@ -22,7 +22,7 @@ export function parseRecordPaymentInput(data: unknown): RecordPaymentInput {
 export async function recordPaymentHandler(data: RecordPaymentInput): Promise<{ error: string | null }> {
   const app = getAppInstance();
   const result = await applyInvoiceCommand(
-    { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
+    { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus, logger: app.logger },
     { invoiceId: data.invoiceId },
     (invoice) => recordPayment(invoice, {
       id: newPaymentId(),

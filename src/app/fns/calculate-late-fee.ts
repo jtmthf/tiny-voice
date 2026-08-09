@@ -19,7 +19,7 @@ export function parseCalculateLateFeeInput(data: unknown): CalculateLateFeeInput
 export async function calculateLateFeeHandler(data: CalculateLateFeeInput): Promise<{ error: string | null }> {
   const app = getAppInstance();
   const result = await applyInvoiceCommand(
-    { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
+    { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus, logger: app.logger },
     { invoiceId: data.invoiceId },
     (invoice) => addLateFee(invoice, app.clock.today(), newLineItemId()),
   );
