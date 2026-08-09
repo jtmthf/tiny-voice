@@ -71,8 +71,7 @@ export function buildTestApp(overrides: Partial<AppDeps> = {}): TestAppResult {
       clock,
     });
 
-  const queries =
-    overrides.queries ?? wireQueries({ clientRepo, invoiceRepo, revenueReadModel });
+  const queries = overrides.queries ?? wireQueries({ clientRepo, invoiceRepo, revenueReadModel });
 
   const app: AppDeps = {
     config,

@@ -159,8 +159,7 @@ export function buildApp(overrides: Partial<AppDeps> = {}): AppDeps {
     logger,
     clock,
   });
-  const queries =
-    overrides.queries ?? wireQueries({ clientRepo, invoiceRepo, revenueReadModel });
+  const queries = overrides.queries ?? wireQueries({ clientRepo, invoiceRepo, revenueReadModel });
 
   return {
     config,
