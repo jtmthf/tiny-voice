@@ -32,7 +32,7 @@ your row when done.
 | 007  | db.transaction rolls back on returned Err Result                                                                             | P2       | S      | —          | DONE   |
 | 008  | Consolidate query wiring into shared wireQueries factory                                                                     | P2       | M      | —          | DONE   |
 | 009  | Read-path efficiency: single-load invoice detail, summary-derived outstanding, delete dead list-invoices                     | P2       | M      | 008        | DONE   |
-| 010  | Property-based SQLite ↔ in-memory adapter parity tests                                                                       | P3       | M      | —          | TODO   |
+| 010  | Property-based SQLite ↔ in-memory adapter parity tests                                                                       | P3       | M      | —          | DONE   |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
