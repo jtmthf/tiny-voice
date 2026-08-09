@@ -28,5 +28,5 @@ export async function createClientHandler(data: CreateClientInput): Promise<neve
 }
 
 export const createClientFn = createServerFn({ method: 'POST' })
-  .inputValidator(parseCreateClientInput)
+  .validator(parseCreateClientInput)
   .handler(({ data }) => createClientHandler(data));

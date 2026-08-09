@@ -35,5 +35,5 @@ export async function recordPaymentHandler(data: RecordPaymentInput): Promise<{ 
 }
 
 export const recordPaymentFn = createServerFn({ method: 'POST' })
-  .inputValidator(parseRecordPaymentInput)
+  .validator(parseRecordPaymentInput)
   .handler(({ data }) => recordPaymentHandler(data));

@@ -26,5 +26,5 @@ export async function voidInvoiceHandler(data: VoidInvoiceInput): Promise<{ erro
 }
 
 export const voidInvoiceFn = createServerFn({ method: 'POST' })
-  .inputValidator(parseVoidInvoiceInput)
+  .validator(parseVoidInvoiceInput)
   .handler(({ data }) => voidInvoiceHandler(data));

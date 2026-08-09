@@ -7,7 +7,7 @@ import type { InvoiceStatus } from '@/invoicing/value-objects/invoice-status';
 const Input = z.object({ status: z.string().optional() });
 
 export const listInvoicesFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: unknown) => Input.parse(data ?? {}))
+  .validator((data: unknown) => Input.parse(data ?? {}))
   .handler(async ({ data }) => {
     const app = getAppReadView();
     const filters = data.status ? { status: data.status as InvoiceStatus } : undefined;

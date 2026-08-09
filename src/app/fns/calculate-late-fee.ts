@@ -29,5 +29,5 @@ export async function calculateLateFeeHandler(data: CalculateLateFeeInput): Prom
 
 export const calculateLateFeeFn = createServerFn({ method: 'POST' })
   .middleware([requireFeatureFlag('lateFees')])
-  .inputValidator(parseCalculateLateFeeInput)
+  .validator(parseCalculateLateFeeInput)
   .handler(({ data }) => calculateLateFeeHandler(data));
