@@ -8,19 +8,12 @@ import { InMemoryClientRepo } from '@/clients/adapters/in-memory-client-repo';
 import { InMemoryInvoiceRepo } from '@/invoicing/adapters/in-memory-invoice-repo';
 import { StubPdfGenerator } from '@/invoicing/adapters/stub-pdf-generator';
 import { CapturingNotificationSender } from '@/invoicing/adapters/capturing-notification-sender';
-import { getInvoiceSummary } from '@/invoicing/queries/get-invoice-summary';
-import { getInvoiceLineItems } from '@/invoicing/queries/get-invoice-line-items';
-import { getInvoicePayments } from '@/invoicing/queries/get-invoice-payments';
-import { listInvoiceSummaries } from '@/invoicing/queries/list-invoice-summaries';
-import { getOutstandingByClient } from '@/invoicing/queries/get-outstanding-by-client';
 import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
 import { InMemoryRevenueReadModel } from '@/reporting/adapters/in-memory-revenue-read-model';
-import { getRevenueByMonth } from '@/reporting/queries/get-revenue-by-month';
-import { getRevenueByYear } from '@/reporting/queries/get-revenue-by-year';
 import { getClient } from '@/clients/queries/get-client';
 import type { ClientId } from '@/shared/ids/client-id';
-import { listClients } from '@/clients/queries/list-clients';
 import { registerSubscribers } from '../register-subscribers';
+import { wireQueries } from '../wire-queries';
 import type { AppDeps } from '../app-deps';
 import type { Database } from '@/shared/db/database';
 
@@ -78,24 +71,8 @@ export function buildTestApp(overrides: Partial<AppDeps> = {}): TestAppResult {
       clock,
     });
 
-  const queries = overrides.queries ?? {
-    clients: {
-      getClient: (id) => getClient({ repo: clientRepo }, id),
-      listClients: () => listClients({ repo: clientRepo }),
-    },
-    invoicing: {
-      getInvoiceSummary: (id) => getInvoiceSummary({ repo: invoiceRepo }, id),
-      getInvoiceLineItems: (id) => getInvoiceLineItems({ repo: invoiceRepo }, id),
-      getInvoicePayments: (id) => getInvoicePayments({ repo: invoiceRepo }, id),
-      listInvoices: (filters) => listInvoiceSummaries({ repo: invoiceRepo }, filters),
-      getOutstandingByClient: (clientId) => getOutstandingByClient({ repo: invoiceRepo }, clientId),
-    },
-    reporting: {
-      getRevenueByMonth: (month) => getRevenueByMonth({ readModel: revenueReadModel }, month),
-      getRevenueByYear: (year) => getRevenueByYear({ readModel: revenueReadModel }, year),
-      listAllRevenue: () => revenueReadModel.listAll(),
-    },
-  };
+  const queries =
+    overrides.queries ?? wireQueries({ clientRepo, invoiceRepo, revenueReadModel });
 
   const app: AppDeps = {
     config,

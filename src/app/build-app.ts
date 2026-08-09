@@ -9,21 +9,14 @@ import { runMigrations } from '@/shared/db/run-migrations';
 import { resolve } from 'node:path';
 import { SqliteClientRepo } from '@/clients/adapters/sqlite-client-repo';
 import { getClient } from '@/clients/queries/get-client';
-import { listClients } from '@/clients/queries/list-clients';
 import { SqliteInvoiceRepo } from '@/invoicing/adapters/sqlite-invoice-repo';
 import { PdfKitGenerator } from '@/invoicing/adapters/pdf-kit-generator';
 import { StubPdfGenerator } from '@/invoicing/adapters/stub-pdf-generator';
 import { ConsoleNotificationSender } from '@/invoicing/adapters/console-notification-sender';
-import { getInvoiceSummary } from '@/invoicing/queries/get-invoice-summary';
-import { getInvoiceLineItems } from '@/invoicing/queries/get-invoice-line-items';
-import { getInvoicePayments } from '@/invoicing/queries/get-invoice-payments';
-import { listInvoiceSummaries } from '@/invoicing/queries/list-invoice-summaries';
-import { getOutstandingByClient } from '@/invoicing/queries/get-outstanding-by-client';
 import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
 import { SqliteRevenueReadModel } from '@/reporting/adapters/sqlite-revenue-read-model';
-import { getRevenueByMonth } from '@/reporting/queries/get-revenue-by-month';
-import { getRevenueByYear } from '@/reporting/queries/get-revenue-by-year';
 import { registerSubscribers } from './register-subscribers';
+import { wireQueries } from './wire-queries';
 import type { AppDeps } from './app-deps';
 import type { Config } from '@/shared/config/config';
 import type { Clock } from '@/shared/time/clock';
@@ -142,36 +135,6 @@ function createEventingAndSubscribers(
   return { eventBus, outbox, unsubscribe };
 }
 
-function createQueries(
-  overrides: Partial<AppDeps>,
-  deps: {
-    clientRepo: ClientRepository;
-    invoiceRepo: InvoiceRepository;
-    revenueReadModel: RevenueReadModel;
-  },
-): AppDeps['queries'] {
-  if (overrides.queries) return overrides.queries;
-  return {
-    clients: {
-      getClient: (id) => getClient({ repo: deps.clientRepo }, id),
-      listClients: () => listClients({ repo: deps.clientRepo }),
-    },
-    invoicing: {
-      getInvoiceSummary: (id) => getInvoiceSummary({ repo: deps.invoiceRepo }, id),
-      getInvoiceLineItems: (id) => getInvoiceLineItems({ repo: deps.invoiceRepo }, id),
-      getInvoicePayments: (id) => getInvoicePayments({ repo: deps.invoiceRepo }, id),
-      listInvoices: (filters) => listInvoiceSummaries({ repo: deps.invoiceRepo }, filters),
-      getOutstandingByClient: (clientId) =>
-        getOutstandingByClient({ repo: deps.invoiceRepo }, clientId),
-    },
-    reporting: {
-      getRevenueByMonth: (month) => getRevenueByMonth({ readModel: deps.revenueReadModel }, month),
-      getRevenueByYear: (year) => getRevenueByYear({ readModel: deps.revenueReadModel }, year),
-      listAllRevenue: () => deps.revenueReadModel.listAll(),
-    },
-  };
-}
-
 /**
  * Composition root. Constructs all dependencies, wires subscribers,
  * and returns the fully assembled AppDeps.
@@ -196,7 +159,8 @@ export function buildApp(overrides: Partial<AppDeps> = {}): AppDeps {
     logger,
     clock,
   });
-  const queries = createQueries(overrides, { clientRepo, invoiceRepo, revenueReadModel });
+  const queries =
+    overrides.queries ?? wireQueries({ clientRepo, invoiceRepo, revenueReadModel });
 
   return {
     config,
