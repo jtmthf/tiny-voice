@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { buildTestApp } from './testing/build-test-app';
 import { buildIntegrationTestApp } from './testing/build-integration-test-app';
+import { buildApp } from './build-app';
 import type { AppDeps } from './app-deps';
 import type { CapturingNotificationSender } from '@/invoicing/adapters/capturing-notification-sender';
 import { createClient } from '@/clients/commands/create-client';
@@ -10,11 +11,21 @@ import { recordPayment, sendInvoice } from '@/invoicing/entities/invoice';
 import { Money } from '@/shared/money/money';
 import { expectOk } from '@/shared/testing/expect-ok';
 import { newInvoiceId } from '@/shared/ids/invoice-id';
+import { newClientId } from '@/shared/ids/client-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import type { DueDate } from '@/shared/time/due-date';
 import type { TaxRate } from '@/invoicing/value-objects/tax-rate';
 import type { YearMonth } from '@/shared/time/year-month';
+import { InMemoryConfig } from '@/shared/config/in-memory-config';
+import { FixedClock } from '@/shared/time/fixed-clock';
+import { CapturingLogger } from '@/shared/logger/capturing-logger';
+import { InMemoryFeatureFlags } from '@/shared/flags/in-memory-feature-flags';
+import { InProcessEventBus } from '@/shared/events/in-process-event-bus';
+import { SqliteOutbox } from '@/shared/events/sqlite-outbox';
+import type { Outbox } from '@/shared/events/outbox';
+import { setupDb } from '@/shared/testing/db-fixture';
+import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
 
 describe('buildTestApp', () => {
   let app: AppDeps;
@@ -205,5 +216,66 @@ describe('buildIntegrationTestApp', () => {
     expect(revenue!.total.cents).toBe(2500n);
 
     expect(notifications.sent).toHaveLength(2); // invoiceSent + paymentReceived
+  });
+});
+
+describe('buildApp startup recovery drain', () => {
+  it('drains an outbox row left over from a previous run at startup', async () => {
+    const { db, teardown } = setupDb();
+    const invoiceId = newInvoiceId();
+    const clientId = newClientId();
+
+    db.prepare('INSERT INTO outbox (event_name, payload) VALUES (?, ?)').run(
+      'InvoiceSent',
+      JSON.stringify({
+        invoiceId,
+        clientId,
+        totalCents: '1000',
+        sentAt: '2026-04-13T00:00:00.000Z',
+      }),
+    );
+
+    const eventBus = new InProcessEventBus<InvoicingEventMap>();
+    let received: InvoicingEventMap['InvoiceSent'] | undefined;
+    eventBus.subscribe('InvoiceSent', (payload) => { received = payload; });
+
+    // The recovery drain is fire-and-forget inside buildApp, so capture the
+    // promise it kicks off to deterministically await its completion here.
+    const rawOutbox = new SqliteOutbox<InvoicingEventMap>(db);
+    let drainPromise: Promise<void> | undefined;
+    const outbox: Outbox<InvoicingEventMap> = new Proxy(rawOutbox, {
+      get(target, prop, receiver) {
+        if (prop === 'drain') {
+          return (...args: Parameters<typeof rawOutbox.drain>) => {
+            drainPromise = target.drain(...args);
+            return drainPromise;
+          };
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+    });
+
+    const app = buildApp({
+      config: new InMemoryConfig(),
+      clock: new FixedClock(new Date('2026-04-13T00:00:00Z')),
+      logger: new CapturingLogger(),
+      featureFlags: new InMemoryFeatureFlags({ lateFees: false }),
+      db,
+      eventBus,
+      outbox,
+    });
+
+    try {
+      expect(drainPromise).toBeDefined();
+      await drainPromise;
+
+      expect(received?.invoiceId).toBe(invoiceId);
+
+      const rows = db.prepare('SELECT * FROM outbox').all();
+      expect(rows).toHaveLength(0);
+    } finally {
+      app.unsubscribe();
+      teardown();
+    }
   });
 });

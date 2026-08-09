@@ -55,4 +55,34 @@ describe('InMemoryOutbox', () => {
       { name: 'Bar', value: 2 },
     ]);
   });
+
+  it('isolates a failing event: other events still deliver, the failing one is retained, onError fires, drain resolves', async () => {
+    const outbox = new InMemoryOutbox<TestEventMap>();
+    outbox.enqueue('Foo', { value: 1 });
+    outbox.enqueue('Bar', { value: 2 });
+    outbox.enqueue('Baz', { value: 3 });
+
+    const received: string[] = [];
+    const errors: { eventName: string; error: unknown }[] = [];
+
+    await outbox.drain(
+      async (eventName) => {
+        if (eventName === 'Bar') throw new Error('boom');
+        received.push(eventName);
+      },
+      (eventName, error) => {
+        errors.push({ eventName, error });
+      },
+    );
+
+    expect(received).toEqual(['Foo', 'Baz']);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.eventName).toBe('Bar');
+
+    const secondDrainReceived: string[] = [];
+    await outbox.drain(async (eventName) => {
+      secondDrainReceived.push(eventName);
+    });
+    expect(secondDrainReceived).toEqual(['Bar']);
+  });
 });

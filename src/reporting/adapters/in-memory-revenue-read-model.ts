@@ -4,12 +4,16 @@ import type { MonthlyRevenue, RevenueReadModel } from '../ports/revenue-read-mod
 
 export class InMemoryRevenueReadModel implements RevenueReadModel {
   private readonly store = new Map<string, MonthlyRevenue>();
+  private readonly processedPaymentIds = new Set<string>();
 
   private key(month: YearMonth, currency: string): string {
     return `${month}:${currency}`;
   }
 
-  recordPayment(input: { month: YearMonth; amount: Money; at: Date }): void {
+  recordPayment(input: { paymentId: string; month: YearMonth; amount: Money; at: Date }): void {
+    if (this.processedPaymentIds.has(input.paymentId)) return;
+    this.processedPaymentIds.add(input.paymentId);
+
     const k = this.key(input.month, input.amount.currency);
     const existing = this.store.get(k);
 

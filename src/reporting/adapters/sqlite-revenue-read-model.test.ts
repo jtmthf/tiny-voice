@@ -31,7 +31,7 @@ describe('SqliteRevenueReadModel', () => {
   });
 
   it('records a payment and retrieves by month', async () => {
-    model.recordPayment({ month: jan, amount: usd(5000n), at: new Date('2025-01-15') });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(5000n), at: new Date('2025-01-15') });
 
     const result = model.getByMonth(jan);
     expect(result).not.toBeNull();
@@ -41,8 +41,8 @@ describe('SqliteRevenueReadModel', () => {
   });
 
   it('aggregates multiple payments in the same month', async () => {
-    model.recordPayment({ month: jan, amount: usd(5000n), at: new Date('2025-01-10') });
-    model.recordPayment({ month: jan, amount: usd(3000n), at: new Date('2025-01-20') });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(5000n), at: new Date('2025-01-10') });
+    model.recordPayment({ paymentId: 'pay_2', month: jan, amount: usd(3000n), at: new Date('2025-01-20') });
 
     const result = model.getByMonth(jan);
     expect(result!.total.cents).toBe(8000n);
@@ -55,9 +55,9 @@ describe('SqliteRevenueReadModel', () => {
   });
 
   it('getByYear returns months in ascending order', async () => {
-    model.recordPayment({ month: mar, amount: usd(1000n), at: new Date('2025-03-01') });
-    model.recordPayment({ month: jan, amount: usd(2000n), at: new Date('2025-01-01') });
-    model.recordPayment({ month: feb, amount: usd(3000n), at: new Date('2025-02-01') });
+    model.recordPayment({ paymentId: 'pay_1', month: mar, amount: usd(1000n), at: new Date('2025-03-01') });
+    model.recordPayment({ paymentId: 'pay_2', month: jan, amount: usd(2000n), at: new Date('2025-01-01') });
+    model.recordPayment({ paymentId: 'pay_3', month: feb, amount: usd(3000n), at: new Date('2025-02-01') });
 
     const results = model.getByYear(2025);
     expect(results).toHaveLength(3);
@@ -67,8 +67,8 @@ describe('SqliteRevenueReadModel', () => {
   });
 
   it('getByYear excludes other years', async () => {
-    model.recordPayment({ month: jan, amount: usd(1000n), at: new Date('2025-01-01') });
-    model.recordPayment({ month: dec24, amount: usd(2000n), at: new Date('2024-12-01') });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(1000n), at: new Date('2025-01-01') });
+    model.recordPayment({ paymentId: 'pay_2', month: dec24, amount: usd(2000n), at: new Date('2024-12-01') });
 
     const results = model.getByYear(2025);
     expect(results).toHaveLength(1);
@@ -76,14 +76,32 @@ describe('SqliteRevenueReadModel', () => {
   });
 
   it('listAll returns months in descending order', async () => {
-    model.recordPayment({ month: jan, amount: usd(1000n), at: new Date('2025-01-01') });
-    model.recordPayment({ month: mar, amount: usd(2000n), at: new Date('2025-03-01') });
-    model.recordPayment({ month: feb, amount: usd(3000n), at: new Date('2025-02-01') });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(1000n), at: new Date('2025-01-01') });
+    model.recordPayment({ paymentId: 'pay_2', month: mar, amount: usd(2000n), at: new Date('2025-03-01') });
+    model.recordPayment({ paymentId: 'pay_3', month: feb, amount: usd(3000n), at: new Date('2025-02-01') });
 
     const results = model.listAll();
     expect(results).toHaveLength(3);
     expect(results[0]!.month).toBe(mar);
     expect(results[1]!.month).toBe(feb);
     expect(results[2]!.month).toBe(jan);
+  });
+
+  it('redelivering the same paymentId is a no-op', async () => {
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(5000n), at: new Date('2025-01-15') });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(5000n), at: new Date('2025-01-15') });
+
+    const result = model.getByMonth(jan);
+    expect(result!.total.cents).toBe(5000n);
+    expect(result!.paymentCount).toBe(1);
+  });
+
+  it('different paymentIds accumulate normally', async () => {
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(5000n), at: new Date('2025-01-15') });
+    model.recordPayment({ paymentId: 'pay_2', month: jan, amount: usd(3000n), at: new Date('2025-01-16') });
+
+    const result = model.getByMonth(jan);
+    expect(result!.total.cents).toBe(8000n);
+    expect(result!.paymentCount).toBe(2);
   });
 });

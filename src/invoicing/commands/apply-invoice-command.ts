@@ -4,6 +4,7 @@ import type { InvoiceId } from '@/shared/ids/invoice-id';
 import type { Database } from '@/shared/db/database';
 import type { EventBus } from '@/shared/events/event-bus';
 import type { Outbox } from '@/shared/events/outbox';
+import type { Logger } from '@/shared/logger/logger';
 import type { Invoice, InvoiceOutcome } from '../entities/invoice';
 import type { InvoiceError } from '../errors/invoice-error';
 import { InvoiceError as IE } from '../errors/invoice-error';
@@ -15,6 +16,7 @@ export interface ApplyInvoiceCommandDeps {
   readonly repo: InvoiceRepository;
   readonly outbox: Outbox<InvoicingEventMap>;
   readonly eventBus: EventBus<InvoicingEventMap>;
+  readonly logger?: Logger;
 }
 
 export type InvoiceTransition = (
@@ -46,7 +48,10 @@ export async function applyInvoiceCommand(
   if (txResult.isErr()) return err(txResult.error);
 
   if (events.length > 0) {
-    await deps.outbox.drain((eventName, payload) => deps.eventBus.publish(eventName, payload));
+    await deps.outbox.drain(
+      (eventName, payload) => deps.eventBus.publish(eventName, payload),
+      (eventName, error) => deps.logger?.warn('outbox.drain.failed', { eventName, error }),
+    );
   }
 
   return ok(aggregate);
