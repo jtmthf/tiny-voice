@@ -65,7 +65,10 @@ function createDatabase(overrides: Partial<AppDeps>, config: Config, logger: Log
   return database;
 }
 
-function createRepositories(overrides: Partial<AppDeps>, db: Database): {
+function createRepositories(
+  overrides: Partial<AppDeps>,
+  db: Database,
+): {
   clientRepo: ClientRepository;
   invoiceRepo: InvoiceRepository;
   revenueReadModel: RevenueReadModel;
@@ -76,15 +79,17 @@ function createRepositories(overrides: Partial<AppDeps>, db: Database): {
   return { clientRepo, invoiceRepo, revenueReadModel };
 }
 
-function createAdapters(overrides: Partial<AppDeps>, config: Config, logger: Logger): {
+function createAdapters(
+  overrides: Partial<AppDeps>,
+  config: Config,
+  logger: Logger,
+): {
   pdfGenerator: PdfGenerator;
   notifications: NotificationSender;
 } {
-  const pdfGenerator = overrides.pdfGenerator ?? (
-    config.get('PDF_GENERATOR') === 'pdfkit'
-      ? new PdfKitGenerator()
-      : new StubPdfGenerator()
-  );
+  const pdfGenerator =
+    overrides.pdfGenerator ??
+    (config.get('PDF_GENERATOR') === 'pdfkit' ? new PdfKitGenerator() : new StubPdfGenerator());
   const notifications = overrides.notifications ?? new ConsoleNotificationSender(logger);
   return { pdfGenerator, notifications };
 }
@@ -100,7 +105,11 @@ function createEventingAndSubscribers(
     logger: Logger;
     clock: Clock;
   },
-): { eventBus: EventBus<InvoicingEventMap>; outbox: Outbox<InvoicingEventMap>; unsubscribe: () => void } {
+): {
+  eventBus: EventBus<InvoicingEventMap>;
+  outbox: Outbox<InvoicingEventMap>;
+  unsubscribe: () => void;
+} {
   const eventBus = overrides.eventBus ?? new InProcessEventBus<InvoicingEventMap>();
   const outbox = overrides.outbox ?? new SqliteOutbox<InvoicingEventMap>(deps.db);
 
@@ -109,15 +118,17 @@ function createEventingAndSubscribers(
     getClient: (id: ClientId) => getClient({ repo: deps.clientRepo }, id),
   };
 
-  const unsubscribe = overrides.unsubscribe ?? registerSubscribers({
-    eventBus,
-    revenueReadModel: deps.revenueReadModel,
-    notifications: deps.notifications,
-    invoiceRepo: deps.invoiceRepo,
-    getClient: invoicingImports.getClient,
-    logger: deps.logger,
-    clock: deps.clock,
-  });
+  const unsubscribe =
+    overrides.unsubscribe ??
+    registerSubscribers({
+      eventBus,
+      revenueReadModel: deps.revenueReadModel,
+      notifications: deps.notifications,
+      invoiceRepo: deps.invoiceRepo,
+      getClient: invoicingImports.getClient,
+      logger: deps.logger,
+      clock: deps.clock,
+    });
 
   // Recover any events left in the outbox from a crash between commit and
   // drain on a previous run. Fire-and-forget: startup must not block on this.
@@ -150,7 +161,8 @@ function createQueries(
       getInvoiceLineItems: (id) => getInvoiceLineItems({ repo: deps.invoiceRepo }, id),
       getInvoicePayments: (id) => getInvoicePayments({ repo: deps.invoiceRepo }, id),
       listInvoices: (filters) => listInvoiceSummaries({ repo: deps.invoiceRepo }, filters),
-      getOutstandingByClient: (clientId) => getOutstandingByClient({ repo: deps.invoiceRepo }, clientId),
+      getOutstandingByClient: (clientId) =>
+        getOutstandingByClient({ repo: deps.invoiceRepo }, clientId),
     },
     reporting: {
       getRevenueByMonth: (month) => getRevenueByMonth({ readModel: deps.revenueReadModel }, month),
@@ -176,15 +188,30 @@ export function buildApp(overrides: Partial<AppDeps> = {}): AppDeps {
   const { clientRepo, invoiceRepo, revenueReadModel } = createRepositories(overrides, db);
   const { pdfGenerator, notifications } = createAdapters(overrides, config, logger);
   const { eventBus, outbox, unsubscribe } = createEventingAndSubscribers(overrides, {
-    db, revenueReadModel, notifications, invoiceRepo, clientRepo, logger, clock,
+    db,
+    revenueReadModel,
+    notifications,
+    invoiceRepo,
+    clientRepo,
+    logger,
+    clock,
   });
   const queries = createQueries(overrides, { clientRepo, invoiceRepo, revenueReadModel });
 
   return {
-    config, clock, logger, featureFlags,
-    eventBus, outbox, db,
-    clientRepo, invoiceRepo, revenueReadModel,
-    pdfGenerator, notifications,
-    queries, unsubscribe,
+    config,
+    clock,
+    logger,
+    featureFlags,
+    eventBus,
+    outbox,
+    db,
+    clientRepo,
+    invoiceRepo,
+    revenueReadModel,
+    pdfGenerator,
+    notifications,
+    queries,
+    unsubscribe,
   };
 }

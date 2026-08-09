@@ -26,10 +26,18 @@ import type { Database } from '@/shared/db/database';
 
 /** Stub database for unit tests — transaction() is a passthrough for in-memory adapters. */
 const STUB_DB: Database = {
-  prepare() { throw new Error('Stub DB: not available in unit test app'); },
-  exec() { throw new Error('Stub DB: not available in unit test app'); },
-  transaction<T>(fn: () => T): T { return fn(); },
-  close() { /* noop */ },
+  prepare() {
+    throw new Error('Stub DB: not available in unit test app');
+  },
+  exec() {
+    throw new Error('Stub DB: not available in unit test app');
+  },
+  transaction<T>(fn: () => T): T {
+    return fn();
+  },
+  close() {
+    /* noop */
+  },
 };
 
 export interface TestAppResult {
@@ -58,15 +66,17 @@ export function buildTestApp(overrides: Partial<AppDeps> = {}): TestAppResult {
   const pdfGenerator = overrides.pdfGenerator ?? new StubPdfGenerator();
   const notifications = overrides.notifications ?? new CapturingNotificationSender();
 
-  const unsubscribe = overrides.unsubscribe ?? registerSubscribers({
-    eventBus,
-    revenueReadModel,
-    notifications,
-    invoiceRepo,
-    getClient: (id: ClientId) => getClient({ repo: clientRepo }, id),
-    logger,
-    clock,
-  });
+  const unsubscribe =
+    overrides.unsubscribe ??
+    registerSubscribers({
+      eventBus,
+      revenueReadModel,
+      notifications,
+      invoiceRepo,
+      getClient: (id: ClientId) => getClient({ repo: clientRepo }, id),
+      logger,
+      clock,
+    });
 
   const queries = overrides.queries ?? {
     clients: {

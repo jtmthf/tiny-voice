@@ -32,12 +32,17 @@ export class InProcessEventBus<TEventMap extends object> implements EventBus<TEv
     };
   }
 
-  async publish<K extends keyof TEventMap & string>(event: K, payload: TEventMap[K]): Promise<void> {
+  async publish<K extends keyof TEventMap & string>(
+    event: K,
+    payload: TEventMap[K],
+  ): Promise<void> {
     const list = this.handlers.get(event);
     if (!list || list.length === 0) return;
 
     const results = await Promise.allSettled(
-      list.map(async (handler) => (handler as (payload: TEventMap[K]) => Promise<void> | void)(payload)),
+      list.map(async (handler) =>
+        (handler as (payload: TEventMap[K]) => Promise<void> | void)(payload),
+      ),
     );
 
     const errors = results
@@ -45,7 +50,10 @@ export class InProcessEventBus<TEventMap extends object> implements EventBus<TEv
       .map((r) => r.reason);
 
     if (errors.length > 0) {
-      throw new AggregateError(errors, `${errors.length} subscriber(s) failed for event "${event}"`);
+      throw new AggregateError(
+        errors,
+        `${errors.length} subscriber(s) failed for event "${event}"`,
+      );
     }
   }
 }

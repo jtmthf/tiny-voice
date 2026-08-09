@@ -17,7 +17,10 @@ export class SqliteOutbox<TEventMap extends object = object> implements Outbox<T
   }
 
   async drain(
-    handler: (eventName: keyof TEventMap & string, payload: TEventMap[keyof TEventMap]) => Promise<void>,
+    handler: (
+      eventName: keyof TEventMap & string,
+      payload: TEventMap[keyof TEventMap],
+    ) => Promise<void>,
     onError?: (eventName: string, error: unknown) => void,
   ): Promise<void> {
     const rows = this.db
@@ -26,7 +29,10 @@ export class SqliteOutbox<TEventMap extends object = object> implements Outbox<T
 
     for (const row of rows) {
       try {
-        await handler(row.event_name as keyof TEventMap & string, JSON.parse(row.payload) as TEventMap[keyof TEventMap]);
+        await handler(
+          row.event_name as keyof TEventMap & string,
+          JSON.parse(row.payload) as TEventMap[keyof TEventMap],
+        );
       } catch (error) {
         onError?.(row.event_name, error);
         continue;

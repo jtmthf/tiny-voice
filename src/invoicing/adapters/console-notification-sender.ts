@@ -20,7 +20,9 @@ export class ConsoleNotificationSender implements NotificationSender {
     return ok(undefined);
   }
 
-  async sendPaymentReceived(input: PaymentReceivedNotification): Promise<Result<void, NotificationError>> {
+  async sendPaymentReceived(
+    input: PaymentReceivedNotification,
+  ): Promise<Result<void, NotificationError>> {
     this.logger.info('Payment received notification', {
       invoiceId: input.invoiceId,
       amountCents: input.amountCents.toString(),

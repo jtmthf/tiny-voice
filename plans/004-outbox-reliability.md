@@ -30,13 +30,13 @@
 Three related defects in the event pipeline:
 
 1. **Double-counted revenue.** `SqliteOutbox.drain` retains a row when any
-   handler fails, and `InProcessEventBus.publish` throws if *any* subscriber
+   handler fails, and `InProcessEventBus.publish` throws if _any_ subscriber
    rejects — even when the others succeeded. `InvoicePaymentRecorded` has two
    subscribers (revenue projection + notification). If the notification throws,
    the projection has already applied the payment, but the row is redelivered
    by the next drain and the projection — which blindly adds
    `total_cents += amount` — counts the payment twice.
-2. **False failures.** The dispatcher drains *after* the transaction commits;
+2. **False failures.** The dispatcher drains _after_ the transaction commits;
    a drain rejection propagates out of `applyInvoiceCommand`, so the server
    function reports failure for a mutation that committed. Users retry and
    double-submit.
@@ -61,8 +61,8 @@ if (events.length > 0) {
 return ok(aggregate);
 ```
 
-  `ApplyInvoiceCommandDeps` (same file, lines 13-18) is
-  `{ db, repo, outbox, eventBus }` — no logger.
+`ApplyInvoiceCommandDeps` (same file, lines 13-18) is
+`{ db, repo, outbox, eventBus }` — no logger.
 
 - `src/shared/events/sqlite-outbox.ts:19-28` — drain aborts the loop on the
   first throwing handler and leaves that row plus all later rows.
@@ -71,10 +71,10 @@ return ok(aggregate);
 - `src/shared/events/in-process-event-bus.ts:39-49` — `publish` runs all
   subscribers via `Promise.allSettled`, then throws `AggregateError` if any
   rejected. **Keep this behavior** — "all subscribers run, caller can detect
-  failure" is correct; the *outbox* must tolerate it.
+  failure" is correct; the _outbox_ must tolerate it.
 - `src/reporting/adapters/sqlite-revenue-read-model.ts:27-61` — `recordPayment`
   SELECTs the month row then UPDATEs `total_cents = existing + amount,
-  payment_count + 1` or INSERTs. No dedup key of any kind.
+payment_count + 1` or INSERTs. No dedup key of any kind.
 - `src/reporting/ports/revenue-read-model.ts` — the port; `recordPayment`
   input is `{ month: YearMonth; amount: Money; at: Date }`.
 - `src/reporting/adapters/in-memory-revenue-read-model.ts` — test twin;
@@ -94,13 +94,13 @@ return ok(aggregate);
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Typecheck | `pnpm typecheck` | exit 0 |
-| Lint | `pnpm lint` | exit 0 |
-| Dep rules | `pnpm deps` | exit 0 |
-| Full tests | `pnpm test` | exit 0 (Node 24) |
-| Migration smoke | `pnpm migrate` | applies 0010 without error |
+| Purpose         | Command          | Expected on success        |
+| --------------- | ---------------- | -------------------------- |
+| Typecheck       | `pnpm typecheck` | exit 0                     |
+| Lint            | `pnpm lint`      | exit 0                     |
+| Dep rules       | `pnpm deps`      | exit 0                     |
+| Full tests      | `pnpm test`      | exit 0 (Node 24)           |
+| Migration smoke | `pnpm migrate`   | applies 0010 without error |
 
 ## Scope
 

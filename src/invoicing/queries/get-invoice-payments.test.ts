@@ -26,7 +26,10 @@ describe('getInvoicePayments', () => {
   it('returns mapped payments', () => {
     const repo = new InMemoryInvoiceRepo();
     const sent = buildSentInvoice();
-    const payment = buildPayment({ amount: Money.fromCents(5000n), recordedAt: new Date('2025-03-01T10:00:00Z') });
+    const payment = buildPayment({
+      amount: Money.fromCents(5000n),
+      recordedAt: new Date('2025-03-01T10:00:00Z'),
+    });
     const withPayment = expectOk(recordPayment(sent, payment)).aggregate;
     repo.save(withPayment);
 

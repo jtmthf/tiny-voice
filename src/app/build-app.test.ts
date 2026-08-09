@@ -105,11 +105,12 @@ describe('buildTestApp', () => {
     const payResult = await applyInvoiceCommand(
       { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
       { invoiceId },
-      (invoice) => recordPayment(invoice, {
-        id: newPaymentId(),
-        amount: Money.fromCents(11000n),
-        recordedAt: app.clock.now(),
-      }),
+      (invoice) =>
+        recordPayment(invoice, {
+          id: newPaymentId(),
+          amount: Money.fromCents(11000n),
+          recordedAt: app.clock.now(),
+        }),
     );
     expect(payResult.isOk()).toBe(true);
 
@@ -201,11 +202,12 @@ describe('buildIntegrationTestApp', () => {
     await applyInvoiceCommand(
       { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus },
       { invoiceId },
-      (invoice) => recordPayment(invoice, {
-        id: newPaymentId(),
-        amount: Money.fromCents(2500n),
-        recordedAt: app.clock.now(),
-      }),
+      (invoice) =>
+        recordPayment(invoice, {
+          id: newPaymentId(),
+          amount: Money.fromCents(2500n),
+          recordedAt: app.clock.now(),
+        }),
     );
 
     // Verify through queries
@@ -237,7 +239,9 @@ describe('buildApp startup recovery drain', () => {
 
     const eventBus = new InProcessEventBus<InvoicingEventMap>();
     let received: InvoicingEventMap['InvoiceSent'] | undefined;
-    eventBus.subscribe('InvoiceSent', (payload) => { received = payload; });
+    eventBus.subscribe('InvoiceSent', (payload) => {
+      received = payload;
+    });
 
     // The recovery drain is fire-and-forget inside buildApp, so capture the
     // promise it kicks off to deterministically await its completion here.

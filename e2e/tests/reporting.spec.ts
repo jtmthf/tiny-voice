@@ -1,8 +1,12 @@
 import { test, expect } from '../fixtures';
 
-test('revenue updates after recording payment @full',
-  async ({ testClient, newInvoicePage, invoiceDetailPage, reportingPage, page }) => {
-
+test('revenue updates after recording payment @full', async ({
+  testClient,
+  newInvoicePage,
+  invoiceDetailPage,
+  reportingPage,
+  page,
+}) => {
   await newInvoicePage.goto();
   await newInvoicePage.selectClient(testClient.id);
   await newInvoicePage.taxRateInput.fill('0');

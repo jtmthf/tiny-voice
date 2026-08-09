@@ -42,9 +42,26 @@ const filenameMatchesExport = {
       },
       'Program:exit'(node) {
         const file = context.filename;
-        const base = path.basename(file).replace(/\.(test|property\.test|spec)\.[tj]sx?$/, '').replace(/\.[tj]sx?$/, '');
+        const base = path
+          .basename(file)
+          .replace(/\.(test|property\.test|spec)\.[tj]sx?$/, '')
+          .replace(/\.[tj]sx?$/, '');
         // Skip index files, reserved filenames, type-only declaration files.
-        const skip = ['index', 'layout', 'page', 'route', 'loading', 'error', 'not-found', 'middleware', 'router', 'instance', 'dto', 'error-messages', 'fixtures'];
+        const skip = [
+          'index',
+          'layout',
+          'page',
+          'route',
+          'loading',
+          'error',
+          'not-found',
+          'middleware',
+          'router',
+          'instance',
+          'dto',
+          'error-messages',
+          'fixtures',
+        ];
         if (skip.includes(base)) return;
         if (file.endsWith('.d.ts')) return;
         // Skip test-support collection files under **/testing/ (factories.ts, arbitraries.ts, fixtures.ts).
@@ -60,7 +77,10 @@ const filenameMatchesExport = {
           context.report({
             node,
             messageId: 'mismatch',
-            data: { file: base, expected: base.replace(/(^|-)(.)/g, (_, __, c) => c.toUpperCase()) },
+            data: {
+              file: base,
+              expected: base.replace(/(^|-)(.)/g, (_, __, c) => c.toUpperCase()),
+            },
           });
         }
       },
@@ -72,7 +92,17 @@ const localPlugin = { rules: { 'filename-matches-export': filenameMatchesExport 
 export default tseslint.config(
   // Global ignores
   {
-    ignores: ['.output/**', 'node_modules/**', 'dist/**', '*.cjs', 'src/app/routeTree.gen.ts', '.agents/**', '.opencode/**', 'playwright-report/**', 'test-results/**'],
+    ignores: [
+      '.output/**',
+      'node_modules/**',
+      'dist/**',
+      '*.cjs',
+      'src/app/routeTree.gen.ts',
+      '.agents/**',
+      '.opencode/**',
+      'playwright-report/**',
+      'test-results/**',
+    ],
   },
 
   // Base TypeScript strict + stylistic
@@ -110,11 +140,7 @@ export default tseslint.config(
         'error',
         {
           case: 'kebabCase',
-          ignore: [
-            '__root\\.tsx$',
-            '\\$[a-z]',
-            'routeTree\\.gen\\.ts$',
-          ],
+          ignore: ['__root\\.tsx$', '\\$[a-z]', 'routeTree\\.gen\\.ts$'],
         },
       ],
 
@@ -124,10 +150,7 @@ export default tseslint.config(
         { '**/*.{ts,tsx}': 'KEBAB_CASE' },
         { ignoreMiddleExtensions: true },
       ],
-      'check-file/folder-naming-convention': [
-        'error',
-        { 'src/**/': 'KEBAB_CASE' },
-      ],
+      'check-file/folder-naming-convention': ['error', { 'src/**/': 'KEBAB_CASE' }],
 
       // Filename must match a named export. See inline rule at top of this file for rationale.
       'local/filename-matches-export': 'error',
@@ -143,11 +166,14 @@ export default tseslint.config(
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
 
       // Enforce import type for type-only imports
-      '@typescript-eslint/consistent-type-imports': ['error', {
-        prefer: 'type-imports',
-        fixStyle: 'inline-type-imports',
-        disallowTypeAnnotations: true,
-      }],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'inline-type-imports',
+          disallowTypeAnnotations: true,
+        },
+      ],
 
       // Ban neverthrow's escape hatches — use expectOk/expectErr (tests) or
       // pattern matching / type-level guarantees (production) instead.
@@ -155,20 +181,27 @@ export default tseslint.config(
         'error',
         {
           selector: "MemberExpression[property.name='_unsafeUnwrap']",
-          message: "Don't use _unsafeUnwrap. In tests use expectOk from @/shared/testing/expect-ok. In production handle the Result or fix the type design so the operation is infallible.",
+          message:
+            "Don't use _unsafeUnwrap. In tests use expectOk from @/shared/testing/expect-ok. In production handle the Result or fix the type design so the operation is infallible.",
         },
         {
           selector: "MemberExpression[property.name='_unsafeUnwrapErr']",
-          message: "Don't use _unsafeUnwrapErr. In tests use expectErr from @/shared/testing/expect-err. In production handle the Result branch explicitly.",
+          message:
+            "Don't use _unsafeUnwrapErr. In tests use expectErr from @/shared/testing/expect-err. In production handle the Result branch explicitly.",
         },
       ],
-
     },
   },
 
   // Relax rules for config files, scripts, and e2e infrastructure
   {
-    files: ['*.config.ts', '*.config.js', 'scripts/**', 'e2e/**/*.config.ts', 'e2e/global-setup.ts'],
+    files: [
+      '*.config.ts',
+      '*.config.js',
+      'scripts/**',
+      'e2e/**/*.config.ts',
+      'e2e/global-setup.ts',
+    ],
     rules: {
       'import-x/no-default-export': 'off',
     },

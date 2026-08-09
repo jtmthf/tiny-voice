@@ -3,7 +3,14 @@ import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { InMemoryInvoiceRepo } from '../adapters/in-memory-invoice-repo';
 import { buildSentInvoice, buildLineItem, buildPayment } from '../testing/invoice-factory';
 import { Money } from '@/shared/money/money';
-import { recordPayment, subtotal, taxAmount, total, paidAmount, outstandingBalance } from '../entities/invoice';
+import {
+  recordPayment,
+  subtotal,
+  taxAmount,
+  total,
+  paidAmount,
+  outstandingBalance,
+} from '../entities/invoice';
 import { getInvoiceSummary } from './get-invoice-summary';
 import { expectOk } from '@/shared/testing/expect-ok';
 

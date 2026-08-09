@@ -18,11 +18,7 @@ interface MigrationRow {
  *   applies if absent, or verifies checksum immutability if present.
  * - All new migrations run inside individual transactions.
  */
-export function runMigrations(
-  db: Database,
-  migrationsDir: string,
-  logger: Logger,
-): void {
+export function runMigrations(db: Database, migrationsDir: string, logger: Logger): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS _migrations (
       filename TEXT PRIMARY KEY,
@@ -63,8 +59,11 @@ export function runMigrations(
 
     db.transaction(() => {
       db.exec(sql);
-      db.prepare('INSERT INTO _migrations (filename, checksum, applied_at) VALUES (?, ?, ?)')
-        .run(file, checksum, new Date().toISOString());
+      db.prepare('INSERT INTO _migrations (filename, checksum, applied_at) VALUES (?, ?, ?)').run(
+        file,
+        checksum,
+        new Date().toISOString(),
+      );
     });
 
     logger.info(`Applied migration: ${file}`, { checksum });

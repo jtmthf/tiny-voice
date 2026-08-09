@@ -48,5 +48,7 @@ export class NewInvoicePage {
     await expect(price).toHaveValue(unitPriceCents);
   }
 
-  async submit() { await this.submitBtn.click(); }
+  async submit() {
+    await this.submitBtn.click();
+  }
 }

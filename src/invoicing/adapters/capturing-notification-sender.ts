@@ -19,7 +19,9 @@ export class CapturingNotificationSender implements NotificationSender {
     return ok(undefined);
   }
 
-  async sendPaymentReceived(input: PaymentReceivedNotification): Promise<Result<void, NotificationError>> {
+  async sendPaymentReceived(
+    input: PaymentReceivedNotification,
+  ): Promise<Result<void, NotificationError>> {
     this.sent.push({ type: 'paymentReceived', input });
     return ok(undefined);
   }

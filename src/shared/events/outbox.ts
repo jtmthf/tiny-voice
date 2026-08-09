@@ -19,7 +19,10 @@ export interface Outbox<TEventMap extends object = object> {
 
   /** Async — attempts every pending event via the handler; see drain contract above. */
   drain(
-    handler: (eventName: keyof TEventMap & string, payload: TEventMap[keyof TEventMap]) => Promise<void>,
+    handler: (
+      eventName: keyof TEventMap & string,
+      payload: TEventMap[keyof TEventMap],
+    ) => Promise<void>,
     onError?: (eventName: string, error: unknown) => void,
   ): Promise<void>;
 }

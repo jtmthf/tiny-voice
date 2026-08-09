@@ -37,13 +37,7 @@ export function FieldLabel({
 }: { hidden?: boolean } & React.ComponentProps<'label'>) {
   const { id } = useFieldContext();
 
-  return (
-    <label
-      htmlFor={id}
-      className={hidden ? 'sr-only' : className}
-      {...props}
-    />
-  );
+  return <label htmlFor={id} className={hidden ? 'sr-only' : className} {...props} />;
 }
 
 export function FieldControl({

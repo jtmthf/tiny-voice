@@ -2,7 +2,10 @@ import type { Result } from 'neverthrow';
 import type { InvoiceId } from '@/shared/ids/invoice-id';
 import type { Money } from '@/shared/money/money';
 
-export interface NotificationError { readonly kind: 'NotificationFailed'; readonly reason: string }
+export interface NotificationError {
+  readonly kind: 'NotificationFailed';
+  readonly reason: string;
+}
 
 export interface InvoiceSentNotification {
   readonly invoiceId: InvoiceId;

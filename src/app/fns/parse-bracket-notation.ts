@@ -16,11 +16,7 @@ function parsePath(key: string): (string | number)[] {
   return parts.map((p) => (/^\d+$/.test(p) ? Number(p) : p));
 }
 
-function setPath(
-  obj: Record<string, unknown>,
-  path: (string | number)[],
-  value: unknown,
-): void {
+function setPath(obj: Record<string, unknown>, path: (string | number)[], value: unknown): void {
   let cur: Record<string, unknown> | unknown[] = obj;
   for (let i = 0; i < path.length - 1; i++) {
     const key = path[i];
@@ -28,9 +24,8 @@ function setPath(
     if (key === undefined || nextKey === undefined) break;
     const curAsObj = cur as Record<string, unknown>;
     if (curAsObj[key as string] == null) {
-      curAsObj[key as string] = typeof nextKey === 'number'
-        ? []
-        : (Object.create(null) as Record<string, unknown>);
+      curAsObj[key as string] =
+        typeof nextKey === 'number' ? [] : (Object.create(null) as Record<string, unknown>);
     }
     cur = curAsObj[key as string] as Record<string, unknown> | unknown[];
   }

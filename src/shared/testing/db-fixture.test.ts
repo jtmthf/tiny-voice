@@ -28,9 +28,9 @@ describe('setupDb', () => {
     ({ db, teardown } = setupDb({ migrationsDir: tempDir }));
 
     const rows = db
-      .prepare<{ name: string }>(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='test_table'",
-      )
+      .prepare<{
+        name: string;
+      }>("SELECT name FROM sqlite_master WHERE type='table' AND name='test_table'")
       .all();
     expect(rows).toHaveLength(1);
     expect(rows[0]!.name).toBe('test_table');
@@ -38,10 +38,7 @@ describe('setupDb', () => {
 
   it('records the migration in the _migrations table', () => {
     tempDir = mkdtempSync(join(tmpdir(), 'tv-migrations-'));
-    writeFileSync(
-      join(tempDir, '0001_test.sql'),
-      'CREATE TABLE another (id INTEGER PRIMARY KEY);',
-    );
+    writeFileSync(join(tempDir, '0001_test.sql'), 'CREATE TABLE another (id INTEGER PRIMARY KEY);');
 
     ({ db, teardown } = setupDb({ migrationsDir: tempDir }));
 
@@ -58,9 +55,9 @@ describe('setupDb', () => {
 
     // Should still have _migrations table
     const rows = db
-      .prepare<{ name: string }>(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='_migrations'",
-      )
+      .prepare<{
+        name: string;
+      }>("SELECT name FROM sqlite_master WHERE type='table' AND name='_migrations'")
       .all();
     expect(rows).toHaveLength(1);
   });
@@ -70,9 +67,9 @@ describe('setupDb', () => {
 
     // _migrations table should exist even with no migration files
     const rows = db
-      .prepare<{ name: string }>(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='_migrations'",
-      )
+      .prepare<{
+        name: string;
+      }>("SELECT name FROM sqlite_master WHERE type='table' AND name='_migrations'")
       .all();
     expect(rows).toHaveLength(1);
   });

@@ -22,7 +22,9 @@ function ReportingPage() {
       <h1>Revenue Reporting</h1>
       <div className="mt-md">
         {yearRevenue.length === 0 ? (
-          <p role="status" className="empty">No revenue for {currentYear}.</p>
+          <p role="status" className="empty">
+            No revenue for {currentYear}.
+          </p>
         ) : (
           <div className="grid-stats">
             <div className="stat-card">
@@ -38,7 +40,9 @@ function ReportingPage() {
       </div>
       <h2 className="mt-lg">Revenue by Month</h2>
       {revenue.length === 0 ? (
-        <p role="status" className="empty">No revenue recorded yet.</p>
+        <p role="status" className="empty">
+          No revenue recorded yet.
+        </p>
       ) : (
         <table>
           <thead>

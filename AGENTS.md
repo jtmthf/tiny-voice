@@ -1,7 +1,9 @@
 <!-- intent-skills:start -->
+
 ## Skill Loading
 
 Before substantial work:
+
 - Skill check: run `npx @tanstack/intent@latest list`, or use skills already listed in context.
 - Skill guidance: if one local skill clearly matches the task, run `npx @tanstack/intent@latest load <package>#<skill>` and follow the returned `SKILL.md`.
 - Monorepos: when working across packages, run the skill check from the workspace root and prefer the local skill for the package being changed.
@@ -30,7 +32,7 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 - **No default exports** -- ESLint: `import-x/no-default-export` (relaxed for `src/app/**`, configs, tests)
 - **No circular deps** -- ESLint: `import-x/no-cycle`
 - **No barrel files** -- ESLint: `barrel-files/avoid-barrel-files`. No `index.ts` re-export files. Always use direct imports to the source file.
-- **Module boundaries** -- dependency-cruiser: cross-module imports are allowed to any subdirectory *except* `adapters/`. Three rules (`no-clients-into-other-adapters`, `no-invoicing-into-other-adapters`, `no-reporting-into-other-adapters`) enforce this. The app layer has no such restriction.
+- **Module boundaries** -- dependency-cruiser: cross-module imports are allowed to any subdirectory _except_ `adapters/`. Three rules (`no-clients-into-other-adapters`, `no-invoicing-into-other-adapters`, `no-reporting-into-other-adapters`) enforce this. The app layer has no such restriction.
 - **Domain never imports adapters or app** -- dependency-cruiser: `domain-no-adapters` rule
 - **No framework outside src/app/** -- dependency-cruiser: `no-framework-outside-app` rule. TanStack imports (`@tanstack/react-router`, `@tanstack/react-start`, `@tanstack/react-query`) are confined to the app layer
 - **Narrow read surface** -- TypeScript: `app-deps.ts` exports `AppReadView` (queries + featureFlags + clock only). Repos, event bus, DB, and infrastructure are not on the type. Do not widen `AppReadView` -- mutations go through server functions that call `getAppInstance()`
@@ -47,7 +49,7 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 6. Event bus handles projections (read model) and notifications. All subscribers registered in `src/app/register-subscribers.ts`.
 7. Feature flags gate at the dispatch boundary (RPC procedure), not inside domain logic. The domain is flag-unaware.
 8. Client components must NOT import `@/app/instance` (the server singleton). Enforced at build time via `createServerOnlyFn` from `@tanstack/react-start`.
-9. Queries bypass domain *logic* (aggregates, commands), not domain *ports*. Query functions in `queries/` depend on repository ports (`InvoiceRepository`, `ClientRepository`) or read-model ports (`RevenueReadModel`) -- never on `Database` directly. `Database` is an infrastructure port consumed by adapters, not by query functions. Route components fetch data via `useSuspenseQuery` with `queryOptions` from `src/app/queries/`. If a route needs data not on `app.queries`, add a new query function in the module's `queries/` directory, wire it through `AppDeps.queries`, expose it via a server function in `src/app/fns/`, and consume it with `queryOptions`. The `AppReadView` type enforces the narrow surface at compile time.
+9. Queries bypass domain _logic_ (aggregates, commands), not domain _ports_. Query functions in `queries/` depend on repository ports (`InvoiceRepository`, `ClientRepository`) or read-model ports (`RevenueReadModel`) -- never on `Database` directly. `Database` is an infrastructure port consumed by adapters, not by query functions. Route components fetch data via `useSuspenseQuery` with `queryOptions` from `src/app/queries/`. If a route needs data not on `app.queries`, add a new query function in the module's `queries/` directory, wire it through `AppDeps.queries`, expose it via a server function in `src/app/fns/`, and consume it with `queryOptions`. The `AppReadView` type enforces the narrow surface at compile time.
 10. Filename-matches-export: exported symbol name corresponds to kebab-case filename (e.g., `create-invoice.ts` exports `createInvoice` / `CreateInvoiceInput`). Co-located schema + handler is the expected pattern.
 11. Cache invalidation uses TanStack Query: mutation server functions redirect or return on success; the calling component calls `queryClient.invalidateQueries({ queryKey: [...] })` in `onSuccess`. Never route cache invalidation through the event bus.
 12. Event payloads carry IDs and immutable facts (amounts, timestamps) -- never mutable state (names, balances, statuses). Subscribers that need mutable data fetch it fresh from the repository at handling time.
@@ -65,11 +67,11 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 
 Assume built-in knowledge of the libraries below is incomplete or out of date. Before writing or modifying code that uses any of them, fetch the latest documentation via Context7 (`resolve-library-id` then `query-docs`).
 
-| Library | Context7 ID | Notes |
-|---|---|---|
-| TanStack Router | `/tanstack/router` | File-based routing, `createFileRoute`, `useSuspenseQuery` integration |
-| TanStack Start | `/tanstack/start` | `createServerFn`, `createServerOnlyFn`, server function patterns |
-| TanStack Query | `/tanstack/query` | `queryOptions`, `useSuspenseQuery`, `useQueryClient`, cache invalidation |
-| Zod 4 | `/websites/zod_dev_v4` | v4 API differs significantly from v3 |
-| neverthrow | `/supermacro/neverthrow` | |
-| fast-check | `/dubzzz/fast-check` | Property-based testing; also `@fast-check/vitest` integration |
+| Library         | Context7 ID              | Notes                                                                    |
+| --------------- | ------------------------ | ------------------------------------------------------------------------ |
+| TanStack Router | `/tanstack/router`       | File-based routing, `createFileRoute`, `useSuspenseQuery` integration    |
+| TanStack Start  | `/tanstack/start`        | `createServerFn`, `createServerOnlyFn`, server function patterns         |
+| TanStack Query  | `/tanstack/query`        | `queryOptions`, `useSuspenseQuery`, `useQueryClient`, cache invalidation |
+| Zod 4           | `/websites/zod_dev_v4`   | v4 API differs significantly from v3                                     |
+| neverthrow      | `/supermacro/neverthrow` |                                                                          |
+| fast-check      | `/dubzzz/fast-check`     | Property-based testing; also `@fast-check/vitest` integration            |

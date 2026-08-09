@@ -8,13 +8,7 @@ import { newLineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import { Money } from '@/shared/money/money';
 import type { DueDate } from '@/shared/time/due-date';
-import {
-  addLateFee,
-  recordPayment,
-  sendInvoice,
-  voidInvoice,
-  total,
-} from '../entities/invoice';
+import { addLateFee, recordPayment, sendInvoice, voidInvoice, total } from '../entities/invoice';
 import { InvoiceError as IE } from '../errors/invoice-error';
 import type { InvoicingEventMap } from '../events/invoicing-event-map';
 import { InMemoryInvoiceRepo } from '../adapters/in-memory-invoice-repo';
@@ -23,10 +17,18 @@ import { applyInvoiceCommand } from './apply-invoice-command';
 import type { InvoiceTransition } from './apply-invoice-command';
 
 const STUB_DB: Database = {
-  prepare() { throw new Error('Stub DB'); },
-  exec() { throw new Error('Stub DB'); },
-  transaction<T>(fn: () => T): T { return fn(); },
-  close() { /* noop */ },
+  prepare() {
+    throw new Error('Stub DB');
+  },
+  exec() {
+    throw new Error('Stub DB');
+  },
+  transaction<T>(fn: () => T): T {
+    return fn();
+  },
+  close() {
+    /* noop */
+  },
 };
 
 const NOW = new Date('2025-01-20T10:00:00Z');
@@ -37,7 +39,9 @@ describe('applyInvoiceCommand', () => {
     const eventBus = new InProcessEventBus<InvoicingEventMap>();
     const outbox = new InMemoryOutbox<InvoicingEventMap>();
     const published: InvoicingEventMap['InvoiceSent'][] = [];
-    eventBus.subscribe('InvoiceSent', (e) => { published.push(e); });
+    eventBus.subscribe('InvoiceSent', (e) => {
+      published.push(e);
+    });
 
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);
@@ -62,7 +66,9 @@ describe('applyInvoiceCommand', () => {
     const eventBus = new InProcessEventBus<InvoicingEventMap>();
     const outbox = new InMemoryOutbox<InvoicingEventMap>();
     const recorded: InvoicingEventMap['InvoicePaymentRecorded'][] = [];
-    eventBus.subscribe('InvoicePaymentRecorded', (e) => { recorded.push(e); });
+    eventBus.subscribe('InvoicePaymentRecorded', (e) => {
+      recorded.push(e);
+    });
 
     const sent = buildSentInvoice();
     repo.save(sent);
@@ -72,11 +78,12 @@ describe('applyInvoiceCommand', () => {
     const result = await applyInvoiceCommand(
       { db: STUB_DB, repo, outbox, eventBus },
       { invoiceId: sent.id },
-      (inv) => recordPayment(inv, {
-        id: paymentId,
-        amount: fullAmount,
-        recordedAt: NOW,
-      }),
+      (inv) =>
+        recordPayment(inv, {
+          id: paymentId,
+          amount: fullAmount,
+          recordedAt: NOW,
+        }),
     );
 
     expect(result.isOk()).toBe(true);
@@ -96,7 +103,9 @@ describe('applyInvoiceCommand', () => {
     const eventBus = new InProcessEventBus<InvoicingEventMap>();
     const outbox = new InMemoryOutbox<InvoicingEventMap>();
     const voided: InvoicingEventMap['InvoiceVoided'][] = [];
-    eventBus.subscribe('InvoiceVoided', (e) => { voided.push(e); });
+    eventBus.subscribe('InvoiceVoided', (e) => {
+      voided.push(e);
+    });
 
     const sent = buildSentInvoice();
     repo.save(sent);
@@ -151,7 +160,9 @@ describe('applyInvoiceCommand', () => {
     const eventBus = new InProcessEventBus<InvoicingEventMap>();
     const outbox = new InMemoryOutbox<InvoicingEventMap>();
     const published: unknown[] = [];
-    eventBus.subscribe('InvoiceSent', (e) => { published.push(e); });
+    eventBus.subscribe('InvoiceSent', (e) => {
+      published.push(e);
+    });
 
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);
@@ -205,7 +216,9 @@ describe('applyInvoiceCommand', () => {
     const eventBus = new InProcessEventBus<InvoicingEventMap>();
     const outbox = new InMemoryOutbox<InvoicingEventMap>();
     const published: unknown[] = [];
-    eventBus.subscribe('InvoiceSent', (e) => { published.push(e); });
+    eventBus.subscribe('InvoiceSent', (e) => {
+      published.push(e);
+    });
 
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);

@@ -62,8 +62,8 @@ transaction<T>(fn: () => T): T {
   - `src/invoicing/commands/apply-invoice-command.test.ts:25-30` — `STUB_DB`
     with passthrough `transaction<T>(fn: () => T): T { return fn(); }`
   - `src/app/testing/build-test-app.ts:28-33` — identical `STUB_DB`
-  (Passthrough is fine for stubs — they have no state to roll back — but see
-  Step 3 for keeping the port's documented contract honest.)
+    (Passthrough is fine for stubs — they have no state to roll back — but see
+    Step 3 for keeping the port's documented contract honest.)
 - Existing test pattern for the sqlite adapter:
   `src/shared/db/sqlite-database.test.ts` (exists; model new cases on it).
 - neverthrow is already a dependency of the shared kernel (AGENTS.md: "Result
@@ -72,13 +72,13 @@ transaction<T>(fn: () => T): T {
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Typecheck | `pnpm typecheck` | exit 0 |
-| Lint | `pnpm lint` | exit 0 |
-| DB suite | `pnpm vitest run src/shared/db/sqlite-database.test.ts` | all pass |
-| Full suite | `pnpm test` | exit 0 (Node 24) |
-| Dep rules | `pnpm deps` | exit 0 |
+| Purpose    | Command                                                 | Expected on success |
+| ---------- | ------------------------------------------------------- | ------------------- |
+| Typecheck  | `pnpm typecheck`                                        | exit 0              |
+| Lint       | `pnpm lint`                                             | exit 0              |
+| DB suite   | `pnpm vitest run src/shared/db/sqlite-database.test.ts` | all pass            |
+| Full suite | `pnpm test`                                             | exit 0 (Node 24)    |
+| Dep rules  | `pnpm deps`                                             | exit 0              |
 
 ## Scope
 
@@ -212,7 +212,7 @@ rollback-on-throw, and savepoint nesting.
 
 Stop and report back (do not improvise) if:
 
-- Any existing test fails after Step 1 — that means some code path *was*
+- Any existing test fails after Step 1 — that means some code path _was_
   relying on write-then-return-err committing, which is exactly the corruption
   hazard; it needs a human look, not a workaround.
 - The nested test (3.4) shows row A rolled back too — savepoint behavior

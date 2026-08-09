@@ -6,7 +6,10 @@ export interface PdfInput {
   readonly clientName: string;
 }
 
-export interface PdfError { readonly kind: 'PdfGenerationFailed'; readonly reason: string }
+export interface PdfError {
+  readonly kind: 'PdfGenerationFailed';
+  readonly reason: string;
+}
 
 export interface PdfGenerator {
   generate(input: PdfInput): Promise<Result<Uint8Array, PdfError>>;

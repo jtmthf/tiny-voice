@@ -26,7 +26,12 @@ describe('deleteClient', () => {
 
     const emailResult = emailAddress('acme@example.com');
     if (emailResult.isErr()) throw new Error('Invalid email');
-    deps.clientRepo.save({ id: clientId, name: 'Acme', email: emailResult.value, createdAt: new Date() });
+    deps.clientRepo.save({
+      id: clientId,
+      name: 'Acme',
+      email: emailResult.value,
+      createdAt: new Date(),
+    });
 
     deps.invoiceRepo.save(
       createInvoice({

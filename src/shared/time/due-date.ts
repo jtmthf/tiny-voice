@@ -8,7 +8,10 @@ export type DueDate = string & { readonly __brand: 'DueDate' };
 
 const DUE_DATE_REGEX = /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/;
 
-export const DueDateSchema = z.string().regex(DUE_DATE_REGEX, 'Expected YYYY-MM-DD format').transform((val) => val as DueDate);
+export const DueDateSchema = z
+  .string()
+  .regex(DUE_DATE_REGEX, 'Expected YYYY-MM-DD format')
+  .transform((val) => val as DueDate);
 
 /**
  * Creates a DueDate from a Date object.

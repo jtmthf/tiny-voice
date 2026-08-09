@@ -11,7 +11,9 @@ export class NewClientPage {
     this.submitBtn = page.getByRole('button', { name: 'Create Client' });
   }
 
-  async goto() { await this.page.goto('/clients/new'); }
+  async goto() {
+    await this.page.goto('/clients/new');
+  }
 
   async create(name: string, email: string) {
     await this.nameInput.fill(name);

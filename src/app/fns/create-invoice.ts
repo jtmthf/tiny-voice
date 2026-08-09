@@ -15,15 +15,20 @@ import type { DueDate } from '@/shared/time/due-date';
 
 export const CreateInvoiceInput = z.object({
   clientId: ClientIdSchema,
-  taxRate: z.coerce.number().transform((v) => v / 100).pipe(TaxRateSchema),
+  taxRate: z.coerce
+    .number()
+    .transform((v) => v / 100)
+    .pipe(TaxRateSchema),
   dueDate: DueDateSchema,
-  lineItems: z.array(
-    z.object({
-      description: z.string().min(1, 'Description is required'),
-      quantity: z.coerce.number().int().min(1),
-      unitPriceCents: z.string().regex(/^[1-9]\d*$/, 'Price must be a positive integer'),
-    }),
-  ).min(1, 'At least one line item is required'),
+  lineItems: z
+    .array(
+      z.object({
+        description: z.string().min(1, 'Description is required'),
+        quantity: z.coerce.number().int().min(1),
+        unitPriceCents: z.string().regex(/^[1-9]\d*$/, 'Price must be a positive integer'),
+      }),
+    )
+    .min(1, 'At least one line item is required'),
 });
 
 export type CreateInvoiceInput = z.infer<typeof CreateInvoiceInput>;

@@ -14,14 +14,7 @@ import {
   buildPayment,
 } from '../testing/invoice-factory';
 import type { Invoice, InvoiceOutcome } from './invoice';
-import {
-  addLineItem,
-  sendInvoice,
-  recordPayment,
-  addLateFee,
-  voidInvoice,
-  total,
-} from './invoice';
+import { addLineItem, sendInvoice, recordPayment, addLateFee, voidInvoice, total } from './invoice';
 
 const NOW = new Date('2025-01-15T12:00:00Z');
 const OVERDUE_TODAY = '2099-01-01' as DueDate;

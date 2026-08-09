@@ -52,9 +52,13 @@ export class PdfKitGenerator implements PdfGenerator {
 
       doc.moveDown();
       doc.text(`Subtotal: ${Money.toDisplayString(subtotal(invoice))}`);
-      doc.text(`Tax (${(invoice.taxRate * 100).toFixed(2)}%): ${Money.toDisplayString(taxAmount(invoice))}`);
+      doc.text(
+        `Tax (${(invoice.taxRate * 100).toFixed(2)}%): ${Money.toDisplayString(taxAmount(invoice))}`,
+      );
       doc.font('Helvetica-Bold').text(`Total: ${Money.toDisplayString(total(invoice))}`);
-      doc.font('Helvetica').text(`Outstanding: ${Money.toDisplayString(outstandingBalance(invoice))}`);
+      doc
+        .font('Helvetica')
+        .text(`Outstanding: ${Money.toDisplayString(outstandingBalance(invoice))}`);
 
       doc.end();
     });

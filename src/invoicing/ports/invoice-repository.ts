@@ -25,5 +25,8 @@ export interface InvoiceRepository {
   save(invoice: Invoice): Result<void, InvoiceError>;
   delete(id: InvoiceId): void;
   list(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly Invoice[];
-  listSummaries(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly InvoiceListItem[];
+  listSummaries(filters?: {
+    status?: InvoiceStatus;
+    clientId?: ClientId;
+  }): readonly InvoiceListItem[];
 }

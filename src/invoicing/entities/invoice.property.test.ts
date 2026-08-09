@@ -14,11 +14,7 @@ import {
   voidInvoice,
 } from './invoice';
 import { lineTotal } from './line-item';
-import {
-  arbDraftInvoice,
-  arbSentInvoice,
-  arbLineItem,
-} from '../testing/arbitraries';
+import { arbDraftInvoice, arbSentInvoice, arbLineItem } from '../testing/arbitraries';
 import { buildPaidInvoice } from '../testing/invoice-factory';
 
 const NOW = new Date('2025-01-20T10:00:00Z');
@@ -40,10 +36,13 @@ describe('Invoice PBT invariants', () => {
     expect(balance.cents).toBeGreaterThanOrEqual(0n);
   });
 
-  it.prop([arbDraftInvoice])('outstanding balance is non-negative for draft invoices', (invoice) => {
-    const balance = outstandingBalance(invoice);
-    expect(balance.cents).toBeGreaterThanOrEqual(0n);
-  });
+  it.prop([arbDraftInvoice])(
+    'outstanding balance is non-negative for draft invoices',
+    (invoice) => {
+      const balance = outstandingBalance(invoice);
+      expect(balance.cents).toBeGreaterThanOrEqual(0n);
+    },
+  );
 
   // 3. State machine: draft can only transition to sent (with items) or void
   it.prop([arbDraftInvoice])('draft invoice: send succeeds iff has line items', (invoice) => {
@@ -71,94 +70,97 @@ describe('Invoice PBT invariants', () => {
     }
   });
 
-  it.prop([arbSentInvoice, arbLineItem])('adding line item to sent invoice fails', (invoice, item) => {
-    const result = addLineItem(invoice, item);
-    expect(result.isErr()).toBe(true);
-  });
+  it.prop([arbSentInvoice, arbLineItem])(
+    'adding line item to sent invoice fails',
+    (invoice, item) => {
+      const result = addLineItem(invoice, item);
+      expect(result.isErr()).toBe(true);
+    },
+  );
 
   // 4. Payments summing to total result in paid status
-  it.prop([arbSentInvoice])(
-    'paying the exact total transitions to paid',
-    (invoice) => {
-      const invoiceTotal = total(invoice);
-      if (invoiceTotal.cents <= 0n) return; // skip zero-total invoices
+  it.prop([arbSentInvoice])('paying the exact total transitions to paid', (invoice) => {
+    const invoiceTotal = total(invoice);
+    if (invoiceTotal.cents <= 0n) return; // skip zero-total invoices
 
-      const payment = {
+    const payment = {
+      id: newPaymentId(),
+      amount: invoiceTotal,
+      recordedAt: NOW,
+    };
+    const result = recordPayment(invoice, payment);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.aggregate.status).toBe('paid');
+      const event = result.value.events[0];
+      expect(event?.type).toBe('InvoicePaymentRecorded');
+      if (event?.type === 'InvoicePaymentRecorded') {
+        expect(event.payload.becamePaid).toBe(true);
+      }
+    }
+  });
+
+  // Also test split payments
+  it.prop([arbSentInvoice, fc.integer({ min: 2, max: 5 })])(
+    'splitting total into N equal payments leads to paid',
+    (invoice, numPayments) => {
+      const invoiceTotal = total(invoice);
+      if (invoiceTotal.cents <= 0n) return;
+      if (invoiceTotal.cents < BigInt(numPayments)) return; // can't split into payments smaller than 1 cent
+
+      const perPayment = invoiceTotal.cents / BigInt(numPayments);
+      if (perPayment <= 0n) return;
+
+      let current = invoice;
+      for (let i = 0; i < numPayments - 1; i++) {
+        const payment = {
+          id: newPaymentId(),
+          amount: Money.fromCents(perPayment),
+          recordedAt: NOW,
+        };
+        const result = recordPayment(current, payment);
+        expect(result.isOk()).toBe(true);
+        if (result.isErr()) return;
+        current = result.value.aggregate;
+      }
+
+      const remainder = outstandingBalance(current);
+      if (remainder.cents <= 0n) {
+        expect(current.status).toBe('paid');
+        return;
+      }
+
+      const lastPayment = {
         id: newPaymentId(),
-        amount: invoiceTotal,
+        amount: remainder,
         recordedAt: NOW,
       };
-      const result = recordPayment(invoice, payment);
-      expect(result.isOk()).toBe(true);
-      if (result.isOk()) {
-        expect(result.value.aggregate.status).toBe('paid');
-        const event = result.value.events[0];
-        expect(event?.type).toBe('InvoicePaymentRecorded');
-        if (event?.type === 'InvoicePaymentRecorded') {
-          expect(event.payload.becamePaid).toBe(true);
-        }
+      const finalResult = recordPayment(current, lastPayment);
+      expect(finalResult.isOk()).toBe(true);
+      if (finalResult.isOk()) {
+        expect(finalResult.value.aggregate.status).toBe('paid');
       }
     },
   );
 
-  // Also test split payments
-  it.prop([
-    arbSentInvoice,
-    fc.integer({ min: 2, max: 5 }),
-  ])('splitting total into N equal payments leads to paid', (invoice, numPayments) => {
-    const invoiceTotal = total(invoice);
-    if (invoiceTotal.cents <= 0n) return;
-    if (invoiceTotal.cents < BigInt(numPayments)) return; // can't split into payments smaller than 1 cent
-
-    const perPayment = invoiceTotal.cents / BigInt(numPayments);
-    if (perPayment <= 0n) return;
-
-    let current = invoice;
-    for (let i = 0; i < numPayments - 1; i++) {
+  // 5. Overpayment returns error
+  it.prop([arbSentInvoice])(
+    'payment exceeding outstanding is rejected as Overpayment',
+    (invoice) => {
+      const outstanding = outstandingBalance(invoice);
+      const overAmount = Money.fromCents(outstanding.cents + 1n);
       const payment = {
         id: newPaymentId(),
-        amount: Money.fromCents(perPayment),
+        amount: overAmount,
         recordedAt: NOW,
       };
-      const result = recordPayment(current, payment);
-      expect(result.isOk()).toBe(true);
-      if (result.isErr()) return;
-      current = result.value.aggregate;
-    }
-
-    const remainder = outstandingBalance(current);
-    if (remainder.cents <= 0n) {
-      expect(current.status).toBe('paid');
-      return;
-    }
-
-    const lastPayment = {
-      id: newPaymentId(),
-      amount: remainder,
-      recordedAt: NOW,
-    };
-    const finalResult = recordPayment(current, lastPayment);
-    expect(finalResult.isOk()).toBe(true);
-    if (finalResult.isOk()) {
-      expect(finalResult.value.aggregate.status).toBe('paid');
-    }
-  });
-
-  // 5. Overpayment returns error
-  it.prop([arbSentInvoice])('payment exceeding outstanding is rejected as Overpayment', (invoice) => {
-    const outstanding = outstandingBalance(invoice);
-    const overAmount = Money.fromCents(outstanding.cents + 1n);
-    const payment = {
-      id: newPaymentId(),
-      amount: overAmount,
-      recordedAt: NOW,
-    };
-    const result = recordPayment(invoice, payment);
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error.kind).toBe('Overpayment');
-    }
-  });
+      const result = recordPayment(invoice, payment);
+      expect(result.isErr()).toBe(true);
+      if (result.isErr()) {
+        expect(result.error.kind).toBe('Overpayment');
+      }
+    },
+  );
 
   // 6. Voided invoice rejects all transitions
   describe('voided invoice rejects all transitions', () => {

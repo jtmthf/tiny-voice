@@ -1,5 +1,11 @@
 import { useState, useEffect, type ReactNode } from 'react';
-import { createRootRouteWithContext, HeadContent, Link, Outlet, Scripts } from '@tanstack/react-router';
+import {
+  createRootRouteWithContext,
+  HeadContent,
+  Link,
+  Outlet,
+  Scripts,
+} from '@tanstack/react-router';
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 
 interface RouterContext {
@@ -25,27 +31,41 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <RootDocument><Outlet /></RootDocument>
+      <RootDocument>
+        <Outlet />
+      </RootDocument>
     </QueryClientProvider>
   );
 }
 
 function RootDocument({ children }: { readonly children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => { setHydrated(true); }, []);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   return (
     <html lang="en">
-      <head><HeadContent /></head>
+      <head>
+        <HeadContent />
+      </head>
       <body>
-        <a href="#main-content" className="skip-link">Skip to content</a>
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
         <nav>
-          <Link to="/" className="logo">tiny-voice</Link>
+          <Link to="/" className="logo">
+            tiny-voice
+          </Link>
           <Link to="/clients">Clients</Link>
-          <Link to="/invoices" search={{ status: undefined }}>Invoices</Link>
+          <Link to="/invoices" search={{ status: undefined }}>
+            Invoices
+          </Link>
           <Link to="/reporting">Reporting</Link>
         </nav>
-        <main id="main-content" data-hydrated={hydrated}>{children}</main>
+        <main id="main-content" data-hydrated={hydrated}>
+          {children}
+        </main>
         <Scripts />
       </body>
     </html>

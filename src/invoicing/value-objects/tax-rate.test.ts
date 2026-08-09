@@ -44,14 +44,14 @@ describe('calculateTax', () => {
     expect(result.cents).toBe(0n);
   });
 
-  fcIt.prop([
-    fc.bigInt({ min: 0n, max: 10_000_000n }),
-    fc.double({ min: 0, max: 1, noNaN: true }),
-  ])('tax is non-negative and does not exceed subtotal', (cents, rate) => {
-    const subtotal = Money.fromCents(cents);
-    const tax = calculateTax(subtotal, rate as TaxRate);
+  fcIt.prop([fc.bigInt({ min: 0n, max: 10_000_000n }), fc.double({ min: 0, max: 1, noNaN: true })])(
+    'tax is non-negative and does not exceed subtotal',
+    (cents, rate) => {
+      const subtotal = Money.fromCents(cents);
+      const tax = calculateTax(subtotal, rate as TaxRate);
 
-    expect(tax.cents).toBeGreaterThanOrEqual(0n);
-    expect(tax.cents).toBeLessThanOrEqual(subtotal.cents);
-  });
+      expect(tax.cents).toBeGreaterThanOrEqual(0n);
+      expect(tax.cents).toBeLessThanOrEqual(subtotal.cents);
+    },
+  );
 });

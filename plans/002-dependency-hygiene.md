@@ -59,15 +59,15 @@ Verify each of these before changing anything:
 
 ## Commands you will need
 
-| Purpose   | Command                          | Expected on success |
-|-----------|----------------------------------|---------------------|
-| Typecheck | `pnpm typecheck`                 | exit 0              |
-| Lint      | `pnpm lint`                      | exit 0              |
-| Dep rules | `pnpm deps`                      | exit 0, no violations |
-| Unit tests| `pnpm test`                      | exit 0 (Node 24)    |
-| Build     | `pnpm build`                     | exit 0, `.output/` produced |
-| E2E smoke | `pnpm test:e2e:critical`         | all pass (starts its own dev server; needs `pnpm migrate` run once first, and Playwright browsers installed — `npx playwright install chromium` if missing) |
-| Audit     | `pnpm audit --prod`              | no advisory for `@tanstack/start-server-core` |
+| Purpose    | Command                  | Expected on success                                                                                                                                         |
+| ---------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Typecheck  | `pnpm typecheck`         | exit 0                                                                                                                                                      |
+| Lint       | `pnpm lint`              | exit 0                                                                                                                                                      |
+| Dep rules  | `pnpm deps`              | exit 0, no violations                                                                                                                                       |
+| Unit tests | `pnpm test`              | exit 0 (Node 24)                                                                                                                                            |
+| Build      | `pnpm build`             | exit 0, `.output/` produced                                                                                                                                 |
+| E2E smoke  | `pnpm test:e2e:critical` | all pass (starts its own dev server; needs `pnpm migrate` run once first, and Playwright browsers installed — `npx playwright install chromium` if missing) |
+| Audit      | `pnpm audit --prod`      | no advisory for `@tanstack/start-server-core`                                                                                                               |
 
 ## Scope
 

@@ -52,7 +52,7 @@ bad commits minutes earlier than CI.
   `calculateLateFeeLineItem` — plus the server fn
   `src/app/fns/calculate-late-fee.ts`). Also the **Invoice** row lists the
   transitions as `createInvoice, addLineItem, sendInvoice, recordPayment,
-  voidInvoice` — omitting `addLateFee`.
+voidInvoice` — omitting `addLateFee`.
 - `.github/workflows/ci.yml` — single job, matrix:
   `command: [typecheck, lint, deps, 'check:filenames', test]` (line 15), with
   pnpm + Node 24 setup. No Playwright job.
@@ -76,13 +76,13 @@ bad commits minutes earlier than CI.
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Lint | `pnpm lint` | exit 0 |
-| Typecheck | `pnpm typecheck` | exit 0 |
-| Unit tests | `pnpm test` | exit 0 (Node 24) |
-| E2E critical (local check of Step 5) | `pnpm test:e2e:critical --project=chromium` | all pass (Playwright browsers installed: `npx playwright install chromium`) |
-| Workflow syntax | `gh workflow list` after push, or just YAML-lint by eye | valid YAML |
+| Purpose                              | Command                                                 | Expected on success                                                         |
+| ------------------------------------ | ------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Lint                                 | `pnpm lint`                                             | exit 0                                                                      |
+| Typecheck                            | `pnpm typecheck`                                        | exit 0                                                                      |
+| Unit tests                           | `pnpm test`                                             | exit 0 (Node 24)                                                            |
+| E2E critical (local check of Step 5) | `pnpm test:e2e:critical --project=chromium`             | all pass (Playwright browsers installed: `npx playwright install chromium`) |
+| Workflow syntax                      | `gh workflow list` after push, or just YAML-lint by eye | valid YAML                                                                  |
 
 ## Scope
 
@@ -184,23 +184,23 @@ Edit `.github/workflows/ci.yml`:
 2. Add a second job (same trigger) for the critical e2e path:
 
 ```yaml
-  e2e:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: npx playwright install --with-deps chromium
-      - run: pnpm test:e2e:critical --project=chromium
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: playwright-report/
+e2e:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: 'pnpm'
+    - run: pnpm install --frozen-lockfile
+    - run: npx playwright install --with-deps chromium
+    - run: pnpm test:e2e:critical --project=chromium
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: playwright-report
+        path: playwright-report/
 ```
 
 Notes: the Playwright config self-starts `pnpm dev` and the app self-migrates,

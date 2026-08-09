@@ -15,11 +15,21 @@ interface Fixtures {
 }
 
 export const test = base.extend<Fixtures>({
-  dashboardPage:    async ({ page }, use) => { await use(new DashboardPage(page)); },
-  newClientPage:    async ({ page }, use) => { await use(new NewClientPage(page)); },
-  newInvoicePage:   async ({ page }, use) => { await use(new NewInvoicePage(page)); },
-  invoiceDetailPage: async ({ page }, use) => { await use(new InvoiceDetailPage(page)); },
-  reportingPage:    async ({ page }, use) => { await use(new ReportingPage(page)); },
+  dashboardPage: async ({ page }, use) => {
+    await use(new DashboardPage(page));
+  },
+  newClientPage: async ({ page }, use) => {
+    await use(new NewClientPage(page));
+  },
+  newInvoicePage: async ({ page }, use) => {
+    await use(new NewInvoicePage(page));
+  },
+  invoiceDetailPage: async ({ page }, use) => {
+    await use(new InvoiceDetailPage(page));
+  },
+  reportingPage: async ({ page }, use) => {
+    await use(new ReportingPage(page));
+  },
 
   testClient: async ({ page, request }, use) => {
     const rawId = test.info().testId.replace(/\s+/g, '-');

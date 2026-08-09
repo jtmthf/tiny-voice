@@ -32,7 +32,9 @@ describe('SqliteOutbox', () => {
   it('enqueues a row and drains it via the handler, deleting on success', async () => {
     outbox.enqueue('Foo', { value: 42 });
 
-    const rowsBeforeDrain = db.prepare<OutboxRow>('SELECT event_name FROM outbox ORDER BY id').all();
+    const rowsBeforeDrain = db
+      .prepare<OutboxRow>('SELECT event_name FROM outbox ORDER BY id')
+      .all();
     expect(rowsBeforeDrain).toHaveLength(1);
 
     const received: { name: string; value: number }[] = [];

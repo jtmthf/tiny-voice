@@ -15,9 +15,7 @@ export const arbMoney = fc
   .bigInt({ min: 1n, max: 1_000_000_00n }) // 1 cent to $1M
   .map((cents) => Money.fromCents(cents));
 
-export const arbTaxRate = fc
-  .integer({ min: 0, max: 1000 })
-  .map((n) => (n / 1000) as TaxRate);
+export const arbTaxRate = fc.integer({ min: 0, max: 1000 }).map((n) => (n / 1000) as TaxRate);
 
 export const arbDueDate = fc
   .date({ min: new Date('2020-01-01'), max: new Date('2030-12-31') })

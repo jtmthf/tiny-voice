@@ -3,7 +3,11 @@ import { createRouter, ErrorComponent } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 
 function PendingComponent() {
-  return <div className="loading" role="status" aria-live="polite">Loading…</div>;
+  return (
+    <div className="loading" role="status" aria-live="polite">
+      Loading…
+    </div>
+  );
 }
 
 export function getRouter() {

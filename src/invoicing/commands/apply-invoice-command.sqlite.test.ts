@@ -42,7 +42,9 @@ describe('applyInvoiceCommand (real SQLite outbox)', () => {
 
   it('commits the aggregate, publishes the event, and empties the outbox', async () => {
     const published: InvoicingEventMap['InvoiceSent'][] = [];
-    eventBus.subscribe('InvoiceSent', (e) => { published.push(e); });
+    eventBus.subscribe('InvoiceSent', (e) => {
+      published.push(e);
+    });
 
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);
@@ -70,10 +72,8 @@ describe('applyInvoiceCommand (real SQLite outbox)', () => {
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);
 
-    await applyInvoiceCommand(
-      { db, repo, outbox, eventBus },
-      { invoiceId: invoice.id },
-      (inv) => sendInvoice(inv, NOW),
+    await applyInvoiceCommand({ db, repo, outbox, eventBus }, { invoiceId: invoice.id }, (inv) =>
+      sendInvoice(inv, NOW),
     ).catch(() => {
       /* deliberately not asserting reject/resolve here — see plan 004 */
     });
@@ -143,7 +143,9 @@ describe('applyInvoiceCommand (real SQLite outbox)', () => {
     // the same event; the projection must not double-apply it.
     await outbox.drain(
       (eventName, payload) => eventBus.publish(eventName, payload),
-      () => { /* ignore */ },
+      () => {
+        /* ignore */
+      },
     );
 
     const rowsAfterSecondDrain = db.prepare<OutboxRow>('SELECT event_name FROM outbox').all();

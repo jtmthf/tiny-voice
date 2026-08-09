@@ -12,8 +12,12 @@ describe('InProcessEventBus', () => {
     const bus = new InProcessEventBus<TestEvents>();
     const calls: string[] = [];
 
-    bus.subscribe('userCreated', (p) => { calls.push(`first:${p.name}`); });
-    bus.subscribe('userCreated', (p) => { calls.push(`second:${p.name}`); });
+    bus.subscribe('userCreated', (p) => {
+      calls.push(`first:${p.name}`);
+    });
+    bus.subscribe('userCreated', (p) => {
+      calls.push(`second:${p.name}`);
+    });
 
     await bus.publish('userCreated', { id: '1', name: 'Alice' });
 
@@ -24,7 +28,9 @@ describe('InProcessEventBus', () => {
     const bus = new InProcessEventBus<TestEvents>();
     const calls: string[] = [];
 
-    const unsub = bus.subscribe('userCreated', () => { calls.push('called'); });
+    const unsub = bus.subscribe('userCreated', () => {
+      calls.push('called');
+    });
     unsub();
 
     await bus.publish('userCreated', { id: '1', name: 'Bob' });
@@ -35,10 +41,16 @@ describe('InProcessEventBus', () => {
     const bus = new InProcessEventBus<TestEvents>();
     const calls: string[] = [];
 
-    bus.subscribe('userCreated', () => { throw new Error('boom'); });
-    bus.subscribe('userCreated', (p) => { calls.push(p.name); });
+    bus.subscribe('userCreated', () => {
+      throw new Error('boom');
+    });
+    bus.subscribe('userCreated', (p) => {
+      calls.push(p.name);
+    });
 
-    await expect(bus.publish('userCreated', { id: '1', name: 'Charlie' })).rejects.toThrow(AggregateError);
+    await expect(bus.publish('userCreated', { id: '1', name: 'Charlie' })).rejects.toThrow(
+      AggregateError,
+    );
 
     // Second subscriber still ran
     expect(calls).toEqual(['Charlie']);

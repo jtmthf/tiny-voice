@@ -30,8 +30,8 @@ Adding one read query today means editing three files in lockstep: the
 `AppDeps['queries']` type in `app-deps.ts`, the wiring literal in
 `build-app.ts` (`createQueries`), and a second, hand-maintained copy of that
 same literal in `build-test-app.ts`. The two copies are only linked by the
-shared type — the test app could silently wire a query to a *different
-implementation* than production and still typecheck. For a repo whose thesis
+shared type — the test app could silently wire a query to a _different
+implementation_ than production and still typecheck. For a repo whose thesis
 is "agents follow rails," a convention that says "now repeat yourself in a
 second file and don't drift" is the anti-pattern. One shared factory removes
 the duplicated literal and reduces the lockstep to two files (type + factory).
@@ -48,7 +48,11 @@ the duplicated literal and reduces the lockstep to two files (type + factory).
 ```ts
 function createQueries(
   overrides: Partial<AppDeps>,
-  deps: { clientRepo: ClientRepository; invoiceRepo: InvoiceRepository; revenueReadModel: RevenueReadModel },
+  deps: {
+    clientRepo: ClientRepository;
+    invoiceRepo: InvoiceRepository;
+    revenueReadModel: RevenueReadModel;
+  },
 ): AppDeps['queries'] {
   if (overrides.queries) return overrides.queries;
   return {
@@ -60,9 +64,12 @@ function createQueries(
       getInvoiceSummary: (id) => getInvoiceSummary({ repo: deps.invoiceRepo }, id),
       // ... getInvoiceLineItems, getInvoicePayments,
       listInvoices: (filters) => listInvoiceSummaries({ repo: deps.invoiceRepo }, filters),
-      getOutstandingByClient: (clientId) => getOutstandingByClient({ repo: deps.invoiceRepo }, clientId),
+      getOutstandingByClient: (clientId) =>
+        getOutstandingByClient({ repo: deps.invoiceRepo }, clientId),
     },
-    reporting: { /* getRevenueByMonth, getRevenueByYear, listAllRevenue */ },
+    reporting: {
+      /* getRevenueByMonth, getRevenueByYear, listAllRevenue */
+    },
   };
 }
 ```
@@ -81,13 +88,13 @@ function createQueries(
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Typecheck | `pnpm typecheck` | exit 0 |
-| Lint | `pnpm lint` | exit 0 |
-| Dep rules | `pnpm deps` | exit 0 |
-| App suite | `pnpm vitest run src/app` | all pass |
-| Full suite | `pnpm test` | exit 0 (Node 24) |
+| Purpose    | Command                   | Expected on success |
+| ---------- | ------------------------- | ------------------- |
+| Typecheck  | `pnpm typecheck`          | exit 0              |
+| Lint       | `pnpm lint`               | exit 0              |
+| Dep rules  | `pnpm deps`               | exit 0              |
+| App suite  | `pnpm vitest run src/app` | all pass            |
+| Full suite | `pnpm test`               | exit 0 (Node 24)    |
 
 ## Scope
 

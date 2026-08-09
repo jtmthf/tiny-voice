@@ -25,7 +25,9 @@ describe('EnvConfig', () => {
   });
 
   it('fails fast on malformed values', () => {
-    expect(() => new EnvConfig({ ...VALID_ENV, LOG_LEVEL: 'verbose' })).toThrow('Invalid configuration');
+    expect(() => new EnvConfig({ ...VALID_ENV, LOG_LEVEL: 'verbose' })).toThrow(
+      'Invalid configuration',
+    );
   });
 
   it('parses LATE_FEES_ENABLED as boolean', () => {

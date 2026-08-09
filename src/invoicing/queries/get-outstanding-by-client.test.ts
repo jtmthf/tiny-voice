@@ -2,7 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { newClientId } from '@/shared/ids/client-id';
 import { Money } from '@/shared/money/money';
 import { InMemoryInvoiceRepo } from '../adapters/in-memory-invoice-repo';
-import { buildDraftInvoice, buildSentInvoice, buildPaidInvoice, buildLineItem, buildPayment } from '../testing/invoice-factory';
+import {
+  buildDraftInvoice,
+  buildSentInvoice,
+  buildPaidInvoice,
+  buildLineItem,
+  buildPayment,
+} from '../testing/invoice-factory';
 import { recordPayment } from '../entities/invoice';
 import { getOutstandingByClient } from './get-outstanding-by-client';
 import { expectOk } from '@/shared/testing/expect-ok';
@@ -23,7 +29,10 @@ describe('getOutstandingByClient', () => {
     repo.save(draft);
 
     // Sent with partial payment — should be included
-    const sent = { ...buildSentInvoice({ lineItems: [buildLineItem({ unitPrice: Money.fromCents(10000n) })] }), clientId };
+    const sent = {
+      ...buildSentInvoice({ lineItems: [buildLineItem({ unitPrice: Money.fromCents(10000n) })] }),
+      clientId,
+    };
     const payment = buildPayment({ amount: Money.fromCents(3000n) });
     const sentWithPayment = expectOk(recordPayment(sent, payment)).aggregate;
     repo.save(sentWithPayment);
@@ -41,8 +50,14 @@ describe('getOutstandingByClient', () => {
     const repo = new InMemoryInvoiceRepo();
     const clientId = newClientId();
 
-    const sent1 = { ...buildSentInvoice({ lineItems: [buildLineItem({ unitPrice: Money.fromCents(5000n) })] }), clientId };
-    const sent2 = { ...buildSentInvoice({ lineItems: [buildLineItem({ unitPrice: Money.fromCents(7000n) })] }), clientId };
+    const sent1 = {
+      ...buildSentInvoice({ lineItems: [buildLineItem({ unitPrice: Money.fromCents(5000n) })] }),
+      clientId,
+    };
+    const sent2 = {
+      ...buildSentInvoice({ lineItems: [buildLineItem({ unitPrice: Money.fromCents(7000n) })] }),
+      clientId,
+    };
     repo.save(sent1);
     repo.save(sent2);
 

@@ -15,10 +15,14 @@ function ClientsPage() {
     <>
       <div className="flex-between">
         <h1>Clients</h1>
-        <Link to="/clients/new" className="btn btn-primary">New Client</Link>
+        <Link to="/clients/new" className="btn btn-primary">
+          New Client
+        </Link>
       </div>
       {clients.length === 0 ? (
-        <p role="status" className="empty">No clients yet. <Link to="/clients/new">Add one</Link>.</p>
+        <p role="status" className="empty">
+          No clients yet. <Link to="/clients/new">Add one</Link>.
+        </p>
       ) : (
         <table>
           <thead>
@@ -31,7 +35,11 @@ function ClientsPage() {
           <tbody>
             {clients.map((c) => (
               <tr key={c.id}>
-                <td><Link to="/clients/$id" params={{ id: c.id }}>{c.name}</Link></td>
+                <td>
+                  <Link to="/clients/$id" params={{ id: c.id }}>
+                    {c.name}
+                  </Link>
+                </td>
                 <td>{c.email}</td>
                 <td>{formatDate(new Date(c.createdAt))}</td>
               </tr>

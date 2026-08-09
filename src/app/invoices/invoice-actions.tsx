@@ -86,10 +86,15 @@ export function InvoiceActions({ invoiceId, status, showLateFeeButton, onSuccess
           <form
             action={sendInvoiceFn.url}
             method="POST"
-            onSubmit={(e) => { e.preventDefault(); sendMutation.mutate(); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendMutation.mutate();
+            }}
           >
             <input type="hidden" name="invoiceId" value={invoiceId} />
-            <button type="submit" className="btn-primary" disabled={isPending}>Send Invoice</button>
+            <button type="submit" className="btn-primary" disabled={isPending}>
+              Send Invoice
+            </button>
           </form>
         )}
 
@@ -107,10 +112,20 @@ export function InvoiceActions({ invoiceId, status, showLateFeeButton, onSuccess
             <input type="hidden" name="invoiceId" value={invoiceId} />
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'end' }}>
               <div className="form-group" style={{ margin: 0 }}>
-                <label htmlFor="amountCents" className="text-xs">Amount (cents)</label>
-                <input id="amountCents" name="amountCents" type="number" min="1" style={{ width: '120px' }} />
+                <label htmlFor="amountCents" className="text-xs">
+                  Amount (cents)
+                </label>
+                <input
+                  id="amountCents"
+                  name="amountCents"
+                  type="number"
+                  min="1"
+                  style={{ width: '120px' }}
+                />
               </div>
-              <button type="submit" className="btn-primary" disabled={isPending}>Record Payment</button>
+              <button type="submit" className="btn-primary" disabled={isPending}>
+                Record Payment
+              </button>
             </div>
           </form>
         )}
@@ -119,10 +134,15 @@ export function InvoiceActions({ invoiceId, status, showLateFeeButton, onSuccess
           <form
             action={calculateLateFeeFn.url}
             method="POST"
-            onSubmit={(e) => { e.preventDefault(); lateFeeMutation.mutate(); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              lateFeeMutation.mutate();
+            }}
           >
             <input type="hidden" name="invoiceId" value={invoiceId} />
-            <button type="submit" disabled={isPending}>Calculate Late Fee</button>
+            <button type="submit" disabled={isPending}>
+              Calculate Late Fee
+            </button>
           </form>
         )}
 
@@ -130,24 +150,38 @@ export function InvoiceActions({ invoiceId, status, showLateFeeButton, onSuccess
           <form
             action={voidInvoiceFn.url}
             method="POST"
-            onSubmit={(e) => { e.preventDefault(); voidMutation.mutate(); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              voidMutation.mutate();
+            }}
           >
             <input type="hidden" name="invoiceId" value={invoiceId} />
-            <button type="submit" className="btn-danger" disabled={isPending}>Void</button>
+            <button type="submit" className="btn-danger" disabled={isPending}>
+              Void
+            </button>
           </form>
         )}
 
         <form
           action={generatePdfFn.url}
           method="POST"
-          onSubmit={(e) => { e.preventDefault(); pdfMutation.mutate(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            pdfMutation.mutate();
+          }}
         >
           <input type="hidden" name="invoiceId" value={invoiceId} />
-          <button type="submit" disabled={isPending}>Generate PDF</button>
+          <button type="submit" disabled={isPending}>
+            Generate PDF
+          </button>
         </form>
       </div>
 
-      {errorMessage && <p className="error-message" role="alert">{errorMessage}</p>}
+      {errorMessage && (
+        <p className="error-message" role="alert">
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 }

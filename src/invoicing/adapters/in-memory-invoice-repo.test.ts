@@ -1,11 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { InMemoryInvoiceRepo } from './in-memory-invoice-repo';
-import {
-  buildDraftInvoice,
-  buildSentInvoice,
-  buildLineItem,
-} from '../testing/invoice-factory';
+import { buildDraftInvoice, buildSentInvoice, buildLineItem } from '../testing/invoice-factory';
 import { addLineItem } from '../entities/invoice';
 import { expectOk } from '@/shared/testing/expect-ok';
 

@@ -23,11 +23,15 @@ function InvoicesPage() {
     <>
       <div className="flex-between">
         <h1>Invoices</h1>
-        <Link to="/invoices/new" className="btn btn-primary">New Invoice</Link>
+        <Link to="/invoices/new" className="btn btn-primary">
+          New Invoice
+        </Link>
       </div>
       <InvoiceFilter current={status} />
       {invoices.length === 0 ? (
-        <p role="status" className="empty">No invoices found.</p>
+        <p role="status" className="empty">
+          No invoices found.
+        </p>
       ) : (
         <table>
           <thead>
@@ -46,13 +50,21 @@ function InvoicesPage() {
               <tr key={inv.id}>
                 <td>
                   <Link to="/invoices/$id" params={{ id: inv.id }}>
-                    {inv.id.slice(0, 8)}...<span className="sr-only">, {inv.status}, {Money.toDisplayString(Money.fromCents(BigInt(inv.total.cents)))}</span>
+                    {inv.id.slice(0, 8)}...
+                    <span className="sr-only">
+                      , {inv.status},{' '}
+                      {Money.toDisplayString(Money.fromCents(BigInt(inv.total.cents)))}
+                    </span>
                   </Link>
                 </td>
-                <td><strong className={`badge badge-${inv.status}`}>{inv.status}</strong></td>
+                <td>
+                  <strong className={`badge badge-${inv.status}`}>{inv.status}</strong>
+                </td>
                 <td>{inv.lineItemCount}</td>
                 <td>{Money.toDisplayString(Money.fromCents(BigInt(inv.total.cents)))}</td>
-                <td>{Money.toDisplayString(Money.fromCents(BigInt(inv.outstandingBalance.cents)))}</td>
+                <td>
+                  {Money.toDisplayString(Money.fromCents(BigInt(inv.outstandingBalance.cents)))}
+                </td>
                 <td>{inv.dueDate}</td>
                 <td>{formatDate(new Date(inv.createdAt))}</td>
               </tr>

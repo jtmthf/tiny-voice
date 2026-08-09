@@ -10,7 +10,7 @@ export function bankersRound(value: bigint, divisor: bigint): bigint {
   }
 
   // Handle sign
-  const negative = (value < 0n) !== (divisor < 0n);
+  const negative = value < 0n !== divisor < 0n;
   const absValue = value < 0n ? -value : value;
   const absDivisor = divisor < 0n ? -divisor : divisor;
 

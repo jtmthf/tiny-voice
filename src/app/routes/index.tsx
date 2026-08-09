@@ -7,10 +7,11 @@ import { Money } from '@/shared/money/money';
 import type { InvoiceSummaryDto } from '@/app/fns/dto';
 
 export const Route = createFileRoute('/')({
-  loader: ({ context }) => Promise.all([
-    context.queryClient.ensureQueryData(clientsQueryOptions()),
-    context.queryClient.ensureQueryData(invoicesQueryOptions()),
-  ]),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(clientsQueryOptions()),
+      context.queryClient.ensureQueryData(invoicesQueryOptions()),
+    ]),
   component: HomePage,
 });
 
@@ -19,7 +20,10 @@ function HomePage() {
   const { data: invoices } = useSuspenseQuery(invoicesQueryOptions());
   const recent = invoices.slice(0, 10);
   const sent = invoices.filter((i) => i.status === 'sent');
-  const totalOutstandingCents = sent.reduce((sum, inv) => sum + BigInt(inv.outstandingBalance.cents), 0n);
+  const totalOutstandingCents = sent.reduce(
+    (sum, inv) => sum + BigInt(inv.outstandingBalance.cents),
+    0n,
+  );
   const totalOutstanding = Money.fromCents(totalOutstandingCents);
 
   return (
@@ -27,16 +31,28 @@ function HomePage() {
       <h1>Dashboard</h1>
       <div className="grid-stats mt-md">
         <div className="stat-card">
-          <div id="stat-clients-label" className="label">Clients</div>
-          <output aria-labelledby="stat-clients-label" className="value">{clients.length}</output>
+          <div id="stat-clients-label" className="label">
+            Clients
+          </div>
+          <output aria-labelledby="stat-clients-label" className="value">
+            {clients.length}
+          </output>
         </div>
         <div className="stat-card">
-          <div id="stat-invoices-label" className="label">Total Invoices</div>
-          <output aria-labelledby="stat-invoices-label" className="value">{invoices.length}</output>
+          <div id="stat-invoices-label" className="label">
+            Total Invoices
+          </div>
+          <output aria-labelledby="stat-invoices-label" className="value">
+            {invoices.length}
+          </output>
         </div>
         <div className="stat-card">
-          <div id="stat-outstanding-label" className="label">Outstanding</div>
-          <output aria-labelledby="stat-outstanding-label" className="value">{Money.toDisplayString(totalOutstanding)}</output>
+          <div id="stat-outstanding-label" className="label">
+            Outstanding
+          </div>
+          <output aria-labelledby="stat-outstanding-label" className="value">
+            {Money.toDisplayString(totalOutstanding)}
+          </output>
         </div>
       </div>
       <h2 className="mt-lg">Recent Invoices</h2>
@@ -47,7 +63,11 @@ function HomePage() {
 
 function RecentInvoices({ invoices }: { invoices: InvoiceSummaryDto[] }) {
   if (invoices.length === 0) {
-    return <p role="status" className="empty">No invoices yet. <Link to="/invoices/new">Create one</Link>.</p>;
+    return (
+      <p role="status" className="empty">
+        No invoices yet. <Link to="/invoices/new">Create one</Link>.
+      </p>
+    );
   }
   return (
     <table>
@@ -65,10 +85,15 @@ function RecentInvoices({ invoices }: { invoices: InvoiceSummaryDto[] }) {
           <tr key={inv.id}>
             <td>
               <Link to="/invoices/$id" params={{ id: inv.id }}>
-                {inv.id.slice(0, 8)}...<span className="sr-only">, {inv.status}, {Money.toDisplayString(Money.fromCents(BigInt(inv.total.cents)))}</span>
+                {inv.id.slice(0, 8)}...
+                <span className="sr-only">
+                  , {inv.status}, {Money.toDisplayString(Money.fromCents(BigInt(inv.total.cents)))}
+                </span>
               </Link>
             </td>
-            <td><span className={`badge badge-${inv.status}`}>{inv.status}</span></td>
+            <td>
+              <span className={`badge badge-${inv.status}`}>{inv.status}</span>
+            </td>
             <td>{Money.toDisplayString(Money.fromCents(BigInt(inv.total.cents)))}</td>
             <td>{Money.toDisplayString(Money.fromCents(BigInt(inv.outstandingBalance.cents)))}</td>
             <td>{formatDate(new Date(inv.createdAt))}</td>

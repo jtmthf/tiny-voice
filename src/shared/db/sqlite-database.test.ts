@@ -55,9 +55,9 @@ describe('SqliteDatabase', () => {
     db.exec('CREATE TABLE parent (id INTEGER PRIMARY KEY)');
     db.exec('CREATE TABLE child (id INTEGER PRIMARY KEY, parent_id INTEGER REFERENCES parent(id))');
 
-    expect(() =>
-      db.prepare('INSERT INTO child (parent_id) VALUES (?)').run(999),
-    ).toThrow(/FOREIGN KEY/);
+    expect(() => db.prepare('INSERT INTO child (parent_id) VALUES (?)').run(999)).toThrow(
+      /FOREIGN KEY/,
+    );
   });
 
   it('uses WAL journal mode', () => {

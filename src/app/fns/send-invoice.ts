@@ -14,10 +14,18 @@ export function parseSendInvoiceInput(data: unknown): SendInvoiceInput {
   return SendInvoiceInput.parse(raw);
 }
 
-export async function sendInvoiceHandler(data: SendInvoiceInput): Promise<{ error: string | null }> {
+export async function sendInvoiceHandler(
+  data: SendInvoiceInput,
+): Promise<{ error: string | null }> {
   const app = getAppInstance();
   const result = await applyInvoiceCommand(
-    { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus, logger: app.logger },
+    {
+      db: app.db,
+      repo: app.invoiceRepo,
+      outbox: app.outbox,
+      eventBus: app.eventBus,
+      logger: app.logger,
+    },
     { invoiceId: data.invoiceId },
     (invoice) => sendInvoice(invoice, app.clock.now()),
   );

@@ -15,9 +15,7 @@ describe('parseBracketNotation', () => {
       clientId: 'client-1',
       taxRate: '10',
       dueDate: '2025-02-01',
-      lineItems: [
-        { description: 'Consulting', quantity: '2', unitPriceCents: '1000' },
-      ],
+      lineItems: [{ description: 'Consulting', quantity: '2', unitPriceCents: '1000' }],
     });
   });
 

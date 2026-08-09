@@ -164,7 +164,14 @@ export class SqliteInvoiceRepo implements InvoiceRepository {
         'INSERT INTO line_items (id, invoice_id, description, quantity, unit_price_cents, kind) VALUES (?, ?, ?, ?, ?, ?)',
       );
       for (const li of invoice.lineItems) {
-        insertLineItem.run(toDb(li.id), rawId, li.description, li.quantity, li.unitPrice.cents.toString(), li.kind);
+        insertLineItem.run(
+          toDb(li.id),
+          rawId,
+          li.description,
+          li.quantity,
+          li.unitPrice.cents.toString(),
+          li.kind,
+        );
       }
 
       // Insert only new payments (append-only).
@@ -180,7 +187,12 @@ export class SqliteInvoiceRepo implements InvoiceRepository {
       );
       for (const p of invoice.payments) {
         if (!existingPaymentIds.has(toDb(p.id))) {
-          insertPayment.run(toDb(p.id), rawId, p.amount.cents.toString(), p.recordedAt.toISOString());
+          insertPayment.run(
+            toDb(p.id),
+            rawId,
+            p.amount.cents.toString(),
+            p.recordedAt.toISOString(),
+          );
         }
       }
 
@@ -232,7 +244,10 @@ export class SqliteInvoiceRepo implements InvoiceRepository {
     });
   }
 
-  listSummaries(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly InvoiceListItem[] {
+  listSummaries(filters?: {
+    status?: InvoiceStatus;
+    clientId?: ClientId;
+  }): readonly InvoiceListItem[] {
     const conditions: string[] = [];
     const params: unknown[] = [];
 
@@ -258,17 +273,19 @@ export class SqliteInvoiceRepo implements InvoiceRepository {
 
     const rows = this.db.prepare<SummaryRow>(sql).all(...params);
 
-    return rows.map((row): InvoiceListItem => ({
-      id: fromDb('inv', row.id),
-      clientId: fromDb('client', row.client_id),
-      status: InvoiceStatusSchema.parse(row.status),
-      taxRate: TaxRateSchema.parse(row.tax_rate),
-      dueDate: DueDateSchema.parse(row.due_date),
-      createdAt: new Date(row.created_at),
-      lineItemCount: row.line_item_count,
-      subtotalCents: BigInt(row.subtotal_cents ?? '0'),
-      paidAmountCents: BigInt(row.paid_amount_cents ?? '0'),
-    }));
+    return rows.map(
+      (row): InvoiceListItem => ({
+        id: fromDb('inv', row.id),
+        clientId: fromDb('client', row.client_id),
+        status: InvoiceStatusSchema.parse(row.status),
+        taxRate: TaxRateSchema.parse(row.tax_rate),
+        dueDate: DueDateSchema.parse(row.due_date),
+        createdAt: new Date(row.created_at),
+        lineItemCount: row.line_item_count,
+        subtotalCents: BigInt(row.subtotal_cents ?? '0'),
+        paidAmountCents: BigInt(row.paid_amount_cents ?? '0'),
+      }),
+    );
   }
 
   delete(id: InvoiceId): void {

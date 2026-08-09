@@ -27,7 +27,7 @@
 
 The refactor that collapsed `src/invoicing/commands/*` into
 `applyInvoiceCommand` deleted the per-command test files, and with them every
-assertion on *which* domain error a disallowed transition returns.
+assertion on _which_ domain error a disallowed transition returns.
 `grep -rn "InvalidTransition" src --include='*.test.ts'` returns **zero**
 matches today. This is the money-critical state machine: a regression that
 loosens a guard (late fee on a paid invoice, re-send of a sent invoice) would
@@ -52,23 +52,23 @@ export function addLineItem(invoice: Invoice, item: LineItem): Result<InvoiceOut
 
 ```ts
 // invoice.ts:151-159 — sendInvoice (the pattern the others follow)
-  if (invoice.status === 'void') return err(IE.invoiceVoided());
-  if (invoice.status === 'paid') return err(IE.alreadyPaid());
-  if (invoice.status !== 'draft') {
-    return err(IE.invalidTransition(invoice.status, 'sent'));
-  }
-  if (invoice.lineItems.length === 0) {
-    return err(IE.noLineItems());
-  }
+if (invoice.status === 'void') return err(IE.invoiceVoided());
+if (invoice.status === 'paid') return err(IE.alreadyPaid());
+if (invoice.status !== 'draft') {
+  return err(IE.invalidTransition(invoice.status, 'sent'));
+}
+if (invoice.lineItems.length === 0) {
+  return err(IE.noLineItems());
+}
 ```
 
-  `recordPayment` (lines 184-197): void → `InvoiceVoided`, paid →
-  `AlreadyPaid`, not-sent → `InvalidTransition`, overpayment → `Overpayment`.
-  `addLateFee` (lines 225-240): void → `InvoiceVoided`, paid → `AlreadyPaid`,
-  not-sent → `InvalidTransition`, existing lateFee item →
-  `LateFeeAlreadyApplied`, not overdue → `NotOverdue`.
-  `voidInvoice` (lines 255-260): void → `InvoiceVoided`, paid → `AlreadyPaid`,
-  otherwise allowed from draft and sent.
+`recordPayment` (lines 184-197): void → `InvoiceVoided`, paid →
+`AlreadyPaid`, not-sent → `InvalidTransition`, overpayment → `Overpayment`.
+`addLateFee` (lines 225-240): void → `InvoiceVoided`, paid → `AlreadyPaid`,
+not-sent → `InvalidTransition`, existing lateFee item →
+`LateFeeAlreadyApplied`, not overdue → `NotOverdue`.
+`voidInvoice` (lines 255-260): void → `InvoiceVoided`, paid → `AlreadyPaid`,
+otherwise allowed from draft and sent.
 
 - `src/invoicing/errors/invoice-error.ts` — the `InvoiceError` discriminated
   union; every variant has a `kind` string (e.g. `'InvalidTransition'`,
@@ -93,12 +93,12 @@ entity.
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Typecheck | `pnpm typecheck` | exit 0 |
-| Lint | `pnpm lint` | exit 0 |
-| New suite | `pnpm vitest run src/invoicing/entities/invoice-transitions.test.ts` | all pass |
-| Full suite | `pnpm test` | exit 0 (Node 24) |
+| Purpose    | Command                                                              | Expected on success |
+| ---------- | -------------------------------------------------------------------- | ------------------- |
+| Typecheck  | `pnpm typecheck`                                                     | exit 0              |
+| Lint       | `pnpm lint`                                                          | exit 0              |
+| New suite  | `pnpm vitest run src/invoicing/entities/invoice-transitions.test.ts` | all pass            |
+| Full suite | `pnpm test`                                                          | exit 0 (Node 24)    |
 
 ## Scope
 
@@ -158,22 +158,22 @@ valid arguments (e.g. `addLineItem(invoice, buildLineItem())`,
 `voidInvoice(invoice, NOW)`), assert `result.isErr()` and
 `result.error.kind === expected`. The full disallowed matrix:
 
-| start | operation | expected kind |
-|---|---|---|
-| sent | addLineItem | InvalidTransition |
-| paid | addLineItem | AlreadyPaid *(after Step 1)* |
-| void | addLineItem | InvoiceVoided |
-| sent | sendInvoice | InvalidTransition |
-| paid | sendInvoice | AlreadyPaid |
-| void | sendInvoice | InvoiceVoided |
-| draft | recordPayment | InvalidTransition |
-| paid | recordPayment | AlreadyPaid |
-| void | recordPayment | InvoiceVoided |
-| draft | addLateFee | InvalidTransition |
-| paid | addLateFee | AlreadyPaid |
-| void | addLateFee | InvoiceVoided |
-| paid | voidInvoice | AlreadyPaid |
-| void | voidInvoice | InvoiceVoided |
+| start | operation     | expected kind                |
+| ----- | ------------- | ---------------------------- |
+| sent  | addLineItem   | InvalidTransition            |
+| paid  | addLineItem   | AlreadyPaid _(after Step 1)_ |
+| void  | addLineItem   | InvoiceVoided                |
+| sent  | sendInvoice   | InvalidTransition            |
+| paid  | sendInvoice   | AlreadyPaid                  |
+| void  | sendInvoice   | InvoiceVoided                |
+| draft | recordPayment | InvalidTransition            |
+| paid  | recordPayment | AlreadyPaid                  |
+| void  | recordPayment | InvoiceVoided                |
+| draft | addLateFee    | InvalidTransition            |
+| paid  | addLateFee    | AlreadyPaid                  |
+| void  | addLateFee    | InvoiceVoided                |
+| paid  | voidInvoice   | AlreadyPaid                  |
+| void  | voidInvoice   | InvoiceVoided                |
 
 Plus the non-status guards, as individual `it` cases:
 
@@ -224,7 +224,7 @@ kinds, the four non-status guards, and three allowed-path pins.
 Stop and report back (do not improvise) if:
 
 - The guard order in the `invoice.ts` excerpts doesn't match the live file.
-- Any *existing* test fails after Step 1 — something does assert
+- Any _existing_ test fails after Step 1 — something does assert
   `InvalidTransition` for paid `addLineItem`, and the alignment needs a
   human decision.
 - A factory builder produces a shape that makes a matrix case unreachable
@@ -235,7 +235,7 @@ Stop and report back (do not improvise) if:
 - Any new transition added to the aggregate must add its row(s) to this
   matrix — reviewers should treat a transition PR without a matrix update as
   incomplete.
-- The matrix pins error *kinds*, not messages — message wording stays free to
+- The matrix pins error _kinds_, not messages — message wording stays free to
   change.
 - Deferred: property-based generation of the matrix (fast-check over statuses)
   was considered and rejected — the explicit table is more legible as

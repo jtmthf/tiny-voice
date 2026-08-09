@@ -64,9 +64,7 @@ describe('calculateLateFeeLineItem (pure)', () => {
 describe('addLateFee transition', () => {
   it('appends a late-fee line item for an overdue sent invoice and emits no event', () => {
     const sent = buildSentInvoice({ dueDate: '2025-02-15' as DueDate });
-    const outcome = expectOk(
-      addLateFee(sent, '2025-03-15' as DueDate, newLineItemId()),
-    );
+    const outcome = expectOk(addLateFee(sent, '2025-03-15' as DueDate, newLineItemId()));
 
     expect(outcome.aggregate.lineItems.length).toBe(sent.lineItems.length + 1);
     const lateFee = outcome.aggregate.lineItems[outcome.aggregate.lineItems.length - 1]!;

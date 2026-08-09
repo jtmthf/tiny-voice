@@ -9,7 +9,12 @@ const jan = '2025-01' as YearMonth;
 describe('getRevenueByMonth', () => {
   it('returns the monthly revenue for a given month', async () => {
     const readModel = new InMemoryRevenueReadModel();
-    readModel.recordPayment({ paymentId: 'pay_1', month: jan, amount: Money.fromCents(5000n), at: new Date('2025-01-15') });
+    readModel.recordPayment({
+      paymentId: 'pay_1',
+      month: jan,
+      amount: Money.fromCents(5000n),
+      at: new Date('2025-01-15'),
+    });
 
     const result = getRevenueByMonth({ readModel }, jan);
     expect(result).not.toBeNull();

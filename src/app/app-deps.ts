@@ -48,7 +48,10 @@ export interface AppDeps {
       getInvoiceSummary(id: InvoiceId): InvoiceSummary | null;
       getInvoiceLineItems(id: InvoiceId): readonly LineItemSummary[] | null;
       getInvoicePayments(id: InvoiceId): readonly PaymentSummary[] | null;
-      listInvoices(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly InvoiceSummary[];
+      listInvoices(filters?: {
+        status?: InvoiceStatus;
+        clientId?: ClientId;
+      }): readonly InvoiceSummary[];
       getOutstandingByClient(clientId: ClientId): Money;
     };
     readonly reporting: {

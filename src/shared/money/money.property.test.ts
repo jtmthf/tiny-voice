@@ -29,9 +29,7 @@ describe('Money PBT', () => {
 });
 
 describe('bankersRound PBT', () => {
-  fcTest.prop([
-    fc.bigInt({ min: 0n, max: 10000n }),
-  ])('rounds 0.5 to even', (n) => {
+  fcTest.prop([fc.bigInt({ min: 0n, max: 10000n })])('rounds 0.5 to even', (n) => {
     // value = 2n+1, divisor = 2 => quotient n, remainder 1, half
     // If n is even, result should be n; if odd, n+1
     const value = 2n * n + 1n;

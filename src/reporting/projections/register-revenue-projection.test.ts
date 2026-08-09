@@ -10,10 +10,18 @@ import { InMemoryRevenueReadModel } from '../adapters/in-memory-revenue-read-mod
 import { registerRevenueProjection } from './register-revenue-projection';
 
 const SILENT_LOGGER: Logger = {
-  info() { /* noop */ },
-  warn() { /* noop */ },
-  error() { /* noop */ },
-  debug() { /* noop */ },
+  info() {
+    /* noop */
+  },
+  warn() {
+    /* noop */
+  },
+  error() {
+    /* noop */
+  },
+  debug() {
+    /* noop */
+  },
 };
 
 function buildPaymentEvent(overrides?: Partial<InvoicePaymentRecorded>): InvoicePaymentRecorded {
@@ -87,10 +95,7 @@ describe('registerRevenueProjection', () => {
 
     await eventBus.publish('InvoicePaymentRecorded', buildPaymentEvent());
     unsub();
-    await eventBus.publish(
-      'InvoicePaymentRecorded',
-      buildPaymentEvent({ amountCents: '99999' }),
-    );
+    await eventBus.publish('InvoicePaymentRecorded', buildPaymentEvent({ amountCents: '99999' }));
 
     const result = readModel.getByMonth('2025-01' as YearMonth);
     expect(result!.total.cents).toBe(10000n); // only the first event

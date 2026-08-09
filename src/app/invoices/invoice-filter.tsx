@@ -18,7 +18,9 @@ export function InvoiceFilter({ current }: { current: string | undefined }) {
       <label htmlFor="status-filter">Filter by status:</label>
       <select id="status-filter" value={currentStatus} onChange={handleChange}>
         {STATUSES.map((s) => (
-          <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+          <option key={s} value={s}>
+            {s.charAt(0).toUpperCase() + s.slice(1)}
+          </option>
         ))}
       </select>
     </div>

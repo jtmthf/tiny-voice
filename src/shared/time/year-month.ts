@@ -8,7 +8,10 @@ export type YearMonth = string & { readonly __brand: 'YearMonth' };
 
 const YEAR_MONTH_REGEX = /^\d{4}-(?:0[1-9]|1[0-2])$/;
 
-export const YearMonthSchema = z.string().regex(YEAR_MONTH_REGEX, 'Expected YYYY-MM format').transform((val) => val as YearMonth);
+export const YearMonthSchema = z
+  .string()
+  .regex(YEAR_MONTH_REGEX, 'Expected YYYY-MM format')
+  .transform((val) => val as YearMonth);
 
 /**
  * Creates a YearMonth from a Date.

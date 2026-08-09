@@ -90,12 +90,12 @@ Repo conventions that apply:
 
 ## Commands you will need
 
-| Purpose   | Command                                | Expected on success |
-|-----------|----------------------------------------|---------------------|
-| Typecheck | `pnpm typecheck`                       | exit 0              |
-| Lint      | `pnpm lint`                            | exit 0              |
-| One file's tests | `pnpm vitest run src/app/fns/parse-bracket-notation.test.ts` | all pass |
-| Full unit suite | `pnpm test`                      | exit 0 (requires Node 24) |
+| Purpose          | Command                                                      | Expected on success       |
+| ---------------- | ------------------------------------------------------------ | ------------------------- |
+| Typecheck        | `pnpm typecheck`                                             | exit 0                    |
+| Lint             | `pnpm lint`                                                  | exit 0                    |
+| One file's tests | `pnpm vitest run src/app/fns/parse-bracket-notation.test.ts` | all pass                  |
+| Full unit suite  | `pnpm test`                                                  | exit 0 (requires Node 24) |
 
 ## Scope
 

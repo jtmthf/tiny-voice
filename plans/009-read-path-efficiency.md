@@ -57,9 +57,9 @@ const lineItems = app.queries.invoicing.getInvoiceLineItems(data.invoiceId);
 const payments = app.queries.invoicing.getInvoicePayments(data.invoiceId);
 ```
 
-  It then fetches `clientName` via `app.queries.clients.getClient` and maps
-  through DTOs from `src/app/fns/dto.ts` (`invoiceSummaryToDto`,
-  `lineItemToDto`, `paymentToDto`).
+It then fetches `clientName` via `app.queries.clients.getClient` and maps
+through DTOs from `src/app/fns/dto.ts` (`invoiceSummaryToDto`,
+`lineItemToDto`, `paymentToDto`).
 
 - `src/invoicing/queries/get-invoice-summary.ts` — `repo.findById` + derived
   getters (`subtotal`, `taxAmount`, `total`, `paidAmount`,
@@ -112,14 +112,14 @@ const outstanding = Money.subtract(tot, paid);
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Typecheck | `pnpm typecheck` | exit 0 |
-| Lint | `pnpm lint` | exit 0 |
-| Dep rules | `pnpm deps` | exit 0 |
-| Invoicing suite | `pnpm vitest run src/invoicing` | all pass |
-| Full suite | `pnpm test` | exit 0 (Node 24) |
-| E2E smoke (detail page) | `pnpm test:e2e:critical --project=chromium` | all pass |
+| Purpose                 | Command                                     | Expected on success |
+| ----------------------- | ------------------------------------------- | ------------------- |
+| Typecheck               | `pnpm typecheck`                            | exit 0              |
+| Lint                    | `pnpm lint`                                 | exit 0              |
+| Dep rules               | `pnpm deps`                                 | exit 0              |
+| Invoicing suite         | `pnpm vitest run src/invoicing`             | all pass            |
+| Full suite              | `pnpm test`                                 | exit 0 (Node 24)    |
+| E2E smoke (detail page) | `pnpm test:e2e:critical --project=chromium` | all pass            |
 
 ## Scope
 
@@ -164,9 +164,14 @@ export interface InvoiceDetail {
   readonly payments: readonly PaymentSummary[];
 }
 
-export interface GetInvoiceDetailDeps { readonly repo: InvoiceRepository; }
+export interface GetInvoiceDetailDeps {
+  readonly repo: InvoiceRepository;
+}
 
-export function getInvoiceDetail(deps: GetInvoiceDetailDeps, invoiceId: InvoiceId): InvoiceDetail | null
+export function getInvoiceDetail(
+  deps: GetInvoiceDetailDeps,
+  invoiceId: InvoiceId,
+): InvoiceDetail | null;
 ```
 
 One `deps.repo.findById(invoiceId)`; return `null` if absent; otherwise build

@@ -30,7 +30,11 @@ function parseDollarString(dollars: number | string): Result<Money, MoneyError> 
   // Validate format: optional sign, digits, optional decimal with up to 2 places
   const match = /^(-?)(\d+)(?:\.(\d{1,2}))?$/.exec(str.trim());
   if (!match) {
-    return err(invalidInput(`Cannot parse "${str}" as dollars. Use format "12.34" with at most 2 decimal places.`));
+    return err(
+      invalidInput(
+        `Cannot parse "${str}" as dollars. Use format "12.34" with at most 2 decimal places.`,
+      ),
+    );
   }
 
   const [, signStr, wholeStr, fracRaw] = match;

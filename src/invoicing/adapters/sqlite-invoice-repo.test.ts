@@ -5,11 +5,7 @@ import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { Money } from '@/shared/money/money';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import { SqliteInvoiceRepo } from './sqlite-invoice-repo';
-import {
-  buildDraftInvoice,
-  buildSentInvoice,
-  buildLineItem,
-} from '../testing/invoice-factory';
+import { buildDraftInvoice, buildSentInvoice, buildLineItem } from '../testing/invoice-factory';
 import { addLineItem, recordPayment } from '../entities/invoice';
 import { expectOk } from '@/shared/testing/expect-ok';
 

@@ -41,7 +41,9 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
         <select id="clientId" name="clientId" required>
           <option value="">Select a client...</option>
           {clients.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
           ))}
         </select>
       </div>
@@ -49,64 +51,96 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <Field className="form-group">
           <FieldLabel>Tax Rate (%)</FieldLabel>
-          <FieldControl render={(props) => (
-            <input {...props} name="taxRate" type="number" step="0.01" min="0" max="100" defaultValue="0" required />
-          )} />
+          <FieldControl
+            render={(props) => (
+              <input
+                {...props}
+                name="taxRate"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                defaultValue="0"
+                required
+              />
+            )}
+          />
         </Field>
         <Field className="form-group">
           <FieldLabel>Due Date</FieldLabel>
-          <FieldControl render={(props) => (
-            <input {...props} name="dueDate" type="date" required />
-          )} />
+          <FieldControl
+            render={(props) => <input {...props} name="dueDate" type="date" required />}
+          />
         </Field>
       </div>
 
       <h3 className="my-md">Line Items</h3>
       {Array.from({ length: lineItemCount }, (_, i) => (
-        <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
+        <div
+          key={i}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '2fr 1fr 1fr auto',
+            gap: '0.5rem',
+            marginBottom: '0.5rem',
+            alignItems: 'end',
+          }}
+        >
           <Field className="form-group" style={{ margin: 0 }}>
             <FieldLabel hidden={i > 0}>Description</FieldLabel>
-            <FieldControl render={(props) => (
-              <input
-                {...props}
-                name={`lineItems[${i}][description]`}
-                type="text"
-                defaultValue=""
-                placeholder="Description"
-                required
-              />
-            )} />
+            <FieldControl
+              render={(props) => (
+                <input
+                  {...props}
+                  name={`lineItems[${i}][description]`}
+                  type="text"
+                  defaultValue=""
+                  placeholder="Description"
+                  required
+                />
+              )}
+            />
           </Field>
           <Field className="form-group" style={{ margin: 0 }}>
             <FieldLabel hidden={i > 0}>Qty</FieldLabel>
-            <FieldControl render={(props) => (
-              <input
-                {...props}
-                name={`lineItems[${i}][quantity]`}
-                type="number"
-                min="1"
-                defaultValue="1"
-                required
-              />
-            )} />
+            <FieldControl
+              render={(props) => (
+                <input
+                  {...props}
+                  name={`lineItems[${i}][quantity]`}
+                  type="number"
+                  min="1"
+                  defaultValue="1"
+                  required
+                />
+              )}
+            />
           </Field>
           <Field className="form-group" style={{ margin: 0 }}>
             <FieldLabel hidden={i > 0}>Price (cents)</FieldLabel>
-            <FieldControl render={(props) => (
-              <input
-                {...props}
-                name={`lineItems[${i}][unitPriceCents]`}
-                type="number"
-                min="1"
-                defaultValue=""
-                required
-              />
-            )} />
-            {i === 0 && <FieldDescription className="form-hint">e.g. 5000 = $50.00</FieldDescription>}
+            <FieldControl
+              render={(props) => (
+                <input
+                  {...props}
+                  name={`lineItems[${i}][unitPriceCents]`}
+                  type="number"
+                  min="1"
+                  defaultValue=""
+                  required
+                />
+              )}
+            />
+            {i === 0 && (
+              <FieldDescription className="form-hint">e.g. 5000 = $50.00</FieldDescription>
+            )}
           </Field>
-          <button type="button" onClick={() => removeRow(i)} disabled={lineItemCount <= 1 || i !== lineItemCount - 1}
+          <button
+            type="button"
+            onClick={() => removeRow(i)}
+            disabled={lineItemCount <= 1 || i !== lineItemCount - 1}
             aria-label={`Remove line item ${i + 1}`}
-            style={{ marginBottom: i === 0 ? 0 : undefined }}>
+            style={{ marginBottom: i === 0 ? 0 : undefined }}
+          >
             <span aria-hidden="true">&times;</span>
           </button>
         </div>

@@ -14,10 +14,18 @@ export function parseVoidInvoiceInput(data: unknown): VoidInvoiceInput {
   return VoidInvoiceInput.parse(raw);
 }
 
-export async function voidInvoiceHandler(data: VoidInvoiceInput): Promise<{ error: string | null }> {
+export async function voidInvoiceHandler(
+  data: VoidInvoiceInput,
+): Promise<{ error: string | null }> {
   const app = getAppInstance();
   const result = await applyInvoiceCommand(
-    { db: app.db, repo: app.invoiceRepo, outbox: app.outbox, eventBus: app.eventBus, logger: app.logger },
+    {
+      db: app.db,
+      repo: app.invoiceRepo,
+      outbox: app.outbox,
+      eventBus: app.eventBus,
+      logger: app.logger,
+    },
     { invoiceId: data.invoiceId },
     (invoice) => voidInvoice(invoice, app.clock.now()),
   );

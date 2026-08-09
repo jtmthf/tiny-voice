@@ -27,7 +27,8 @@ function InvoiceDetailPage() {
 
   const { summary, lineItems, payments, clientName } = data;
   const today = new Date().toISOString().slice(0, 10) as DueDate;
-  const showLateFeeButton = summary.status === 'sent' && isDueDateOverdue(summary.dueDate as DueDate, today);
+  const showLateFeeButton =
+    summary.status === 'sent' && isDueDateOverdue(summary.dueDate as DueDate, today);
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ['invoices'] });
@@ -35,45 +36,56 @@ function InvoiceDetailPage() {
 
   return (
     <>
-      <Link to="/invoices" search={{ status: undefined }} className="text-sm">&larr; Back to invoices</Link>
+      <Link to="/invoices" search={{ status: undefined }} className="text-sm">
+        &larr; Back to invoices
+      </Link>
       <div className="mt-md">
         <div className="card">
           <div className="flex-between">
             <h2>Invoice {summary.id.slice(0, 8)}...</h2>
-            <span role="status" className={`badge badge-${summary.status}`}>{summary.status}</span>
+            <span role="status" className={`badge badge-${summary.status}`}>
+              {summary.status}
+            </span>
           </div>
           <div className="grid-stats mt-md">
             <div>
               <span className="text-muted text-sm">Subtotal</span>
-              <div className="font-semibold">{Money.toDisplayString(Money.fromCents(BigInt(summary.subtotal.cents)))}</div>
+              <div className="font-semibold">
+                {Money.toDisplayString(Money.fromCents(BigInt(summary.subtotal.cents)))}
+              </div>
             </div>
             <div>
               <span className="text-muted text-sm">Tax</span>
-              <div className="font-semibold">{Money.toDisplayString(Money.fromCents(BigInt(summary.taxAmount.cents)))}</div>
+              <div className="font-semibold">
+                {Money.toDisplayString(Money.fromCents(BigInt(summary.taxAmount.cents)))}
+              </div>
             </div>
             <div>
               <span className="text-muted text-sm">Total</span>
-              <div className="font-semibold">{Money.toDisplayString(Money.fromCents(BigInt(summary.total.cents)))}</div>
+              <div className="font-semibold">
+                {Money.toDisplayString(Money.fromCents(BigInt(summary.total.cents)))}
+              </div>
             </div>
             <div>
               <span className="text-muted text-sm">Paid</span>
-              <div className="font-semibold">{Money.toDisplayString(Money.fromCents(BigInt(summary.paidAmount.cents)))}</div>
+              <div className="font-semibold">
+                {Money.toDisplayString(Money.fromCents(BigInt(summary.paidAmount.cents)))}
+              </div>
             </div>
             <div>
               <span className="text-muted text-sm">Outstanding</span>
-              <div className="font-semibold">{Money.toDisplayString(Money.fromCents(BigInt(summary.outstandingBalance.cents)))}</div>
+              <div className="font-semibold">
+                {Money.toDisplayString(Money.fromCents(BigInt(summary.outstandingBalance.cents)))}
+              </div>
             </div>
           </div>
           <div className="mt-sm text-muted text-sm">
-            Due: {summary.dueDate} &middot; Created: {formatDate(new Date(summary.createdAt))} &middot; {summary.lineItemCount} line item{summary.lineItemCount !== 1 ? 's' : ''}
+            Due: {summary.dueDate} &middot; Created: {formatDate(new Date(summary.createdAt))}{' '}
+            &middot; {summary.lineItemCount} line item{summary.lineItemCount !== 1 ? 's' : ''}
           </div>
         </div>
 
-        {clientName && (
-          <p className="text-muted text-sm">
-            Client: {clientName}
-          </p>
-        )}
+        {clientName && <p className="text-muted text-sm">Client: {clientName}</p>}
 
         <InvoiceActions
           invoiceId={id}

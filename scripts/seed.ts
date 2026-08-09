@@ -28,9 +28,7 @@ function seededId(): string {
   const hex = ts.toString(16).padStart(12, '0');
   const r1 = faker.number.int({ min: 0, max: 0xfff }).toString(16).padStart(3, '0');
   const r2 = faker.number.int({ min: 0, max: 0x3fff });
-  const r3 = faker.number.int({ min: 0, max: 0xffffffffffff })
-    .toString(16)
-    .padStart(12, '0');
+  const r3 = faker.number.int({ min: 0, max: 0xffffffffffff }).toString(16).padStart(12, '0');
   return `${hex.slice(0, 8)}-${hex.slice(8)}-7${r1}-${(0x8000 | r2).toString(16)}-${r3}`;
 }
 
@@ -115,7 +113,9 @@ try {
 
     const existing = db.prepare<{ count: number }>('SELECT COUNT(*) as count FROM clients').get();
     if (existing && existing.count > 0) {
-      logger.info(`Database already has ${existing.count} clients -- skipping seed. Delete the DB to re-seed.`);
+      logger.info(
+        `Database already has ${existing.count} clients -- skipping seed. Delete the DB to re-seed.`,
+      );
       process.exit(0);
     }
 
@@ -132,13 +132,14 @@ try {
         const lastName = faker.person.lastName();
         const domain = faker.internet.domainName();
         const email = faker.internet.email({ firstName, lastName, provider: domain }).toLowerCase();
-        const createdAt = isoDate(
-          faker.date.between({ from: '2025-01-01', to: '2025-03-01' }),
-        );
+        const createdAt = isoDate(faker.date.between({ from: '2025-01-01', to: '2025-03-01' }));
 
-        db.prepare(
-          'INSERT INTO clients (id, name, email, created_at) VALUES (?, ?, ?, ?)',
-        ).run(id, companyName, email, createdAt);
+        db.prepare('INSERT INTO clients (id, name, email, created_at) VALUES (?, ?, ?, ?)').run(
+          id,
+          companyName,
+          email,
+          createdAt,
+        );
       }
       logger.info(`  -> ${clientIds.length} clients`);
 
@@ -195,7 +196,13 @@ try {
         for (const item of items) {
           db.prepare(
             'INSERT INTO line_items (id, invoice_id, description, quantity, unit_price_cents) VALUES (?, ?, ?, ?, ?)',
-          ).run(item.id, invoiceId, item.description, item.quantity, item.unitPriceCents.toString());
+          ).run(
+            item.id,
+            invoiceId,
+            item.description,
+            item.quantity,
+            item.unitPriceCents.toString(),
+          );
         }
       }
       logger.info(`  -> ${invoices.length} invoices`);
@@ -217,7 +224,10 @@ try {
 
         if (invoice.status === 'paid') {
           // 1-3 payments summing to exact total
-          const numPayments = faker.number.int({ min: 1, max: Math.min(3, invoice.lineItems.length) });
+          const numPayments = faker.number.int({
+            min: 1,
+            max: Math.min(3, invoice.lineItems.length),
+          });
           let remaining = totalCents;
 
           for (let p = 0; p < numPayments; p++) {
@@ -227,10 +237,7 @@ try {
               : (remaining * BigInt(faker.number.int({ min: 30, max: 70 }))) / 100n;
             remaining -= amountCents;
 
-            const recordedAt = addDays(
-              invoice.createdAt,
-              faker.number.int({ min: 1, max: 45 }),
-            );
+            const recordedAt = addDays(invoice.createdAt, faker.number.int({ min: 1, max: 45 }));
 
             db.prepare(
               'INSERT INTO payments (id, invoice_id, amount_cents, recorded_at) VALUES (?, ?, ?, ?)',
@@ -245,12 +252,8 @@ try {
           }
         } else if (invoice.status === 'sent' && faker.datatype.boolean(0.4)) {
           // 40% of sent invoices have a partial payment
-          const partialCents =
-            (totalCents * BigInt(faker.number.int({ min: 20, max: 80 }))) / 100n;
-          const recordedAt = addDays(
-            invoice.createdAt,
-            faker.number.int({ min: 5, max: 30 }),
-          );
+          const partialCents = (totalCents * BigInt(faker.number.int({ min: 20, max: 80 }))) / 100n;
+          const recordedAt = addDays(invoice.createdAt, faker.number.int({ min: 5, max: 30 }));
 
           db.prepare(
             'INSERT INTO payments (id, invoice_id, amount_cents, recorded_at) VALUES (?, ?, ?, ?)',

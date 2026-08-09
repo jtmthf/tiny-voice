@@ -38,9 +38,7 @@ export class SqliteRevenueReadModel implements RevenueReadModel {
         .run(input.paymentId, input.month, input.at.toISOString());
 
       const existing = this.db
-        .prepare<RevenueRow>(
-          'SELECT * FROM revenue_by_month WHERE month = ? AND currency = ?',
-        )
+        .prepare<RevenueRow>('SELECT * FROM revenue_by_month WHERE month = ? AND currency = ?')
         .get(input.month, input.amount.currency);
 
       if (existing) {
@@ -51,12 +49,7 @@ export class SqliteRevenueReadModel implements RevenueReadModel {
              SET total_cents = ?, payment_count = payment_count + 1, updated_at = ?
              WHERE month = ? AND currency = ?`,
           )
-          .run(
-            newTotal.toString(),
-            input.at.toISOString(),
-            input.month,
-            input.amount.currency,
-          );
+          .run(newTotal.toString(), input.at.toISOString(), input.month, input.amount.currency);
       } else {
         this.db
           .prepare(

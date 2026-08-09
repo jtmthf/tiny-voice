@@ -43,18 +43,23 @@ export class InMemoryInvoiceRepo implements InvoiceRepository {
     this.store.delete(id);
   }
 
-  listSummaries(filters?: { status?: InvoiceStatus; clientId?: ClientId }): readonly InvoiceListItem[] {
+  listSummaries(filters?: {
+    status?: InvoiceStatus;
+    clientId?: ClientId;
+  }): readonly InvoiceListItem[] {
     const invoices = this.list(filters);
-    return invoices.map((inv): InvoiceListItem => ({
-      id: inv.id,
-      clientId: inv.clientId,
-      status: inv.status,
-      taxRate: inv.taxRate,
-      dueDate: inv.dueDate,
-      createdAt: inv.createdAt,
-      lineItemCount: inv.lineItems.length,
-      subtotalCents: subtotal(inv).cents,
-      paidAmountCents: paidAmount(inv).cents,
-    }));
+    return invoices.map(
+      (inv): InvoiceListItem => ({
+        id: inv.id,
+        clientId: inv.clientId,
+        status: inv.status,
+        taxRate: inv.taxRate,
+        dueDate: inv.dueDate,
+        createdAt: inv.createdAt,
+        lineItemCount: inv.lineItems.length,
+        subtotalCents: subtotal(inv).cents,
+        paidAmountCents: paidAmount(inv).cents,
+      }),
+    );
   }
 }

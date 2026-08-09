@@ -9,14 +9,8 @@ import type { ClientId } from '@/shared/ids/client-id';
 import type { AppDeps } from '@/app/app-deps';
 import type { CapturingNotificationSender } from '@/invoicing/adapters/capturing-notification-sender';
 
-import {
-  createClientHandler,
-  parseCreateClientInput,
-} from './create-client';
-import {
-  createInvoiceHandler,
-  parseCreateInvoiceInput,
-} from './create-invoice';
+import { createClientHandler, parseCreateClientInput } from './create-client';
+import { createInvoiceHandler, parseCreateInvoiceInput } from './create-invoice';
 import { sendInvoiceHandler } from './send-invoice';
 import { recordPaymentHandler } from './record-payment';
 import { voidInvoiceHandler } from './void-invoice';
@@ -28,7 +22,12 @@ function redirectIdParam(e: unknown): string | null {
   if (!isRedirect(e)) return null;
   const opts = (e as { options?: { params?: unknown } }).options;
   const params = opts?.params;
-  if (params && typeof params === 'object' && 'id' in params && typeof (params as { id: unknown }).id === 'string') {
+  if (
+    params &&
+    typeof params === 'object' &&
+    'id' in params &&
+    typeof (params as { id: unknown }).id === 'string'
+  ) {
     return (params as { id: string }).id;
   }
   return null;
@@ -93,9 +92,9 @@ describe('createClient handler', () => {
   });
 
   it('throws Error with message for invalid email', async () => {
-    await expect(
-      createClientHandler({ name: 'Good', email: 'not-an-email' }),
-    ).rejects.toThrow(/Invalid email/);
+    await expect(createClientHandler({ name: 'Good', email: 'not-an-email' })).rejects.toThrow(
+      /Invalid email/,
+    );
   });
 
   it('rejects empty name at schema boundary', () => {
@@ -190,7 +189,9 @@ describe('sendInvoice handler', () => {
   it('returns { error: null } and fires notification on success', async () => {
     const clientId = await createTestClient();
     const invoiceId = await createTestInvoice(clientId);
-    const result = await sendInvoiceHandler({ invoiceId: invoiceId as Parameters<typeof sendInvoiceHandler>[0]['invoiceId'] });
+    const result = await sendInvoiceHandler({
+      invoiceId: invoiceId as Parameters<typeof sendInvoiceHandler>[0]['invoiceId'],
+    });
     expect(result.error).toBeNull();
     expect(notifications.sent.some((s) => s.type === 'invoiceSent')).toBe(true);
   });
@@ -207,7 +208,9 @@ describe('recordPayment handler', () => {
   async function createSentInvoice(): Promise<string> {
     const clientId = await createTestClient();
     const invoiceId = await createTestInvoice(clientId);
-    await sendInvoiceHandler({ invoiceId: invoiceId as Parameters<typeof sendInvoiceHandler>[0]['invoiceId'] });
+    await sendInvoiceHandler({
+      invoiceId: invoiceId as Parameters<typeof sendInvoiceHandler>[0]['invoiceId'],
+    });
     return invoiceId;
   }
 
@@ -305,9 +308,9 @@ describe('generatePdf handler', () => {
   });
 
   it('throws Invoice not found for nonexistent invoice', async () => {
-    await expect(
-      generatePdfHandler({ invoiceId: newInvoiceId() }),
-    ).rejects.toThrow(/Invoice not found/);
+    await expect(generatePdfHandler({ invoiceId: newInvoiceId() })).rejects.toThrow(
+      /Invoice not found/,
+    );
   });
 });
 
@@ -315,18 +318,29 @@ describe('calculateLateFee handler + middleware gate', () => {
   it('middleware throws Feature is disabled when flag is off', async () => {
     setUp({ lateFeesEnabled: false });
     const middleware = requireFeatureFlag('lateFees');
-    const serverFn = (middleware as unknown as { options: { server: (opts: { next: () => Promise<unknown> }) => Promise<unknown> } }).options.server;
-    await expect(
-      serverFn({ next: async () => ({}) }),
-    ).rejects.toThrow(/Feature is disabled/);
+    const serverFn = (
+      middleware as unknown as {
+        options: { server: (opts: { next: () => Promise<unknown> }) => Promise<unknown> };
+      }
+    ).options.server;
+    await expect(serverFn({ next: async () => ({}) })).rejects.toThrow(/Feature is disabled/);
   });
 
   it('middleware passes through when flag is on', async () => {
     setUp({ lateFeesEnabled: true });
     const middleware = requireFeatureFlag('lateFees');
-    const serverFn = (middleware as unknown as { options: { server: (opts: { next: () => Promise<unknown> }) => Promise<unknown> } }).options.server;
+    const serverFn = (
+      middleware as unknown as {
+        options: { server: (opts: { next: () => Promise<unknown> }) => Promise<unknown> };
+      }
+    ).options.server;
     let called = false;
-    await serverFn({ next: async () => { called = true; return {}; } });
+    await serverFn({
+      next: async () => {
+        called = true;
+        return {};
+      },
+    });
     expect(called).toBe(true);
   });
 

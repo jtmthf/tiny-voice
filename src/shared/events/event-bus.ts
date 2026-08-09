@@ -9,5 +9,8 @@
  */
 export interface EventBus<TEventMap extends object> {
   publish<K extends keyof TEventMap & string>(event: K, payload: TEventMap[K]): Promise<void>;
-  subscribe<K extends keyof TEventMap & string>(event: K, handler: (payload: TEventMap[K]) => Promise<void> | void): () => void;
+  subscribe<K extends keyof TEventMap & string>(
+    event: K,
+    handler: (payload: TEventMap[K]) => Promise<void> | void,
+  ): () => void;
 }

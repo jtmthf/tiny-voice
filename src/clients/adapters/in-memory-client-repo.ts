@@ -18,9 +18,7 @@ export class InMemoryClientRepo implements ClientRepository {
   }
 
   list(): readonly Client[] {
-    return [...this.clients.values()].sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-    );
+    return [...this.clients.values()].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }
 
   save(client: Client): void {

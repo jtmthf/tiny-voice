@@ -9,7 +9,10 @@ import { ok, err } from 'neverthrow';
 import { Money } from '@/shared/money/money';
 import { TaxRateSchema } from '../value-objects/tax-rate';
 import type { Invoice } from '../entities/invoice';
-import { createInvoice as createInvoicePure, addLineItem as addLineItemPure } from '../entities/invoice';
+import {
+  createInvoice as createInvoicePure,
+  addLineItem as addLineItemPure,
+} from '../entities/invoice';
 import type { InvoiceError } from '../errors/invoice-error';
 import type { InvoiceRepository } from '../ports/invoice-repository';
 
@@ -18,12 +21,14 @@ export const CreateInvoiceInputSchema = z.object({
   clientId: ClientIdSchema,
   taxRate: TaxRateSchema,
   dueDate: DueDateSchema,
-  lineItems: z.array(z.object({
-    id: LineItemIdSchema,
-    description: z.string().min(1),
-    quantity: z.number().int().min(1),
-    unitPriceCents: z.bigint().refine((v) => v > 0n, 'Unit price must be positive'),
-  })),
+  lineItems: z.array(
+    z.object({
+      id: LineItemIdSchema,
+      description: z.string().min(1),
+      quantity: z.number().int().min(1),
+      unitPriceCents: z.bigint().refine((v) => v > 0n, 'Unit price must be positive'),
+    }),
+  ),
 });
 
 export type CreateInvoiceInput = z.infer<typeof CreateInvoiceInputSchema>;

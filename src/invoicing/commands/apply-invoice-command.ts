@@ -19,9 +19,7 @@ export interface ApplyInvoiceCommandDeps {
   readonly logger?: Logger;
 }
 
-export type InvoiceTransition = (
-  invoice: Invoice,
-) => Result<InvoiceOutcome, InvoiceError>;
+export type InvoiceTransition = (invoice: Invoice) => Result<InvoiceOutcome, InvoiceError>;
 
 export async function applyInvoiceCommand(
   deps: ApplyInvoiceCommandDeps,

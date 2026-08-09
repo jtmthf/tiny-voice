@@ -1,8 +1,11 @@
 import { test, expect } from '../fixtures';
 
-test('full lifecycle: create invoice -> send -> record payment -> verify paid @critical',
-  async ({ testClient, newInvoicePage, invoiceDetailPage, page }) => {
-
+test('full lifecycle: create invoice -> send -> record payment -> verify paid @critical', async ({
+  testClient,
+  newInvoicePage,
+  invoiceDetailPage,
+  page,
+}) => {
   await newInvoicePage.goto();
   await newInvoicePage.selectClient(testClient.id);
   await newInvoicePage.taxRateInput.fill('0');
@@ -22,9 +25,12 @@ test('full lifecycle: create invoice -> send -> record payment -> verify paid @c
   await expect(invoiceDetailPage.statusBadge).toContainText('paid');
 });
 
-test('void a draft invoice @critical',
-  async ({ testClient, newInvoicePage, invoiceDetailPage, page }) => {
-
+test('void a draft invoice @critical', async ({
+  testClient,
+  newInvoicePage,
+  invoiceDetailPage,
+  page,
+}) => {
   await newInvoicePage.goto();
   await newInvoicePage.selectClient(testClient.id);
   await newInvoicePage.taxRateInput.fill('0');
@@ -40,9 +46,12 @@ test('void a draft invoice @critical',
   await expect(invoiceDetailPage.statusBadge).toContainText('void');
 });
 
-test('create invoice with multiple line items @critical',
-  async ({ testClient, newInvoicePage, invoiceDetailPage, page }) => {
-
+test('create invoice with multiple line items @critical', async ({
+  testClient,
+  newInvoicePage,
+  invoiceDetailPage,
+  page,
+}) => {
   await newInvoicePage.goto();
   await newInvoicePage.selectClient(testClient.id);
   await newInvoicePage.taxRateInput.fill('0');

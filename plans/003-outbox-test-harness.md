@@ -61,9 +61,9 @@ async drain(handler: (...) => Promise<void>): Promise<void> {
 }
 ```
 
-  Delete happens only after the handler resolves (good — that's the guarantee
-  to pin). A throwing handler aborts the whole loop (that part changes in
-  plan 004 — do NOT pin it).
+Delete happens only after the handler resolves (good — that's the guarantee
+to pin). A throwing handler aborts the whole loop (that part changes in
+plan 004 — do NOT pin it).
 
 - `src/shared/events/in-memory-outbox.ts` — test adapter with the divergent
   (buggy) semantics:
@@ -97,12 +97,12 @@ Conventions: vitest; kebab-case filenames; test file named after its subject
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Typecheck | `pnpm typecheck` | exit 0 |
-| Lint | `pnpm lint` | exit 0 |
-| One suite | `pnpm vitest run src/shared/events/sqlite-outbox.test.ts` | all pass |
-| Full suite | `pnpm test` | exit 0 (Node 24) |
+| Purpose    | Command                                                   | Expected on success |
+| ---------- | --------------------------------------------------------- | ------------------- |
+| Typecheck  | `pnpm typecheck`                                          | exit 0              |
+| Lint       | `pnpm lint`                                               | exit 0              |
+| One suite  | `pnpm vitest run src/shared/events/sqlite-outbox.test.ts` | all pass            |
+| Full suite | `pnpm test`                                               | exit 0 (Node 24)    |
 
 ## Scope
 
@@ -151,7 +151,7 @@ Cases (plain vitest, no DB):
    with a working handler delivers both in order.
 
 > Deliberately do NOT assert whether a failing drain rejects or resolves, and
-> do NOT assert whether events *after* a failing one were attempted — plan 004
+> do NOT assert whether events _after_ a failing one were attempted — plan 004
 > changes exactly that. Pin only: no successful-delete-before-handle, and
 > failed events remain.
 
@@ -228,7 +228,7 @@ Stop and report back (do not improvise) if:
 
 - These tests define the outbox contract plan 004 must preserve: delete only
   after successful handling; enqueue atomic with the aggregate save; failed
-  rows recoverable by re-drain. 004 may *add* behavior (continue past
+  rows recoverable by re-drain. 004 may _add_ behavior (continue past
   failures, never reject post-commit) but must keep these green.
 - The two "don't assert" notes in Steps 2 and 4 are deliberate — if a future
   editor tightens those assertions, they couple the tests to pre-004 behavior.

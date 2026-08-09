@@ -21,7 +21,6 @@ import type { LineItem } from './line-item';
 import { lineTotal } from './line-item';
 import type { Payment } from './payment';
 
-
 // ---------------------------------------------------------------------------
 // Aggregate root
 // ---------------------------------------------------------------------------
@@ -149,10 +148,7 @@ export function addLineItem(
   });
 }
 
-export function sendInvoice(
-  invoice: Invoice,
-  now: Date,
-): Result<InvoiceOutcome, InvoiceError> {
+export function sendInvoice(invoice: Invoice, now: Date): Result<InvoiceOutcome, InvoiceError> {
   if (invoice.status === 'void') return err(IE.invoiceVoided());
   if (invoice.status === 'paid') return err(IE.alreadyPaid());
   if (invoice.status !== 'draft') {
@@ -253,10 +249,7 @@ export function addLateFee(
   });
 }
 
-export function voidInvoice(
-  invoice: Invoice,
-  now: Date,
-): Result<InvoiceOutcome, InvoiceError> {
+export function voidInvoice(invoice: Invoice, now: Date): Result<InvoiceOutcome, InvoiceError> {
   if (invoice.status === 'void') return err(IE.invoiceVoided());
   if (invoice.status === 'paid') return err(IE.alreadyPaid());
   const updated: Invoice = {

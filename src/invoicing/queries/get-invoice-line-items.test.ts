@@ -15,8 +15,16 @@ describe('getInvoiceLineItems', () => {
   it('returns mapped line items', () => {
     const repo = new InMemoryInvoiceRepo();
     const items = [
-      buildLineItem({ description: 'Design work', quantity: 3, unitPrice: Money.fromCents(15000n) }),
-      buildLineItem({ description: 'Development', quantity: 1, unitPrice: Money.fromCents(50000n) }),
+      buildLineItem({
+        description: 'Design work',
+        quantity: 3,
+        unitPrice: Money.fromCents(15000n),
+      }),
+      buildLineItem({
+        description: 'Development',
+        quantity: 1,
+        unitPrice: Money.fromCents(50000n),
+      }),
     ];
     const invoice = buildDraftInvoice({ lineItems: items });
     repo.save(invoice);

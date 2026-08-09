@@ -14,11 +14,7 @@ module.exports = {
       comment: 'Files that are not imported by any other file.',
       from: {
         orphan: true,
-        pathNot: [
-          '\\.test\\.ts$',
-          '\\.property\\.test\\.ts$',
-          '^src/app/',
-        ],
+        pathNot: ['\\.test\\.ts$', '\\.property\\.test\\.ts$', '^src/app/'],
       },
       to: {},
     },
@@ -32,41 +28,34 @@ module.exports = {
         pathNot: '\\.test\\.ts$',
       },
       to: {
-        path: [
-          '^src/(clients|invoicing|reporting)/adapters',
-          '^src/app/',
-        ],
+        path: ['^src/(clients|invoicing|reporting)/adapters', '^src/app/'],
       },
     },
     {
       name: 'no-clients-into-other-adapters',
       severity: 'error',
-      comment:
-        'clients must not import adapters from invoicing or reporting.',
+      comment: 'clients must not import adapters from invoicing or reporting.',
       from: { path: '^src/clients/', pathNot: '\\.test\\.ts$' },
       to: { path: '^src/(invoicing|reporting)/adapters/' },
     },
     {
       name: 'no-invoicing-into-other-adapters',
       severity: 'error',
-      comment:
-        'invoicing must not import adapters from clients or reporting.',
+      comment: 'invoicing must not import adapters from clients or reporting.',
       from: { path: '^src/invoicing/', pathNot: '\\.test\\.ts$' },
       to: { path: '^src/(clients|reporting)/adapters/' },
     },
     {
       name: 'no-reporting-into-other-adapters',
       severity: 'error',
-      comment:
-        'reporting must not import adapters from clients or invoicing.',
+      comment: 'reporting must not import adapters from clients or invoicing.',
       from: { path: '^src/reporting/', pathNot: '\\.test\\.ts$' },
       to: { path: '^src/(clients|invoicing)/adapters/' },
     },
     {
       name: 'no-shared-into-app',
       severity: 'error',
-      comment:
-        'Shared kernel must not depend on the app layer.',
+      comment: 'Shared kernel must not depend on the app layer.',
       from: {
         path: '^src/shared/',
         pathNot: '\\.test\\.ts$',

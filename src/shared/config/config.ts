@@ -2,7 +2,12 @@
  * Port interface for typed configuration access.
  */
 
-export type ConfigKey = 'DATABASE_PATH' | 'PDF_GENERATOR' | 'LATE_FEES_ENABLED' | 'LOG_LEVEL' | 'NODE_ENV';
+export type ConfigKey =
+  | 'DATABASE_PATH'
+  | 'PDF_GENERATOR'
+  | 'LATE_FEES_ENABLED'
+  | 'LOG_LEVEL'
+  | 'NODE_ENV';
 
 export interface ConfigValues {
   readonly DATABASE_PATH: string;

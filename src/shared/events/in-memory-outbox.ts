@@ -13,7 +13,10 @@ export class InMemoryOutbox<TEventMap extends object = object> implements Outbox
   }
 
   async drain(
-    handler: (eventName: keyof TEventMap & string, payload: TEventMap[keyof TEventMap]) => Promise<void>,
+    handler: (
+      eventName: keyof TEventMap & string,
+      payload: TEventMap[keyof TEventMap],
+    ) => Promise<void>,
     onError?: (eventName: string, error: unknown) => void,
   ): Promise<void> {
     const survivors: PendingEvent<TEventMap>[] = [];
