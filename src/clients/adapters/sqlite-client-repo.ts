@@ -26,7 +26,11 @@ function rowToClient(row: ClientRow): Client {
  * SQLite adapter for ClientRepository.
  */
 export class SqliteClientRepo implements ClientRepository {
-  constructor(private readonly db: Database) {}
+  private readonly db: Database;
+
+  constructor(db: Database) {
+    this.db = db;
+  }
 
   findById(id: ClientId): Client | null {
     const row = this.db

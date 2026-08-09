@@ -92,7 +92,11 @@ function toInvoice(row: InvoiceRow, lineItems: LineItem[], payments: Payment[]):
 }
 
 export class SqliteInvoiceRepo implements InvoiceRepository {
-  constructor(private readonly db: Database) {}
+  private readonly db: Database;
+
+  constructor(db: Database) {
+    this.db = db;
+  }
 
   findById(id: InvoiceId): Invoice | null {
     const rawId = toDb(id);

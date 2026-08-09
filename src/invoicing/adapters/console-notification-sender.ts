@@ -9,7 +9,11 @@ import type {
 } from '../ports/notification-sender';
 
 export class ConsoleNotificationSender implements NotificationSender {
-  constructor(private readonly logger: Logger) {}
+  private readonly logger: Logger;
+
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
 
   async sendInvoiceSent(input: InvoiceSentNotification): Promise<Result<void, NotificationError>> {
     this.logger.info('Invoice sent notification', {

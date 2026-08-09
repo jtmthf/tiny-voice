@@ -13,8 +13,11 @@ function isErrResult(value: unknown): value is Result<unknown, unknown> & { isEr
 }
 
 class RollbackSignal<T> extends Error {
-  constructor(readonly result: T) {
+  readonly result: T;
+
+  constructor(result: T) {
     super('rollback');
+    this.result = result;
   }
 }
 
