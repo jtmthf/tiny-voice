@@ -41,9 +41,6 @@ importers:
       react-dom:
         specifier: '19'
         version: 19.2.5(react@19.2.5)
-      server-only:
-        specifier: ^0.0.1
-        version: 0.0.1
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
@@ -2527,9 +2524,6 @@ packages:
   seroval@1.6.2:
     resolution: {integrity: sha512-mPT+SD2TrlB6wvte1KkYOYUkubaTbd6pZ/6Kk3C9nxzrHmCZyhxOO7XGAeL7f+yLKZglzGtM9odUVvg/EhO+vQ==}
     engines: {node: '>=10'}
-
-  server-only@0.0.1:
-    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
 
   shebang-command@2.0.0:
     resolution: {integrity: sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==}
@@ -5285,8 +5279,6 @@ snapshots:
       seroval: 1.6.2
 
   seroval@1.6.2: {}
-
-  server-only@0.0.1: {}
 
   shebang-command@2.0.0:
     dependencies:
