@@ -17,6 +17,7 @@ import type { NotificationSender } from '@/invoicing/ports/notification-sender';
 import type { InvoiceSummary } from '@/invoicing/queries/get-invoice-summary';
 import type { LineItemSummary } from '@/invoicing/queries/get-invoice-line-items';
 import type { PaymentSummary } from '@/invoicing/queries/get-invoice-payments';
+import type { InvoiceDetail } from '@/invoicing/queries/get-invoice-detail';
 import type { InvoicingEventMap } from '@/invoicing/events/invoicing-event-map';
 import type { InvoiceStatus } from '@/invoicing/value-objects/invoice-status';
 import type { RevenueReadModel, MonthlyRevenue } from '@/reporting/ports/revenue-read-model';
@@ -48,6 +49,7 @@ export interface AppDeps {
       getInvoiceSummary(id: InvoiceId): InvoiceSummary | null;
       getInvoiceLineItems(id: InvoiceId): readonly LineItemSummary[] | null;
       getInvoicePayments(id: InvoiceId): readonly PaymentSummary[] | null;
+      getInvoiceDetail(id: InvoiceId): InvoiceDetail | null;
       listInvoices(filters?: {
         status?: InvoiceStatus;
         clientId?: ClientId;

@@ -1,7 +1,7 @@
 import type { ClientId } from '@/shared/ids/client-id';
 import type { Money as MoneyType } from '@/shared/money/money';
 import { Money } from '@/shared/money/money';
-import { outstandingBalance } from '../entities/invoice';
+import { calculateTax } from '../value-objects/tax-rate';
 import type { InvoiceRepository } from '../ports/invoice-repository';
 
 export interface GetOutstandingByClientDeps {
@@ -12,12 +12,15 @@ export function getOutstandingByClient(
   deps: GetOutstandingByClientDeps,
   clientId: ClientId,
 ): MoneyType {
-  const invoices = deps.repo.list({ clientId });
+  const items = deps.repo.listSummaries({ clientId });
   let sum = Money.zero();
-  for (const inv of invoices) {
-    if (inv.status === 'sent') {
-      sum = Money.add(sum, outstandingBalance(inv));
-    }
+  for (const item of items) {
+    if (item.status !== 'sent') continue;
+    const sub = Money.fromCents(item.subtotalCents);
+    const tax = calculateTax(sub, item.taxRate);
+    const tot = Money.add(sub, tax);
+    const outstanding = Money.subtract(tot, Money.fromCents(item.paidAmountCents));
+    sum = Money.add(sum, outstanding);
   }
   return sum;
 }

@@ -9,7 +9,8 @@ import {
   buildLineItem,
   buildPayment,
 } from '../testing/invoice-factory';
-import { recordPayment } from '../entities/invoice';
+import { recordPayment, outstandingBalance } from '../entities/invoice';
+import type { TaxRate } from '../value-objects/tax-rate';
 import { getOutstandingByClient } from './get-outstanding-by-client';
 import { expectOk } from '@/shared/testing/expect-ok';
 
@@ -64,5 +65,27 @@ describe('getOutstandingByClient', () => {
     const result = getOutstandingByClient({ repo }, clientId);
     // sent1: 5000 + 500 tax = 5500; sent2: 7000 + 700 tax = 7700; total = 13200
     expect(result.cents).toBe(13200n);
+  });
+
+  it("matches the aggregate-derived outstanding balance under banker's rounding with a partial payment", () => {
+    const repo = new InMemoryInvoiceRepo();
+    const clientId = newClientId();
+
+    // subtotal 2020 cents * 7.5% = 151.5 cents pre-rounding, which banker's
+    // rounding pushes to the nearest even integer (152), not a naive 152/151.
+    const sent = {
+      ...buildSentInvoice({
+        lineItems: [buildLineItem({ unitPrice: Money.fromCents(2020n) })],
+        taxRate: 0.075 as TaxRate,
+      }),
+      clientId,
+    };
+    const payment = buildPayment({ amount: Money.fromCents(1000n) });
+    const sentWithPayment = expectOk(recordPayment(sent, payment)).aggregate;
+    repo.save(sentWithPayment);
+
+    const expected = outstandingBalance(sentWithPayment);
+    const result = getOutstandingByClient({ repo }, clientId);
+    expect(result.cents).toBe(expected.cents);
   });
 });

@@ -31,7 +31,7 @@ your row when done.
 | 006  | Fix actively-wrong docs; CI e2e gate; drop duplicate lint cell; .nvmrc; pre-commit hook                                      | P2       | S–M    | —          | DONE   |
 | 007  | db.transaction rolls back on returned Err Result                                                                             | P2       | S      | —          | DONE   |
 | 008  | Consolidate query wiring into shared wireQueries factory                                                                     | P2       | M      | —          | DONE   |
-| 009  | Read-path efficiency: single-load invoice detail, summary-derived outstanding, delete dead list-invoices                     | P2       | M      | 008        | TODO   |
+| 009  | Read-path efficiency: single-load invoice detail, summary-derived outstanding, delete dead list-invoices                     | P2       | M      | 008        | DONE   |
 | 010  | Property-based SQLite ↔ in-memory adapter parity tests                                                                       | P3       | M      | —          | TODO   |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
