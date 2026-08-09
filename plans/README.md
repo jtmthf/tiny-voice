@@ -21,18 +21,18 @@ your row when done.
 
 ## Execution order & status
 
-| Plan | Title | Priority | Effort | Depends on | Status |
-|------|-------|----------|--------|------------|--------|
-| 001 | Fix prototype pollution in bracket-notation parser | P1 | S | — | DONE |
-| 002 | Patch vulnerable start-server-core; clean manifest (undici override, drop server-only, nitro pin decision) | P1 | S | — | DONE |
-| 003 | Outbox characterization tests (+ fix InMemoryOutbox event loss) | P1 | M | — | DONE |
-| 004 | Outbox reliability: idempotent revenue projection, per-row drain isolation, startup recovery, decoupled post-commit failures | P1 | M–L | 003 | DONE |
-| 005 | Invoice state-machine guard test matrix (+ align addLineItem paid → AlreadyPaid) | P1 | S | — | DONE |
-| 006 | Fix actively-wrong docs; CI e2e gate; drop duplicate lint cell; .nvmrc; pre-commit hook | P2 | S–M | — | TODO |
-| 007 | db.transaction rolls back on returned Err Result | P2 | S | — | TODO |
-| 008 | Consolidate query wiring into shared wireQueries factory | P2 | M | — | TODO |
-| 009 | Read-path efficiency: single-load invoice detail, summary-derived outstanding, delete dead list-invoices | P2 | M | 008 | TODO |
-| 010 | Property-based SQLite ↔ in-memory adapter parity tests | P3 | M | — | TODO |
+| Plan | Title                                                                                                                        | Priority | Effort | Depends on | Status |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------- | -------- | ------ | ---------- | ------ |
+| 001  | Fix prototype pollution in bracket-notation parser                                                                           | P1       | S      | —          | DONE   |
+| 002  | Patch vulnerable start-server-core; clean manifest (undici override, drop server-only, nitro pin decision)                   | P1       | S      | —          | DONE   |
+| 003  | Outbox characterization tests (+ fix InMemoryOutbox event loss)                                                              | P1       | M      | —          | DONE   |
+| 004  | Outbox reliability: idempotent revenue projection, per-row drain isolation, startup recovery, decoupled post-commit failures | P1       | M–L    | 003        | DONE   |
+| 005  | Invoice state-machine guard test matrix (+ align addLineItem paid → AlreadyPaid)                                             | P1       | S      | —          | DONE   |
+| 006  | Fix actively-wrong docs; CI e2e gate; drop duplicate lint cell; .nvmrc; pre-commit hook                                      | P2       | S–M    | —          | DONE   |
+| 007  | db.transaction rolls back on returned Err Result                                                                             | P2       | S      | —          | TODO   |
+| 008  | Consolidate query wiring into shared wireQueries factory                                                                     | P2       | M      | —          | TODO   |
+| 009  | Read-path efficiency: single-load invoice detail, summary-derived outstanding, delete dead list-invoices                     | P2       | M      | 008        | TODO   |
+| 010  | Property-based SQLite ↔ in-memory adapter parity tests                                                                       | P3       | M      | —          | TODO   |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
@@ -69,7 +69,7 @@ Recorded so future audits don't re-litigate them:
   demonstrates.
 - **`InProcessEventBus.publish` throwing AggregateError on partial subscriber
   failure** — kept by design ("all subscribers run, caller can detect");
-  plan 004 makes the *outbox* tolerant instead of changing bus semantics.
+  plan 004 makes the _outbox_ tolerant instead of changing bus semantics.
 - **Replacing the bracket-notation parser with a library (qs)** — one 36-line
   file doesn't justify a dependency with its own CVE history; plan 001 hardens
   it in place.
