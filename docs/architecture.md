@@ -17,40 +17,40 @@ stateDiagram-v2
 
 ### Allowed transitions by status
 
-| Current status | Allowed operations | Disallowed (returns error) |
-|---|---|---|
-| **Draft** | `addLineItem`, `sendInvoice` (requires >= 1 line item), `voidInvoice` | `recordPayment` (InvalidTransition) |
-| **Sent** | `recordPayment` (rejects overpayment), `voidInvoice`, `addLateFee` (one late fee only) | `addLineItem` (InvalidTransition), `sendInvoice` (InvalidTransition) |
-| **Paid** | None | All operations return `AlreadyPaid` |
-| **Void** | None | All operations return `InvoiceVoided` |
+| Current status | Allowed operations                                                                     | Disallowed (returns error)                                           |
+| -------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Draft**      | `addLineItem`, `sendInvoice` (requires >= 1 line item), `voidInvoice`                  | `recordPayment` (InvalidTransition)                                  |
+| **Sent**       | `recordPayment` (rejects overpayment), `voidInvoice`, `addLateFee` (one late fee only) | `addLineItem` (InvalidTransition), `sendInvoice` (InvalidTransition) |
+| **Paid**       | None                                                                                   | All operations return `AlreadyPaid`                                  |
+| **Void**       | None                                                                                   | All operations return `InvoiceVoided`                                |
 
 When `recordPayment` causes `outstandingBalance` to reach zero, the status automatically transitions from Sent to Paid.
 
 ## Port / Adapter table
 
-| Port | Location | Real adapter | Test adapter |
-|---|---|---|---|
-| `Clock` | `src/shared/time/clock.ts` | `SystemClock` (`src/shared/time/system-clock.ts`) | `FixedClock` (`src/shared/time/fixed-clock.ts`) |
-| `Database` | `src/shared/db/database.ts` | `SqliteDatabase` (`src/shared/db/sqlite-database.ts`) | In-memory SQLite via `setupDb` (`src/shared/testing/db-fixture.ts`); stub DB in unit tests |
-| `Config` | `src/shared/config/config.ts` | `EnvConfig` (`src/shared/config/env-config.ts`) | `InMemoryConfig` (`src/shared/config/in-memory-config.ts`) |
-| `Logger` | `src/shared/logger/logger.ts` | `ConsoleLogger` (`src/shared/logger/console-logger.ts`) | `CapturingLogger` (`src/shared/logger/capturing-logger.ts`) |
-| `FeatureFlags` | `src/shared/flags/feature-flags.ts` | `ConfigFeatureFlags` (`src/shared/flags/config-feature-flags.ts`) | `InMemoryFeatureFlags` (`src/shared/flags/in-memory-feature-flags.ts`) |
-| `EventBus` | `src/shared/events/event-bus.ts` | `InProcessEventBus` (`src/shared/events/in-process-event-bus.ts`) | Same `InProcessEventBus` (in-process, no external infra) |
-| `ClientRepository` | `src/clients/ports/client-repository.ts` | `SqliteClientRepo` (`src/clients/adapters/sqlite-client-repo.ts`) | `InMemoryClientRepo` (`src/clients/adapters/in-memory-client-repo.ts`) |
-| `InvoiceRepository` | `src/invoicing/ports/invoice-repository.ts` | `SqliteInvoiceRepo` (`src/invoicing/adapters/sqlite-invoice-repo.ts`) | `InMemoryInvoiceRepo` (`src/invoicing/adapters/in-memory-invoice-repo.ts`) |
-| `RevenueReadModel` | `src/reporting/ports/revenue-read-model.ts` | `SqliteRevenueReadModel` (`src/reporting/adapters/sqlite-revenue-read-model.ts`) | `InMemoryRevenueReadModel` (`src/reporting/adapters/in-memory-revenue-read-model.ts`) |
-| `PdfGenerator` | `src/invoicing/ports/pdf-generator.ts` | `PdfKitGenerator` (`src/invoicing/adapters/pdf-kit-generator.ts`) | `StubPdfGenerator` (`src/invoicing/adapters/stub-pdf-generator.ts`) |
-| `NotificationSender` | `src/invoicing/ports/notification-sender.ts` | `ConsoleNotificationSender` (`src/invoicing/adapters/console-notification-sender.ts`) | `CapturingNotificationSender` (`src/invoicing/adapters/capturing-notification-sender.ts`) |
+| Port                 | Location                                     | Real adapter                                                                          | Test adapter                                                                               |
+| -------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `Clock`              | `src/shared/time/clock.ts`                   | `SystemClock` (`src/shared/time/system-clock.ts`)                                     | `FixedClock` (`src/shared/time/fixed-clock.ts`)                                            |
+| `Database`           | `src/shared/db/database.ts`                  | `SqliteDatabase` (`src/shared/db/sqlite-database.ts`)                                 | In-memory SQLite via `setupDb` (`src/shared/testing/db-fixture.ts`); stub DB in unit tests |
+| `Config`             | `src/shared/config/config.ts`                | `EnvConfig` (`src/shared/config/env-config.ts`)                                       | `InMemoryConfig` (`src/shared/config/in-memory-config.ts`)                                 |
+| `Logger`             | `src/shared/logger/logger.ts`                | `ConsoleLogger` (`src/shared/logger/console-logger.ts`)                               | `CapturingLogger` (`src/shared/logger/capturing-logger.ts`)                                |
+| `FeatureFlags`       | `src/shared/flags/feature-flags.ts`          | `ConfigFeatureFlags` (`src/shared/flags/config-feature-flags.ts`)                     | `InMemoryFeatureFlags` (`src/shared/flags/in-memory-feature-flags.ts`)                     |
+| `EventBus`           | `src/shared/events/event-bus.ts`             | `InProcessEventBus` (`src/shared/events/in-process-event-bus.ts`)                     | Same `InProcessEventBus` (in-process, no external infra)                                   |
+| `ClientRepository`   | `src/clients/ports/client-repository.ts`     | `SqliteClientRepo` (`src/clients/adapters/sqlite-client-repo.ts`)                     | `InMemoryClientRepo` (`src/clients/adapters/in-memory-client-repo.ts`)                     |
+| `InvoiceRepository`  | `src/invoicing/ports/invoice-repository.ts`  | `SqliteInvoiceRepo` (`src/invoicing/adapters/sqlite-invoice-repo.ts`)                 | `InMemoryInvoiceRepo` (`src/invoicing/adapters/in-memory-invoice-repo.ts`)                 |
+| `RevenueReadModel`   | `src/reporting/ports/revenue-read-model.ts`  | `SqliteRevenueReadModel` (`src/reporting/adapters/sqlite-revenue-read-model.ts`)      | `InMemoryRevenueReadModel` (`src/reporting/adapters/in-memory-revenue-read-model.ts`)      |
+| `PdfGenerator`       | `src/invoicing/ports/pdf-generator.ts`       | `PdfKitGenerator` (`src/invoicing/adapters/pdf-kit-generator.ts`)                     | `StubPdfGenerator` (`src/invoicing/adapters/stub-pdf-generator.ts`)                        |
+| `NotificationSender` | `src/invoicing/ports/notification-sender.ts` | `ConsoleNotificationSender` (`src/invoicing/adapters/console-notification-sender.ts`) | `CapturingNotificationSender` (`src/invoicing/adapters/capturing-notification-sender.ts`)  |
 
 ## Event / Subscriber fan-out table
 
 All subscribers are registered in `src/app/register-subscribers.ts`.
 
-| Event | Emitted by | Subscribers |
-|---|---|---|
-| `InvoiceSent` | `sendInvoice` transition (`src/invoicing/entities/invoice.ts`), dispatched by `applyInvoiceCommand` | 1. `NotificationSender.sendInvoiceSent` |
+| Event                    | Emitted by                                                                                            | Subscribers                                                                                                    |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `InvoiceSent`            | `sendInvoice` transition (`src/invoicing/entities/invoice.ts`), dispatched by `applyInvoiceCommand`   | 1. `NotificationSender.sendInvoiceSent`                                                                        |
 | `InvoicePaymentRecorded` | `recordPayment` transition (`src/invoicing/entities/invoice.ts`), dispatched by `applyInvoiceCommand` | 1. `registerRevenueProjection` -> `RevenueReadModel.recordPayment` 2. `NotificationSender.sendPaymentReceived` |
-| `InvoiceVoided` | `voidInvoice` transition (`src/invoicing/entities/invoice.ts`), dispatched by `applyInvoiceCommand` | _(no subscribers — void is a terminal state)_ |
+| `InvoiceVoided`          | `voidInvoice` transition (`src/invoicing/entities/invoice.ts`), dispatched by `applyInvoiceCommand`   | _(no subscribers — void is a terminal state)_                                                                  |
 
 **Event payload design rule:** Events carry IDs and immutable facts (amounts, timestamps) — never mutable state (names, balances, statuses). Subscribers that need mutable data fetch it fresh from the repository at handling time. This avoids stale snapshots embedded in event payloads.
 
@@ -86,6 +86,12 @@ Transitions that need wall-clock data accept a `now: Date` (or `today: DueDate`)
 
 `createInvoice` (insert) and `deleteInvoice` (hard delete) do **not** go through `applyInvoiceCommand` — they have different shapes (insert assembles a new aggregate; delete touches multiple tables with no transition). See [ADR-0001](adr/0001-invoice-command-dispatch-scope.md).
 
+> **Save semantics**: `SqliteInvoiceRepo.save` rewrites the full line-item set
+> (delete + re-insert) on every save and appends only new payments. The
+> rewrite is intentional — the repository persists whole aggregates (see
+> AGENTS.md rule 2) rather than diffing mutations. Do not "optimize" it into
+> partial updates.
+
 ## Composition root tour
 
 `buildApp()` in `src/app/build-app.ts` constructs the full dependency graph in this order:
@@ -110,7 +116,9 @@ Returns an `AppDeps` object (defined in `src/app/app-deps.ts`). Accepts `Partial
 Example: "Add a CSV export of monthly revenue."
 
 1. **Create a query** in the appropriate module: `src/reporting/queries/export-revenue-csv.ts`. Export the handler function and a Zod input schema (co-located).
-2. **Add to module index**: Re-export from `src/reporting/index.ts`.
+2. **Import directly**: There are no barrel files (enforced by ESLint
+   `barrel-files/avoid-barrel-files`). Consumers import from the source file:
+   `import { exportRevenueCsv } from '@/reporting/queries/export-revenue-csv'`.
 3. **If it's a mutation**: Create a server function in `src/app/fns/` using `createServerFn({ method: 'POST' })`. Define the input schema (Zod) in the fn module — that's the HTTP boundary. Call `getAppInstance()` to access the full `AppDeps`. Call `queryClient.invalidateQueries` in the component's `onSuccess`.
    - **For an invoice load → mutate → save mutation**: add a pure transition to `src/invoicing/entities/invoice.ts` returning `Result<InvoiceOutcome, InvoiceError>` — the new aggregate plus any `InvoiceDomainEvent`s the transition publishes. If the transition publishes a new event variant, add it to `InvoiceDomainEvent` and `InvoicingEventMap` (with the matching Zod schema in `src/invoicing/events/`). Then dispatch via `applyInvoiceCommand` from the fn, passing an inline closure. See [Invoice command dispatch](#invoice-command-dispatch).
    - **For an insert (like `createInvoice`) or hard delete (like `deleteInvoice`)**: skip the dispatcher and call the repo directly from a dedicated command function. ADR-0001 explains why.
