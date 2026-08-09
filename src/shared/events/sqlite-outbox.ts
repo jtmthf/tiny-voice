@@ -8,7 +8,11 @@ interface OutboxRow {
 }
 
 export class SqliteOutbox<TEventMap extends object = object> implements Outbox<TEventMap> {
-  constructor(private readonly db: Database) {}
+  private readonly db: Database;
+
+  constructor(db: Database) {
+    this.db = db;
+  }
 
   enqueue<K extends keyof TEventMap & string>(eventName: K, payload: TEventMap[K]): void {
     this.db

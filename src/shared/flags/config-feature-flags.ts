@@ -13,7 +13,11 @@ const FLAG_TO_CONFIG_KEY = {
  * Real adapter: reads boolean flags from Config.
  */
 export class ConfigFeatureFlags implements FeatureFlags {
-  constructor(private readonly config: Config) {}
+  private readonly config: Config;
+
+  constructor(config: Config) {
+    this.config = config;
+  }
 
   isEnabled(flag: FlagName): boolean {
     const key = FLAG_TO_CONFIG_KEY[flag];

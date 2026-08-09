@@ -6,8 +6,10 @@ export class NewInvoicePage {
   readonly dueDateInput: Locator;
   readonly addItemBtn: Locator;
   readonly submitBtn: Locator;
+  private page: Page;
 
-  constructor(private page: Page) {
+  constructor(page: Page) {
+    this.page = page;
     this.clientSelect = page.getByRole('combobox', { name: 'Client' });
     this.taxRateInput = page.getByRole('spinbutton', { name: 'Tax Rate (%)' });
     this.dueDateInput = page.getByLabel('Due Date');

@@ -2,8 +2,10 @@ import { expect, type Page, type Locator } from '@playwright/test';
 
 export class ReportingPage {
   readonly revenueTable: Locator;
+  private page: Page;
 
-  constructor(private page: Page) {
+  constructor(page: Page) {
+    this.page = page;
     this.revenueTable = page.getByRole('table');
   }
 

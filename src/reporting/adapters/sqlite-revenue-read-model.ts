@@ -22,7 +22,11 @@ function rowToMonthlyRevenue(row: RevenueRow): MonthlyRevenue {
 }
 
 export class SqliteRevenueReadModel implements RevenueReadModel {
-  constructor(private readonly db: Database) {}
+  private readonly db: Database;
+
+  constructor(db: Database) {
+    this.db = db;
+  }
 
   recordPayment(input: { paymentId: string; month: YearMonth; amount: Money; at: Date }): void {
     this.db.transaction(() => {

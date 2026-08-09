@@ -8,8 +8,10 @@ export class InvoiceDetailPage {
   readonly statusBadge: Locator;
   readonly lineItemsTable: Locator;
   readonly paymentsTable: Locator;
+  private page: Page;
 
-  constructor(private page: Page) {
+  constructor(page: Page) {
+    this.page = page;
     this.sendBtn = page.getByRole('button', { name: 'Send Invoice' });
     this.voidBtn = page.getByRole('button', { name: 'Void' });
     this.payBtn = page.getByRole('button', { name: 'Record Payment' });

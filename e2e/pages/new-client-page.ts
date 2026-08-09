@@ -4,8 +4,10 @@ export class NewClientPage {
   readonly nameInput: Locator;
   readonly emailInput: Locator;
   readonly submitBtn: Locator;
+  private page: Page;
 
-  constructor(private page: Page) {
+  constructor(page: Page) {
+    this.page = page;
     this.nameInput = page.getByRole('textbox', { name: 'Name' });
     this.emailInput = page.getByRole('textbox', { name: 'Email' });
     this.submitBtn = page.getByRole('button', { name: 'Create Client' });
