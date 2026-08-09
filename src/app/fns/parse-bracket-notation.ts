@@ -1,5 +1,7 @@
+const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 export function parseBracketNotation(formData: FormData): Record<string, unknown> {
-  const root: Record<string, unknown> = {};
+  const root: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
   for (const [key, value] of formData.entries()) {
     setPath(root, parsePath(key), value);
   }
@@ -7,10 +9,11 @@ export function parseBracketNotation(formData: FormData): Record<string, unknown
 }
 
 function parsePath(key: string): (string | number)[] {
-  return key
-    .split(/[\[\]]/)
-    .filter(Boolean)
-    .map((p) => (/^\d+$/.test(p) ? Number(p) : p));
+  const parts = key.split(/[\[\]]/).filter(Boolean);
+  if (parts.some((p) => FORBIDDEN_KEYS.has(p))) {
+    throw new Error(`Unsafe key in form data: ${key}`);
+  }
+  return parts.map((p) => (/^\d+$/.test(p) ? Number(p) : p));
 }
 
 function setPath(
@@ -25,7 +28,9 @@ function setPath(
     if (key === undefined || nextKey === undefined) break;
     const curAsObj = cur as Record<string, unknown>;
     if (curAsObj[key as string] == null) {
-      curAsObj[key as string] = typeof nextKey === 'number' ? [] : {};
+      curAsObj[key as string] = typeof nextKey === 'number'
+        ? []
+        : (Object.create(null) as Record<string, unknown>);
     }
     cur = curAsObj[key as string] as Record<string, unknown> | unknown[];
   }
