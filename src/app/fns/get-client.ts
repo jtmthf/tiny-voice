@@ -8,7 +8,7 @@ import type { ClientDto } from './dto';
 const Input = z.object({ id: ClientIdSchema });
 
 export const getClientFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: unknown) => Input.parse(data))
+  .validator((data: unknown) => Input.parse(data))
   .handler(async ({ data }): Promise<ClientDto | null> => {
     const app = getAppReadView();
     const client = app.queries.clients.getClient(data.id);

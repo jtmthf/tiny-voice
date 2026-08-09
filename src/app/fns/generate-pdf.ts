@@ -36,5 +36,5 @@ export async function generatePdfHandler(data: GeneratePdfInput): Promise<Genera
 }
 
 export const generatePdfFn = createServerFn({ method: 'POST' })
-  .inputValidator(parseGeneratePdfInput)
+  .validator(parseGeneratePdfInput)
   .handler(({ data }) => generatePdfHandler(data));

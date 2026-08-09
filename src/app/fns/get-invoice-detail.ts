@@ -15,7 +15,7 @@ export interface InvoiceDetailDto {
 }
 
 export const getInvoiceDetailFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: unknown) => Input.parse(data))
+  .validator((data: unknown) => Input.parse(data))
   .handler(async ({ data }): Promise<InvoiceDetailDto> => {
     const app = getAppReadView();
     const summary = app.queries.invoicing.getInvoiceSummary(data.invoiceId);

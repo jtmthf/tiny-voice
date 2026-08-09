@@ -7,7 +7,7 @@ import { invoiceSummaryToDto } from './dto';
 const Input = z.object({ clientId: ClientIdSchema });
 
 export const getClientInvoicesFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: unknown) => Input.parse(data))
+  .validator((data: unknown) => Input.parse(data))
   .handler(async ({ data }) => {
     const app = getAppReadView();
     return app.queries.invoicing.listInvoices({ clientId: data.clientId }).map(invoiceSummaryToDto);

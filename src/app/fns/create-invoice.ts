@@ -59,5 +59,5 @@ export async function createInvoiceHandler(data: CreateInvoiceInput): Promise<ne
 }
 
 export const createInvoiceFn = createServerFn({ method: 'POST' })
-  .inputValidator(parseCreateInvoiceInput)
+  .validator(parseCreateInvoiceInput)
   .handler(({ data }) => createInvoiceHandler(data));

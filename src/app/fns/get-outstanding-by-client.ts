@@ -7,7 +7,7 @@ import type { MoneyDto } from './dto';
 const Input = z.object({ clientId: ClientIdSchema });
 
 export const getOutstandingByClientFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: unknown) => Input.parse(data))
+  .validator((data: unknown) => Input.parse(data))
   .handler(async ({ data }): Promise<MoneyDto> => {
     const app = getAppReadView();
     const money = app.queries.invoicing.getOutstandingByClient(data.clientId);
