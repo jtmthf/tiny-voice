@@ -25,7 +25,7 @@ or the linter enforces**. If a plan's change leaves the rule as prose in
 
 | Plan | Title                                                       | Theme        | Priority | Effort | Depends on | Status |
 | ---- | ----------------------------------------------------------- | ------------ | -------- | ------ | ---------- | ------ |
-| 001  | tsconfig strictness sweep (8 flags, 18 known errors)        | Types & lint | P1       | S      | —          | TODO   |
+| 001  | tsconfig strictness sweep (8 flags, 18 known errors)        | Types & lint | P1       | S      | —          | DONE   |
 | 002  | typescript-eslint `strictTypeChecked` + repo-specific rules | Types & lint | P1       | M      | 001        | TODO   |
 | 003  | Domain kit: value objects and branded IDs                   | Entities     | P1       | M      | —          | TODO   |
 | 004  | DI container primitive (`src/shared/di/`)                   | DI           | P1       | M–L    | —          | TODO   |

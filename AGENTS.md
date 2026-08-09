@@ -36,7 +36,8 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 - **Domain never imports adapters or app** -- dependency-cruiser: `domain-no-adapters` rule
 - **No framework outside src/app/** -- dependency-cruiser: `no-framework-outside-app` rule. TanStack imports (`@tanstack/react-router`, `@tanstack/react-start`, `@tanstack/react-query`) are confined to the app layer
 - **Narrow read surface** -- TypeScript: `app-deps.ts` exports `AppReadView` (queries + featureFlags + clock only). Repos, event bus, DB, and infrastructure are not on the type. Do not widen `AppReadView` -- mutations go through server functions that call `getAppInstance()`
-- **TypeScript strict** -- `tsconfig.json`: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`
+- **TypeScript strict** -- `tsconfig.json`: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedLocals`, `noUnusedParameters`, `noPropertyAccessFromIndexSignature`, `noImplicitOverride`, `noUncheckedSideEffectImports`, `erasableSyntaxOnly`
+- **No parameter properties, no enums** -- TypeScript: `erasableSyntaxOnly`. Constructors take plain parameters and assign to declared fields. This also forecloses decorator-based DI by construction (see plan 004).
 - **Conventional commits** -- commitlint via `simple-git-hooks`
 
 ## Rules the toolchain cannot enforce
