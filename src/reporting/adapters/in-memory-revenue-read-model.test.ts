@@ -15,7 +15,7 @@ function usd(cents: bigint): Money {
 describe('InMemoryRevenueReadModel', () => {
   it('records a payment and retrieves by month', async () => {
     const model = new InMemoryRevenueReadModel();
-    model.recordPayment({ month: jan, amount: usd(5000n), at: new Date('2025-01-15') });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(5000n), at: new Date('2025-01-15') });
 
     const result = model.getByMonth(jan);
     expect(result).not.toBeNull();
@@ -26,8 +26,8 @@ describe('InMemoryRevenueReadModel', () => {
 
   it('aggregates multiple payments in the same month', async () => {
     const model = new InMemoryRevenueReadModel();
-    model.recordPayment({ month: jan, amount: usd(5000n), at: new Date('2025-01-10') });
-    model.recordPayment({ month: jan, amount: usd(3000n), at: new Date('2025-01-20') });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(5000n), at: new Date('2025-01-10') });
+    model.recordPayment({ paymentId: 'pay_2', month: jan, amount: usd(3000n), at: new Date('2025-01-20') });
 
     const result = model.getByMonth(jan);
     expect(result!.total.cents).toBe(8000n);
@@ -42,9 +42,9 @@ describe('InMemoryRevenueReadModel', () => {
 
   it('getByYear returns months in ascending order', async () => {
     const model = new InMemoryRevenueReadModel();
-    model.recordPayment({ month: mar, amount: usd(1000n), at: new Date('2025-03-01') });
-    model.recordPayment({ month: jan, amount: usd(2000n), at: new Date('2025-01-01') });
-    model.recordPayment({ month: feb, amount: usd(3000n), at: new Date('2025-02-01') });
+    model.recordPayment({ paymentId: 'pay_1', month: mar, amount: usd(1000n), at: new Date('2025-03-01') });
+    model.recordPayment({ paymentId: 'pay_2', month: jan, amount: usd(2000n), at: new Date('2025-01-01') });
+    model.recordPayment({ paymentId: 'pay_3', month: feb, amount: usd(3000n), at: new Date('2025-02-01') });
 
     const results = model.getByYear(2025);
     expect(results).toHaveLength(3);
@@ -55,8 +55,8 @@ describe('InMemoryRevenueReadModel', () => {
 
   it('getByYear excludes other years', async () => {
     const model = new InMemoryRevenueReadModel();
-    model.recordPayment({ month: jan, amount: usd(1000n), at: new Date('2025-01-01') });
-    model.recordPayment({ month: dec24, amount: usd(2000n), at: new Date('2024-12-01') });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(1000n), at: new Date('2025-01-01') });
+    model.recordPayment({ paymentId: 'pay_2', month: dec24, amount: usd(2000n), at: new Date('2024-12-01') });
 
     const results = model.getByYear(2025);
     expect(results).toHaveLength(1);
@@ -65,9 +65,9 @@ describe('InMemoryRevenueReadModel', () => {
 
   it('listAll returns months in descending order', async () => {
     const model = new InMemoryRevenueReadModel();
-    model.recordPayment({ month: jan, amount: usd(1000n), at: new Date('2025-01-01') });
-    model.recordPayment({ month: mar, amount: usd(2000n), at: new Date('2025-03-01') });
-    model.recordPayment({ month: feb, amount: usd(3000n), at: new Date('2025-02-01') });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(1000n), at: new Date('2025-01-01') });
+    model.recordPayment({ paymentId: 'pay_2', month: mar, amount: usd(2000n), at: new Date('2025-03-01') });
+    model.recordPayment({ paymentId: 'pay_3', month: feb, amount: usd(3000n), at: new Date('2025-02-01') });
 
     const results = model.listAll();
     expect(results).toHaveLength(3);
@@ -80,10 +80,30 @@ describe('InMemoryRevenueReadModel', () => {
     const model = new InMemoryRevenueReadModel();
     const early = new Date('2025-01-10');
     const late = new Date('2025-01-20');
-    model.recordPayment({ month: jan, amount: usd(1000n), at: early });
-    model.recordPayment({ month: jan, amount: usd(2000n), at: late });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(1000n), at: early });
+    model.recordPayment({ paymentId: 'pay_2', month: jan, amount: usd(2000n), at: late });
 
     const result = model.getByMonth(jan);
     expect(result!.updatedAt).toEqual(late);
+  });
+
+  it('redelivering the same paymentId is a no-op', async () => {
+    const model = new InMemoryRevenueReadModel();
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(5000n), at: new Date('2025-01-15') });
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(5000n), at: new Date('2025-01-15') });
+
+    const result = model.getByMonth(jan);
+    expect(result!.total.cents).toBe(5000n);
+    expect(result!.paymentCount).toBe(1);
+  });
+
+  it('different paymentIds accumulate normally', async () => {
+    const model = new InMemoryRevenueReadModel();
+    model.recordPayment({ paymentId: 'pay_1', month: jan, amount: usd(5000n), at: new Date('2025-01-15') });
+    model.recordPayment({ paymentId: 'pay_2', month: jan, amount: usd(3000n), at: new Date('2025-01-16') });
+
+    const result = model.getByMonth(jan);
+    expect(result!.total.cents).toBe(8000n);
+    expect(result!.paymentCount).toBe(2);
   });
 });

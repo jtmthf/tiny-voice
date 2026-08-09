@@ -24,40 +24,53 @@ function rowToMonthlyRevenue(row: RevenueRow): MonthlyRevenue {
 export class SqliteRevenueReadModel implements RevenueReadModel {
   constructor(private readonly db: Database) {}
 
-  recordPayment(input: { month: YearMonth; amount: Money; at: Date }): void {
-    const existing = this.db
-      .prepare<RevenueRow>(
-        'SELECT * FROM revenue_by_month WHERE month = ? AND currency = ?',
-      )
-      .get(input.month, input.amount.currency);
+  recordPayment(input: { paymentId: string; month: YearMonth; amount: Money; at: Date }): void {
+    this.db.transaction(() => {
+      const alreadyProcessed = this.db
+        .prepare('SELECT 1 FROM revenue_processed_payments WHERE payment_id = ?')
+        .get(input.paymentId);
+      if (alreadyProcessed) return;
 
-    if (existing) {
-      const newTotal = BigInt(existing.total_cents) + input.amount.cents;
       this.db
         .prepare(
-          `UPDATE revenue_by_month
-           SET total_cents = ?, payment_count = payment_count + 1, updated_at = ?
-           WHERE month = ? AND currency = ?`,
+          'INSERT INTO revenue_processed_payments (payment_id, month, processed_at) VALUES (?, ?, ?)',
         )
-        .run(
-          newTotal.toString(),
-          input.at.toISOString(),
-          input.month,
-          input.amount.currency,
-        );
-    } else {
-      this.db
-        .prepare(
-          `INSERT INTO revenue_by_month (month, currency, total_cents, payment_count, updated_at)
-           VALUES (?, ?, ?, 1, ?)`,
+        .run(input.paymentId, input.month, input.at.toISOString());
+
+      const existing = this.db
+        .prepare<RevenueRow>(
+          'SELECT * FROM revenue_by_month WHERE month = ? AND currency = ?',
         )
-        .run(
-          input.month,
-          input.amount.currency,
-          input.amount.cents.toString(),
-          input.at.toISOString(),
-        );
-    }
+        .get(input.month, input.amount.currency);
+
+      if (existing) {
+        const newTotal = BigInt(existing.total_cents) + input.amount.cents;
+        this.db
+          .prepare(
+            `UPDATE revenue_by_month
+             SET total_cents = ?, payment_count = payment_count + 1, updated_at = ?
+             WHERE month = ? AND currency = ?`,
+          )
+          .run(
+            newTotal.toString(),
+            input.at.toISOString(),
+            input.month,
+            input.amount.currency,
+          );
+      } else {
+        this.db
+          .prepare(
+            `INSERT INTO revenue_by_month (month, currency, total_cents, payment_count, updated_at)
+             VALUES (?, ?, ?, 1, ?)`,
+          )
+          .run(
+            input.month,
+            input.amount.currency,
+            input.amount.cents.toString(),
+            input.at.toISOString(),
+          );
+      }
+    });
   }
 
   getByMonth(month: YearMonth): MonthlyRevenue | null {

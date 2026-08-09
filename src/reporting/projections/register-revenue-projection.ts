@@ -18,7 +18,7 @@ export function registerRevenueProjection(deps: {
     const recordedAt = new Date(payload.recordedAt);
     const month = yearMonthOf(recordedAt);
     const amount = Money.fromCents(BigInt(payload.amountCents));
-    deps.readModel.recordPayment({ month, amount, at: recordedAt });
+    deps.readModel.recordPayment({ paymentId: payload.paymentId, month, amount, at: recordedAt });
     deps.logger.info('revenue.projection.updated', { month, invoiceId: payload.invoiceId });
   });
 }

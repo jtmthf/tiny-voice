@@ -9,8 +9,11 @@ export interface MonthlyRevenue {
 }
 
 export interface RevenueReadModel {
-  /** Idempotent-safe increment: adds `amount` to the row for (month, currency), creating if missing. */
-  recordPayment(input: { month: YearMonth; amount: Money; at: Date }): void;
+  /**
+   * Idempotent increment: adds `amount` to the row for (month, currency),
+   * creating if missing. Redelivering the same `paymentId` is a no-op.
+   */
+  recordPayment(input: { paymentId: string; month: YearMonth; amount: Money; at: Date }): void;
 
   getByMonth(month: YearMonth): MonthlyRevenue | null;
   getByYear(year: number): readonly MonthlyRevenue[];
