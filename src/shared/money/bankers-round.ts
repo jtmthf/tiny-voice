@@ -6,6 +6,9 @@
  */
 export function bankersRound(value: bigint, divisor: bigint): bigint {
   if (divisor === 0n) {
+    // Deliberate assertion, not a domain error: callers only pass a fixed
+    // non-zero SCALE constant as the divisor.
+    // eslint-disable-next-line no-restricted-syntax
     throw new RangeError('Division by zero');
   }
 

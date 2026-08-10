@@ -126,6 +126,9 @@ function toDisplayString(m: Money): string {
  */
 function multiplyByInt(m: Money, n: number): Money {
   if (!Number.isInteger(n)) {
+    // Deliberate assertion, not a domain error: callers pass line-item
+    // quantities, which are integers by construction.
+    // eslint-disable-next-line no-restricted-syntax
     throw new Error(`multiplyByInt requires an integer, got ${n}`);
   }
   return fromCents(m.cents * BigInt(n));
