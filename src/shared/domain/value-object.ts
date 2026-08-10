@@ -26,10 +26,9 @@ export interface ValueObject<TBrand extends string, TSchema extends z.ZodType> {
    * Declared as a property, not a method, so it can be re-exported standalone
    * without tripping `@typescript-eslint/no-unbound-method`.
    */
-  readonly parse: (raw: unknown) => Result<
-    BrandedOutput<TSchema, TBrand>,
-    ValueObjectError<TBrand>
-  >;
+  readonly parse: (
+    raw: unknown,
+  ) => Result<BrandedOutput<TSchema, TBrand>, ValueObjectError<TBrand>>;
   /**
    * Type guard. Sound only for validating schemas (no value-changing
    * `.transform()`), which is what this kit is for.
