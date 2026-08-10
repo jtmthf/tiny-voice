@@ -1,5 +1,5 @@
 import type { Money } from '@/shared/money/money';
-import type { YearMonth } from '@/shared/time/year-month';
+import { type YearMonth } from '@/shared/time/year-month';
 
 export interface MonthlyRevenue {
   readonly month: YearMonth;

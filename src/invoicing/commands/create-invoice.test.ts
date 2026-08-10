@@ -3,8 +3,8 @@ import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newClientId } from '@/shared/ids/client-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import { FixedClock } from '@/shared/time/fixed-clock';
-import type { DueDate } from '@/shared/time/due-date';
-import type { TaxRate } from '../value-objects/tax-rate';
+import { DueDate } from '@/shared/time/due-date';
+import { TaxRate } from '../value-objects/tax-rate';
 import { InMemoryInvoiceRepo } from '../adapters/in-memory-invoice-repo';
 import { createInvoice } from './create-invoice';
 
@@ -18,8 +18,8 @@ describe('createInvoice command', () => {
       {
         id: newInvoiceId(),
         clientId: newClientId(),
-        taxRate: 0.1 as TaxRate,
-        dueDate: '2025-02-15' as DueDate,
+        taxRate: TaxRate.trusted(0.1),
+        dueDate: DueDate.trusted('2025-02-15'),
         lineItems: [],
       },
     );
@@ -44,8 +44,8 @@ describe('createInvoice command', () => {
       {
         id: newInvoiceId(),
         clientId: newClientId(),
-        taxRate: 0.1 as TaxRate,
-        dueDate: '2025-02-15' as DueDate,
+        taxRate: TaxRate.trusted(0.1),
+        dueDate: DueDate.trusted('2025-02-15'),
         lineItems: [
           { id: newLineItemId(), description: 'Widget', quantity: 2, unitPriceCents: 5000n },
           { id: newLineItemId(), description: 'Gadget', quantity: 1, unitPriceCents: 10000n },

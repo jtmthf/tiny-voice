@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { redirect } from '@tanstack/react-router';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { getAppInstance } from '@/app/instance';
 import { createInvoice } from '@/invoicing/commands/create-invoice';
 import { newInvoiceId } from '@/shared/ids/invoice-id';

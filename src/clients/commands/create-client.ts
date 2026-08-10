@@ -1,4 +1,4 @@
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { err, type Result } from 'neverthrow';
 import type { ClientRepository } from '../ports/client-repository';
 import type { Clock } from '@/shared/time/clock';

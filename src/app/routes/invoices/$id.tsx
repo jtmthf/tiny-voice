@@ -4,8 +4,7 @@ import { invoiceDetailQueryOptions } from '@/app/queries/invoice-queries';
 import { InvoiceActions } from '@/app/invoices/invoice-actions';
 import { formatDate } from '@/app/lib/format-date';
 import { Money } from '@/shared/money/money';
-import { isOverdue as isDueDateOverdue } from '@/shared/time/due-date';
-import type { DueDate } from '@/shared/time/due-date';
+import { isOverdue as isDueDateOverdue, DueDate } from '@/shared/time/due-date';
 import type { LineItemDto } from '@/app/fns/dto';
 
 export const Route = createFileRoute('/invoices/$id')({
@@ -26,9 +25,11 @@ function InvoiceDetailPage() {
   if (!data.summary) return <p>Invoice not found.</p>;
 
   const { summary, lineItems, payments, clientName } = data;
-  const today = new Date().toISOString().slice(0, 10) as DueDate;
+  // An ISO-8601 date slice is YYYY-MM-DD by construction, and the DTO's
+  // dueDate was serialized from an already-parsed DueDate.
+  const today = DueDate.trusted(new Date().toISOString().slice(0, 10));
   const showLateFeeButton =
-    summary.status === 'sent' && isDueDateOverdue(summary.dueDate as DueDate, today);
+    summary.status === 'sent' && isDueDateOverdue(DueDate.trusted(summary.dueDate), today);
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ['invoices'] });

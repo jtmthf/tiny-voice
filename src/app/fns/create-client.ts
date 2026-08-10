@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { redirect } from '@tanstack/react-router';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { getAppInstance } from '@/app/instance';
 import { createClient } from '@/clients/commands/create-client';
 import { clientErrorMessage } from '@/app/lib/error-messages';

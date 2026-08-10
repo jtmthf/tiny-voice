@@ -14,9 +14,9 @@ import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newClientId } from '@/shared/ids/client-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
-import type { DueDate } from '@/shared/time/due-date';
-import type { TaxRate } from '@/invoicing/value-objects/tax-rate';
-import type { YearMonth } from '@/shared/time/year-month';
+import { DueDate } from '@/shared/time/due-date';
+import { TaxRate } from '@/invoicing/value-objects/tax-rate';
+import { YearMonth } from '@/shared/time/year-month';
 import { InMemoryConfig } from '@/shared/config/in-memory-config';
 import { FixedClock } from '@/shared/time/fixed-clock';
 import { CapturingLogger } from '@/shared/logger/capturing-logger';
@@ -76,8 +76,8 @@ describe('buildTestApp', () => {
       {
         id: invoiceId,
         clientId: client.id,
-        taxRate: 0.1 as TaxRate,
-        dueDate: '2026-05-13' as DueDate,
+        taxRate: TaxRate.trusted(0.1),
+        dueDate: DueDate.trusted('2026-05-13'),
         lineItems: [
           {
             id: newLineItemId(),
@@ -118,7 +118,7 @@ describe('buildTestApp', () => {
     expect(notifications.sent.some((s) => s.type === 'paymentReceived')).toBe(true);
 
     // 6. Query revenue
-    const revenue = app.queries.reporting.getRevenueByMonth('2026-04' as YearMonth);
+    const revenue = app.queries.reporting.getRevenueByMonth(YearMonth.trusted('2026-04'));
     expect(revenue).not.toBeNull();
     expect(revenue!.total.cents).toBe(11000n);
 
@@ -177,8 +177,8 @@ describe('buildIntegrationTestApp', () => {
       {
         id: invoiceId,
         clientId: client.id,
-        taxRate: 0 as TaxRate,
-        dueDate: '2026-05-01' as DueDate,
+        taxRate: TaxRate.trusted(0),
+        dueDate: DueDate.trusted('2026-05-01'),
         lineItems: [
           {
             id: newLineItemId(),
@@ -214,7 +214,7 @@ describe('buildIntegrationTestApp', () => {
     const summary = app.queries.invoicing.getInvoiceSummary(invoiceId);
     expect(summary!.status).toBe('paid');
 
-    const revenue = app.queries.reporting.getRevenueByMonth('2026-04' as YearMonth);
+    const revenue = app.queries.reporting.getRevenueByMonth(YearMonth.trusted('2026-04'));
     expect(revenue!.total.cents).toBe(2500n);
 
     expect(notifications.sent).toHaveLength(2); // invoiceSent + paymentReceived

@@ -1,5 +1,5 @@
 import { Money } from '@/shared/money/money';
-import type { YearMonth } from '@/shared/time/year-month';
+import { type YearMonth } from '@/shared/time/year-month';
 import type { MonthlyRevenue, RevenueReadModel } from '../ports/revenue-read-model';
 
 export class InMemoryRevenueReadModel implements RevenueReadModel {

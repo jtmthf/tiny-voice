@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { Money } from '@/shared/money/money';
-import type { YearMonth } from '@/shared/time/year-month';
+import { YearMonth } from '@/shared/time/year-month';
 import { InMemoryRevenueReadModel } from '../adapters/in-memory-revenue-read-model';
 import { getRevenueByMonth } from './get-revenue-by-month';
 
-const jan = '2025-01' as YearMonth;
+const jan = YearMonth.trusted('2025-01');
 
 describe('getRevenueByMonth', () => {
   it('returns the monthly revenue for a given month', () => {

@@ -3,22 +3,22 @@ import { describe, expect } from 'vitest';
 import fc from 'fast-check';
 import { Money } from '@/shared/money/money';
 import { newLineItemId } from '@/shared/ids/line-item-id';
-import type { DueDate } from '@/shared/time/due-date';
+import { DueDate } from '@/shared/time/due-date';
 import { expectOk } from '@/shared/testing/expect-ok';
 import { buildSentInvoice } from '../testing/invoice-factory';
 import { addLateFee, calculateLateFeeLineItem, daysOverdue } from './invoice';
 
 describe('daysOverdue', () => {
   it('returns positive days when today is after due date', () => {
-    expect(daysOverdue('2025-01-01' as DueDate, '2025-01-31' as DueDate)).toBe(30);
+    expect(daysOverdue(DueDate.trusted('2025-01-01'), DueDate.trusted('2025-01-31'))).toBe(30);
   });
 
   it('returns 0 when dates are the same', () => {
-    expect(daysOverdue('2025-01-15' as DueDate, '2025-01-15' as DueDate)).toBe(0);
+    expect(daysOverdue(DueDate.trusted('2025-01-15'), DueDate.trusted('2025-01-15'))).toBe(0);
   });
 
   it('returns negative when today is before due date', () => {
-    expect(daysOverdue('2025-02-15' as DueDate, '2025-01-15' as DueDate)).toBe(-31);
+    expect(daysOverdue(DueDate.trusted('2025-02-15'), DueDate.trusted('2025-01-15'))).toBe(-31);
   });
 });
 
@@ -63,8 +63,8 @@ describe('calculateLateFeeLineItem (pure)', () => {
 
 describe('addLateFee transition', () => {
   it('appends a late-fee line item for an overdue sent invoice and emits no event', () => {
-    const sent = buildSentInvoice({ dueDate: '2025-02-15' as DueDate });
-    const outcome = expectOk(addLateFee(sent, '2025-03-15' as DueDate, newLineItemId()));
+    const sent = buildSentInvoice({ dueDate: DueDate.trusted('2025-02-15') });
+    const outcome = expectOk(addLateFee(sent, DueDate.trusted('2025-03-15'), newLineItemId()));
 
     expect(outcome.aggregate.lineItems.length).toBe(sent.lineItems.length + 1);
     const lateFee = outcome.aggregate.lineItems[outcome.aggregate.lineItems.length - 1]!;
@@ -74,16 +74,16 @@ describe('addLateFee transition', () => {
   });
 
   it('rejects when the invoice is not overdue', () => {
-    const sent = buildSentInvoice({ dueDate: '2025-03-15' as DueDate });
-    const result = addLateFee(sent, '2025-02-15' as DueDate, newLineItemId());
+    const sent = buildSentInvoice({ dueDate: DueDate.trusted('2025-03-15') });
+    const result = addLateFee(sent, DueDate.trusted('2025-02-15'), newLineItemId());
 
     expect(result.isErr()).toBe(true);
     if (result.isErr()) expect(result.error.kind).toBe('NotOverdue');
   });
 
   it('rejects a second late fee on the same invoice', () => {
-    const sent = buildSentInvoice({ dueDate: '2025-02-15' as DueDate });
-    const today = '2025-03-15' as DueDate;
+    const sent = buildSentInvoice({ dueDate: DueDate.trusted('2025-02-15') });
+    const today = DueDate.trusted('2025-03-15');
     const first = expectOk(addLateFee(sent, today, newLineItemId())).aggregate;
     const second = addLateFee(first, today, newLineItemId());
 

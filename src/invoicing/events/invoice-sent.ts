@@ -1,4 +1,4 @@
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { InvoiceIdSchema } from '@/shared/ids/invoice-id';
 import { ClientIdSchema } from '@/shared/ids/client-id';
 

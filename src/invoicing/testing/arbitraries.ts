@@ -4,8 +4,8 @@ import { newClientId } from '@/shared/ids/client-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import { Money } from '@/shared/money/money';
-import type { DueDate } from '@/shared/time/due-date';
-import type { TaxRate } from '../value-objects/tax-rate';
+import { DueDate } from '@/shared/time/due-date';
+import { TaxRate } from '../value-objects/tax-rate';
 import type { Invoice } from '../entities/invoice';
 import type { LineItem } from '../entities/line-item';
 import type { Payment } from '../entities/payment';
@@ -15,7 +15,8 @@ export const arbMoney = fc
   .bigInt({ min: 1n, max: 1_000_000_00n }) // 1 cent to $1M
   .map((cents) => Money.fromCents(cents));
 
-export const arbTaxRate = fc.integer({ min: 0, max: 1000 }).map((n) => (n / 1000) as TaxRate);
+// n/1000 for n in [0, 1000] is in [0, 1] by construction.
+export const arbTaxRate = fc.integer({ min: 0, max: 1000 }).map((n) => TaxRate.trusted(n / 1000));
 
 export const arbDueDate = fc
   .date({ min: new Date('2020-01-01'), max: new Date('2030-12-31') })
@@ -23,7 +24,8 @@ export const arbDueDate = fc
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}` as DueDate;
+    // Zero-padded from a real Date, so YYYY-MM-DD by construction.
+    return DueDate.trusted(`${yyyy}-${mm}-${dd}`);
   });
 
 export const arbLineItem: fc.Arbitrary<LineItem> = fc.record({

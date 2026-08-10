@@ -1,6 +1,6 @@
 import type { Database } from '@/shared/db/database';
 import type { Money } from '@/shared/money/money';
-import type { YearMonth } from '@/shared/time/year-month';
+import { type YearMonth } from '@/shared/time/year-month';
 import { YearMonthSchema } from '@/shared/time/year-month';
 import type { MonthlyRevenue, RevenueReadModel } from '../ports/revenue-read-model';
 

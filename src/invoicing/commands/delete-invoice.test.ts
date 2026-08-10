@@ -4,8 +4,8 @@ import { deleteInvoice } from './delete-invoice';
 import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newClientId } from '@/shared/ids/client-id';
 import { createInvoice } from '../entities/invoice';
-import type { DueDate } from '@/shared/time/due-date';
-import type { TaxRate } from '../value-objects/tax-rate';
+import { DueDate } from '@/shared/time/due-date';
+import { TaxRate } from '../value-objects/tax-rate';
 import { expectOk } from '@/shared/testing/expect-ok';
 import { expectErr } from '@/shared/testing/expect-err';
 
@@ -19,8 +19,8 @@ describe('deleteInvoice', () => {
       createInvoice({
         id: invoiceId,
         clientId,
-        taxRate: 0 as TaxRate,
-        dueDate: '2025-12-31' as DueDate,
+        taxRate: TaxRate.trusted(0),
+        dueDate: DueDate.trusted('2025-12-31'),
         createdAt: new Date(),
       }),
     );

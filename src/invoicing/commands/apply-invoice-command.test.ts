@@ -7,7 +7,7 @@ import { newInvoiceId } from '@/shared/ids/invoice-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import { Money } from '@/shared/money/money';
-import type { DueDate } from '@/shared/time/due-date';
+import { DueDate } from '@/shared/time/due-date';
 import { addLateFee, recordPayment, sendInvoice, voidInvoice, total } from '../entities/invoice';
 import { InvoiceError as IE } from '../errors/invoice-error';
 import type { InvoicingEventMap } from '../events/invoicing-event-map';
@@ -138,13 +138,13 @@ describe('applyInvoiceCommand', () => {
       },
     });
 
-    const sent = buildSentInvoice({ dueDate: '2025-01-01' as DueDate });
+    const sent = buildSentInvoice({ dueDate: DueDate.trusted('2025-01-01') });
     repo.save(sent);
 
     const result = await applyInvoiceCommand(
       { db: STUB_DB, repo, outbox: trackingOutbox, eventBus },
       { invoiceId: sent.id },
-      (inv) => addLateFee(inv, '2025-02-15' as DueDate, newLineItemId()),
+      (inv) => addLateFee(inv, DueDate.trusted('2025-02-15'), newLineItemId()),
     );
 
     expect(result.isOk()).toBe(true);

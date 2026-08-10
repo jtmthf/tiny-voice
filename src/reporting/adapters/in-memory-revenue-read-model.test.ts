@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { Money } from '@/shared/money/money';
-import type { YearMonth } from '@/shared/time/year-month';
+import { YearMonth } from '@/shared/time/year-month';
 import { InMemoryRevenueReadModel } from './in-memory-revenue-read-model';
 
-const jan = '2025-01' as YearMonth;
-const feb = '2025-02' as YearMonth;
-const mar = '2025-03' as YearMonth;
-const dec24 = '2024-12' as YearMonth;
+const jan = YearMonth.trusted('2025-01');
+const feb = YearMonth.trusted('2025-02');
+const mar = YearMonth.trusted('2025-03');
+const dec24 = YearMonth.trusted('2024-12');
 
 function usd(cents: bigint): Money {
   return Money.fromCents(cents);
