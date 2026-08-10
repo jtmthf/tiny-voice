@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { getClient } from './get-client';
 import { InMemoryClientRepo } from '../adapters/in-memory-client-repo';
 import { testClient } from '../testing/client-factory';
-import { newClientId } from '../../shared/ids/client-id';
+import { newClientId } from '@/shared/ids/client-id';
 
 describe('getClient', () => {
   it('returns client when found', () => {

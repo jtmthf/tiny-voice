@@ -1,4 +1,4 @@
-import { parseClientId } from '../../shared/ids/client-id';
+import { parseClientId } from '@/shared/ids/client-id';
 import type { Client } from '../entities/client';
 import type { EmailAddress } from '../value-objects/email-address';
 

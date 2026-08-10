@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { setupDb } from '../../shared/testing/db-fixture';
+import { setupDb } from '@/shared/testing/db-fixture';
 import { SqliteClientRepo } from './sqlite-client-repo';
 import { testClient } from '../testing/client-factory';
-import { newClientId } from '../../shared/ids/client-id';
+import { newClientId } from '@/shared/ids/client-id';
 import { emailAddress } from '../value-objects/email-address';
 import { expectOk } from '@/shared/testing/expect-ok';
-import type { Database } from '../../shared/db/database';
+import type { Database } from '@/shared/db/database';
 
 let db: Database;
 let teardown: () => void;

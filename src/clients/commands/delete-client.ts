@@ -1,8 +1,8 @@
 import type { Result } from 'neverthrow';
 import { ok, err } from 'neverthrow';
-import type { ClientId } from '../../shared/ids/client-id';
+import type { ClientId } from '@/shared/ids/client-id';
 import type { ClientRepository } from '../ports/client-repository';
-import type { InvoiceRepository } from '../../invoicing/ports/invoice-repository';
+import type { InvoiceRepository } from '@/invoicing/ports/invoice-repository';
 
 export interface DeleteClientError {
   readonly kind: 'NotFound';

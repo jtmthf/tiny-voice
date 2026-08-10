@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { createClient } from './create-client';
 import { InMemoryClientRepo } from '../adapters/in-memory-client-repo';
-import { FixedClock } from '../../shared/time/fixed-clock';
-import { CapturingLogger } from '../../shared/logger/capturing-logger';
+import { FixedClock } from '@/shared/time/fixed-clock';
+import { CapturingLogger } from '@/shared/logger/capturing-logger';
 import { expectOk } from '@/shared/testing/expect-ok';
 import { expectErr } from '@/shared/testing/expect-err';
 

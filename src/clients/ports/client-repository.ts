@@ -1,4 +1,4 @@
-import type { ClientId } from '../../shared/ids/client-id';
+import type { ClientId } from '@/shared/ids/client-id';
 import type { Client } from '../entities/client';
 
 /**

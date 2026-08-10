@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { InMemoryClientRepo } from './in-memory-client-repo';
 import { testClient } from '../testing/client-factory';
-import { newClientId } from '../../shared/ids/client-id';
+import { newClientId } from '@/shared/ids/client-id';
 
 describe('InMemoryClientRepo', () => {
   it('save then findById round-trip', () => {

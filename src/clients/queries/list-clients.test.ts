@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { listClients } from './list-clients';
 import { InMemoryClientRepo } from '../adapters/in-memory-client-repo';
 import { testClient } from '../testing/client-factory';
-import { newClientId } from '../../shared/ids/client-id';
+import { newClientId } from '@/shared/ids/client-id';
 
 describe('listClients', () => {
   it('returns empty array when no clients', () => {

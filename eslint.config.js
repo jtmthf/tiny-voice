@@ -189,6 +189,21 @@ export default tseslint.config(
         },
       ],
 
+      // One path convention, not two: relative imports are for siblings and
+      // direct children only. Anything further away uses the '@/' alias.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../../*', '../../../*'],
+              message:
+                "Use the '@/' alias for cross-directory imports. Relative imports are for siblings and direct children only.",
+            },
+          ],
+        },
+      ],
+
       // Ban neverthrow's escape hatches — use expectOk/expectErr (tests) or
       // pattern matching / type-level guarantees (production) instead.
       'no-restricted-syntax': [
