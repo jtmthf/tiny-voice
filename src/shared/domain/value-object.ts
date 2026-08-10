@@ -21,19 +21,26 @@ export interface ValueObject<TBrand extends string, TSchema extends z.ZodType> {
   readonly brand: TBrand;
   /** Branded schema — use at RPC/event boundaries (AGENTS.md rule 5). */
   readonly schema: z.ZodType<BrandedOutput<TSchema, TBrand>, z.input<TSchema>>;
-  /** Result-returning parse — the only sanctioned way to produce the type. */
-  parse(raw: unknown): Result<BrandedOutput<TSchema, TBrand>, ValueObjectError<TBrand>>;
+  /**
+   * Result-returning parse — the only sanctioned way to produce the type.
+   * Declared as a property, not a method, so it can be re-exported standalone
+   * without tripping `@typescript-eslint/no-unbound-method`.
+   */
+  readonly parse: (raw: unknown) => Result<
+    BrandedOutput<TSchema, TBrand>,
+    ValueObjectError<TBrand>
+  >;
   /**
    * Type guard. Sound only for validating schemas (no value-changing
    * `.transform()`), which is what this kit is for.
    */
-  is(raw: unknown): raw is BrandedOutput<TSchema, TBrand>;
+  readonly is: (raw: unknown) => raw is BrandedOutput<TSchema, TBrand>;
   /**
    * Bypass validation. ONLY for values already proven valid by construction —
    * DB rows written through `parse`, or generated values. Every call site
    * needs a comment saying which.
    */
-  trusted(value: z.output<TSchema>): BrandedOutput<TSchema, TBrand>;
+  readonly trusted: (value: z.output<TSchema>) => BrandedOutput<TSchema, TBrand>;
 }
 
 /**
@@ -54,7 +61,7 @@ export function defineValueObject<TBrand extends string, TSchema extends z.ZodTy
   return {
     brand,
     schema: branded,
-    parse(raw: unknown): Result<Output, ValueObjectError<TBrand>> {
+    parse: (raw: unknown): Result<Output, ValueObjectError<TBrand>> => {
       const result = branded.safeParse(raw);
       if (result.success) {
         return ok(result.data);
@@ -66,11 +73,7 @@ export function defineValueObject<TBrand extends string, TSchema extends z.ZodTy
         issues: result.error.issues.map((issue) => issue.message),
       });
     },
-    is(raw: unknown): raw is Output {
-      return branded.safeParse(raw).success;
-    },
-    trusted(value: z.output<TSchema>): Output {
-      return value as Output;
-    },
+    is: (raw: unknown): raw is Output => branded.safeParse(raw).success,
+    trusted: (value: z.output<TSchema>): Output => value as Output,
   };
 }
