@@ -47,7 +47,7 @@ export class InProcessEventBus<TEventMap extends object> implements EventBus<TEv
 
     const errors = results
       .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
-      .map((r) => r.reason);
+      .map((r): unknown => r.reason);
 
     if (errors.length > 0) {
       throw new AggregateError(

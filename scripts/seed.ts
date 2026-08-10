@@ -250,7 +250,8 @@ try {
             entry.count++;
             revenueAccumulator.set(month, entry);
           }
-        } else if (invoice.status === 'sent' && faker.datatype.boolean(0.4)) {
+        } else if (faker.datatype.boolean(0.4)) {
+          // invoice.status === 'sent' here (the only other status that reaches this loop)
           // 40% of sent invoices have a partial payment
           const partialCents = (totalCents * BigInt(faker.number.int({ min: 20, max: 80 }))) / 100n;
           const recordedAt = addDays(invoice.createdAt, faker.number.int({ min: 5, max: 30 }));
