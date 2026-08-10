@@ -21,11 +21,16 @@ export function newId<P extends string>(prefix: P): () => Id<P> {
 export function parseId<P extends string>(prefix: P, value: string): Id<P> {
   const expectedPrefix = `${prefix}_`;
   if (!value.startsWith(expectedPrefix)) {
+    // TODO(plan-003): parseId violates AGENTS.md rule 1 (domain code throws
+    // instead of returning Result). Plan 003 (domain value-object kit) fixes it.
+    // eslint-disable-next-line no-restricted-syntax
     throw new Error(`Expected ${prefix}_ prefix, got: ${value}`);
   }
   const uuid = value.slice(expectedPrefix.length);
   const result = z.uuid().safeParse(uuid);
   if (!result.success) {
+    // TODO(plan-003): see above.
+    // eslint-disable-next-line no-restricted-syntax
     throw new Error(`Invalid UUID in ${prefix} ID: ${value}`);
   }
   return value as Id<P>;

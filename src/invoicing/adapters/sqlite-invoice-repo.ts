@@ -239,12 +239,11 @@ export class SqliteInvoiceRepo implements InvoiceRepository {
     const rows = this.db.prepare<InvoiceWithChildrenRow>(sql).all(...params);
 
     return rows.map((row) => {
-      const lineItems: LineItemRow[] = JSON.parse(row.line_items_json);
-      const payments: PaymentRow[] = JSON.parse(row.payments_json);
-      // json_group_array returns [null] for empty sets
-      const validLineItems = lineItems.filter((li) => li.id !== null);
-      const validPayments = payments.filter((p) => p.id !== null);
-      return toInvoice(row, validLineItems.map(toLineItem), validPayments.map(toPayment));
+      // json_group_array over a correlated subquery with zero matching rows
+      // yields '[]', not '[null]' — verified empirically. No null-filtering needed.
+      const lineItems = JSON.parse(row.line_items_json) as LineItemRow[];
+      const payments = JSON.parse(row.payments_json) as PaymentRow[];
+      return toInvoice(row, lineItems.map(toLineItem), payments.map(toPayment));
     });
   }
 

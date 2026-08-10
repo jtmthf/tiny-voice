@@ -30,7 +30,7 @@ describe('SqliteRevenueReadModel', () => {
     teardown();
   });
 
-  it('records a payment and retrieves by month', async () => {
+  it('records a payment and retrieves by month', () => {
     model.recordPayment({
       paymentId: 'pay_1',
       month: jan,
@@ -45,7 +45,7 @@ describe('SqliteRevenueReadModel', () => {
     expect(result!.paymentCount).toBe(1);
   });
 
-  it('aggregates multiple payments in the same month', async () => {
+  it('aggregates multiple payments in the same month', () => {
     model.recordPayment({
       paymentId: 'pay_1',
       month: jan,
@@ -64,12 +64,12 @@ describe('SqliteRevenueReadModel', () => {
     expect(result!.paymentCount).toBe(2);
   });
 
-  it('returns null for unknown month', async () => {
+  it('returns null for unknown month', () => {
     const result = model.getByMonth(jan);
     expect(result).toBeNull();
   });
 
-  it('getByYear returns months in ascending order', async () => {
+  it('getByYear returns months in ascending order', () => {
     model.recordPayment({
       paymentId: 'pay_1',
       month: mar,
@@ -96,7 +96,7 @@ describe('SqliteRevenueReadModel', () => {
     expect(results[2]!.month).toBe(mar);
   });
 
-  it('getByYear excludes other years', async () => {
+  it('getByYear excludes other years', () => {
     model.recordPayment({
       paymentId: 'pay_1',
       month: jan,
@@ -115,7 +115,7 @@ describe('SqliteRevenueReadModel', () => {
     expect(results[0]!.month).toBe(jan);
   });
 
-  it('listAll returns months in descending order', async () => {
+  it('listAll returns months in descending order', () => {
     model.recordPayment({
       paymentId: 'pay_1',
       month: jan,
@@ -142,7 +142,7 @@ describe('SqliteRevenueReadModel', () => {
     expect(results[2]!.month).toBe(jan);
   });
 
-  it('redelivering the same paymentId is a no-op', async () => {
+  it('redelivering the same paymentId is a no-op', () => {
     model.recordPayment({
       paymentId: 'pay_1',
       month: jan,
@@ -161,7 +161,7 @@ describe('SqliteRevenueReadModel', () => {
     expect(result!.paymentCount).toBe(1);
   });
 
-  it('different paymentIds accumulate normally', async () => {
+  it('different paymentIds accumulate normally', () => {
     model.recordPayment({
       paymentId: 'pay_1',
       month: jan,

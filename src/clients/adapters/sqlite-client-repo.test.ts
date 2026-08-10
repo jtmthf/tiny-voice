@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { setupDb } from '../../shared/testing/db-fixture';
+import { setupDb } from '@/shared/testing/db-fixture';
 import { SqliteClientRepo } from './sqlite-client-repo';
 import { testClient } from '../testing/client-factory';
-import { newClientId } from '../../shared/ids/client-id';
+import { newClientId } from '@/shared/ids/client-id';
 import { emailAddress } from '../value-objects/email-address';
 import { expectOk } from '@/shared/testing/expect-ok';
-import type { Database } from '../../shared/db/database';
+import type { Database } from '@/shared/db/database';
 
 let db: Database;
 let teardown: () => void;
@@ -23,7 +23,7 @@ afterEach(() => {
 });
 
 describe('SqliteClientRepo', () => {
-  it('save then findById round-trip', async () => {
+  it('save then findById round-trip', () => {
     const client = testClient();
     repo.save(client);
 
@@ -35,12 +35,12 @@ describe('SqliteClientRepo', () => {
     expect(found!.createdAt.toISOString()).toBe(client.createdAt.toISOString());
   });
 
-  it('findById returns null for non-existent id', async () => {
+  it('findById returns null for non-existent id', () => {
     const found = repo.findById(newClientId());
     expect(found).toBeNull();
   });
 
-  it('save then update (upsert)', async () => {
+  it('save then update (upsert)', () => {
     const client = testClient();
     repo.save(client);
 
@@ -56,7 +56,7 @@ describe('SqliteClientRepo', () => {
     expect(found!.email).toBe('updated@example.com');
   });
 
-  it('list returns clients ordered by createdAt ascending', async () => {
+  it('list returns clients ordered by createdAt ascending', () => {
     const first = testClient({
       id: newClientId(),
       name: 'First',
@@ -85,7 +85,7 @@ describe('SqliteClientRepo', () => {
     expect(all[2]!.name).toBe('Third');
   });
 
-  it('list returns empty array when no clients exist', async () => {
+  it('list returns empty array when no clients exist', () => {
     const all = repo.list();
     expect(all).toEqual([]);
   });

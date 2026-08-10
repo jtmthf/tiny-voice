@@ -6,7 +6,7 @@ import { parseClientId } from '@/shared/ids/client-id';
 export const Route = createFileRoute('/api/clients/$id')({
   server: {
     handlers: {
-      DELETE: async ({ params }) => {
+      DELETE: ({ params }) => {
         const app = getAppInstance();
         const result = deleteClient(
           { clientRepo: app.clientRepo, invoiceRepo: app.invoiceRepo },

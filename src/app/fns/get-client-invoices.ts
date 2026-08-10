@@ -8,7 +8,7 @@ const Input = z.object({ clientId: ClientIdSchema });
 
 export const getClientInvoicesFn = createServerFn({ method: 'GET' })
   .validator((data: unknown) => Input.parse(data))
-  .handler(async ({ data }) => {
+  .handler(({ data }) => {
     const app = getAppReadView();
     return app.queries.invoicing.listInvoices({ clientId: data.clientId }).map(invoiceSummaryToDto);
   });

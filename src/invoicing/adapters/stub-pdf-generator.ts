@@ -7,7 +7,7 @@ import type { PdfInput, PdfError, PdfGenerator } from '../ports/pdf-generator';
  * Same input always produces the same bytes.
  */
 export class StubPdfGenerator implements PdfGenerator {
-  async generate(input: PdfInput): Promise<Result<Uint8Array, PdfError>> {
+  generate(input: PdfInput): Promise<Result<Uint8Array, PdfError>> {
     const invoiceId = input.invoice.id;
     // Build a minimal valid PDF with the invoice ID embedded as text.
     const content = `Invoice #${invoiceId}`;
@@ -28,6 +28,6 @@ export class StubPdfGenerator implements PdfGenerator {
       '%%EOF',
     ].join('\n');
 
-    return ok(new TextEncoder().encode(pdf));
+    return Promise.resolve(ok(new TextEncoder().encode(pdf)));
   }
 }

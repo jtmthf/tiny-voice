@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { InMemoryClientRepo } from '../adapters/in-memory-client-repo';
-import { InMemoryInvoiceRepo } from '../../invoicing/adapters/in-memory-invoice-repo';
+import { InMemoryInvoiceRepo } from '@/invoicing/adapters/in-memory-invoice-repo';
 import { deleteClient } from './delete-client';
-import { newClientId } from '../../shared/ids/client-id';
-import { newInvoiceId } from '../../shared/ids/invoice-id';
-import { createInvoice } from '../../invoicing/entities/invoice';
-import type { DueDate } from '../../shared/time/due-date';
-import type { TaxRate } from '../../invoicing/value-objects/tax-rate';
-import { expectOk } from '../../shared/testing/expect-ok';
-import { expectErr } from '../../shared/testing/expect-err';
+import { newClientId } from '@/shared/ids/client-id';
+import { newInvoiceId } from '@/shared/ids/invoice-id';
+import { createInvoice } from '@/invoicing/entities/invoice';
+import type { DueDate } from '@/shared/time/due-date';
+import type { TaxRate } from '@/invoicing/value-objects/tax-rate';
+import { expectOk } from '@/shared/testing/expect-ok';
+import { expectErr } from '@/shared/testing/expect-err';
 import { emailAddress } from '../value-objects/email-address';
 
 function makeDeps() {

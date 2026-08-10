@@ -10,9 +10,7 @@ let _instance: AppDeps | null = null;
  * if a client component imports it (rule #8).
  */
 export const getAppInstance = createServerOnlyFn((): AppDeps => {
-  if (!_instance) {
-    _instance = buildApp();
-  }
+  _instance ??= buildApp();
   return _instance;
 });
 

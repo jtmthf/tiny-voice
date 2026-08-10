@@ -1,8 +1,8 @@
 import { z } from 'zod/v4';
 import { err, type Result } from 'neverthrow';
 import type { ClientRepository } from '../ports/client-repository';
-import type { Clock } from '../../shared/time/clock';
-import type { Logger } from '../../shared/logger/logger';
+import type { Clock } from '@/shared/time/clock';
+import type { Logger } from '@/shared/logger/logger';
 import type { Client, ClientValidationError } from '../entities/client';
 import { makeClient } from '../entities/client';
 import { emailAddress } from '../value-objects/email-address';

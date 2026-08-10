@@ -105,9 +105,16 @@ export default tseslint.config(
     ],
   },
 
-  // Base TypeScript strict + stylistic
-  ...tseslint.configs.strict,
-  ...tseslint.configs.stylistic,
+  // Base TypeScript strict + stylistic (type-checked variants — projectService
+  // is already configured below, so full type information is available)
+  ...tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
+
+  // Type-aware rules need type info; these files aren't part of the TS project
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
 
   // Main rules for all TS files
   {
@@ -130,6 +137,20 @@ export default tseslint.config(
     rules: {
       // Deprecated API detection
       '@typescript-eslint/no-deprecated': 'error',
+
+      // strictTypeChecked already enables ban-ts-comment; require a real
+      // explanation (10+ chars) on any @ts-expect-error instead of a bare one.
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        { 'ts-expect-error': 'allow-with-description', minimumDescriptionLength: 10 },
+      ],
+
+      // number/bigint have unambiguous, lossless string forms — permit them
+      // in template literals. bigint has no allow* option in this
+      // typescript-eslint version because the rule already allows it
+      // unconditionally. Do NOT add allowAny/allowNullish/allowBoolean;
+      // those are the cases where interpolation hides a bug.
+      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
 
       // import-x rules
       'import-x/no-default-export': 'error',
@@ -175,6 +196,21 @@ export default tseslint.config(
         },
       ],
 
+      // One path convention, not two: relative imports are for siblings and
+      // direct children only. Anything further away uses the '@/' alias.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../../*', '../../../*'],
+              message:
+                "Use the '@/' alias for cross-directory imports. Relative imports are for siblings and direct children only.",
+            },
+          ],
+        },
+      ],
+
       // Ban neverthrow's escape hatches — use expectOk/expectErr (tests) or
       // pattern matching / type-level guarantees (production) instead.
       'no-restricted-syntax': [
@@ -192,6 +228,56 @@ export default tseslint.config(
       ],
     },
   },
+
+  // Domain code returns Result<T, DomainError> (AGENTS.md rule 1); throw only
+  // for infrastructure failures, which belong in adapters. Note: no-restricted-syntax
+  // does not merge across config blocks, so the _unsafeUnwrap/_unsafeUnwrapErr
+  // selectors from the main rules block are repeated here.
+  {
+    files: [
+      'src/{clients,invoicing,reporting}/{entities,commands,queries,value-objects,errors,ports}/**/*.ts',
+      'src/shared/{money,ids,time,outcome}/**/*.ts',
+    ],
+    ignores: ['**/*.test.ts', '**/*.property.test.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ThrowStatement',
+          message:
+            'Domain code returns Result<T, DomainError> (AGENTS.md rule 1). Throw only for infrastructure failures, which belong in adapters.',
+        },
+        {
+          selector: "MemberExpression[property.name='_unsafeUnwrap']",
+          message:
+            "Don't use _unsafeUnwrap. In tests use expectOk from @/shared/testing/expect-ok. In production handle the Result or fix the type design so the operation is infallible.",
+        },
+        {
+          selector: "MemberExpression[property.name='_unsafeUnwrapErr']",
+          message:
+            "Don't use _unsafeUnwrapErr. In tests use expectErr from @/shared/testing/expect-err. In production handle the Result branch explicitly.",
+        },
+      ],
+    },
+  },
+
+  // Ban hand-rolled brand casts outside the domain kit — commented out until
+  // plan 003 (domain value-object kit) lands; enabling it now would flag the
+  // existing casts that 003 is about to delete. TODO(plan-003): uncomment.
+  // {
+  //   files: ['**/*.ts', '**/*.tsx'],
+  //   ignores: ['src/shared/domain/**'],
+  //   rules: {
+  //     'no-restricted-syntax': [
+  //       'error',
+  //       {
+  //         selector:
+  //           "TSAsExpression > TSTypeReference[typeName.name=/^(EmailAddress|TaxRate|DueDate|YearMonth)$/]",
+  //         message: 'Do not cast into a branded type. Parse it through the value object (src/shared/domain/).',
+  //       },
+  //     ],
+  //   },
+  // },
 
   // Relax rules for config files, scripts, and e2e infrastructure
   {

@@ -2,16 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { listClients } from './list-clients';
 import { InMemoryClientRepo } from '../adapters/in-memory-client-repo';
 import { testClient } from '../testing/client-factory';
-import { newClientId } from '../../shared/ids/client-id';
+import { newClientId } from '@/shared/ids/client-id';
 
 describe('listClients', () => {
-  it('returns empty array when no clients', async () => {
+  it('returns empty array when no clients', () => {
     const repo = new InMemoryClientRepo();
-    const result = await listClients({ repo });
+    const result = listClients({ repo });
     expect(result).toEqual([]);
   });
 
-  it('returns all clients sorted by createdAt', async () => {
+  it('returns all clients sorted by createdAt', () => {
     const first = testClient({
       id: newClientId(),
       name: 'First',
@@ -24,7 +24,7 @@ describe('listClients', () => {
     });
     const repo = new InMemoryClientRepo([second, first]);
 
-    const result = await listClients({ repo });
+    const result = listClients({ repo });
     expect(result).toHaveLength(2);
     expect(result[0]!.name).toBe('First');
     expect(result[1]!.name).toBe('Second');

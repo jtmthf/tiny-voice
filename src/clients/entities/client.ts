@@ -1,9 +1,9 @@
 import { ok, err } from 'neverthrow';
 import type { Result } from 'neverthrow';
-import type { ClientId } from '../../shared/ids/client-id';
-import { newClientId } from '../../shared/ids/client-id';
+import type { ClientId } from '@/shared/ids/client-id';
+import { newClientId } from '@/shared/ids/client-id';
 import type { EmailAddress } from '../value-objects/email-address';
-import type { Clock } from '../../shared/time/clock';
+import type { Clock } from '@/shared/time/clock';
 
 /**
  * Client entity — immutable data type.

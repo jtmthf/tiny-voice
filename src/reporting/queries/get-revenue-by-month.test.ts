@@ -7,7 +7,7 @@ import { getRevenueByMonth } from './get-revenue-by-month';
 const jan = '2025-01' as YearMonth;
 
 describe('getRevenueByMonth', () => {
-  it('returns the monthly revenue for a given month', async () => {
+  it('returns the monthly revenue for a given month', () => {
     const readModel = new InMemoryRevenueReadModel();
     readModel.recordPayment({
       paymentId: 'pay_1',
@@ -21,7 +21,7 @@ describe('getRevenueByMonth', () => {
     expect(result!.total.cents).toBe(5000n);
   });
 
-  it('returns null for a month with no data', async () => {
+  it('returns null for a month with no data', () => {
     const readModel = new InMemoryRevenueReadModel();
     const result = getRevenueByMonth({ readModel }, jan);
     expect(result).toBeNull();

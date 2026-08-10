@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { InMemoryInvoiceRepo } from '../adapters/in-memory-invoice-repo';
 import { deleteInvoice } from './delete-invoice';
-import { newInvoiceId } from '../../shared/ids/invoice-id';
-import { newClientId } from '../../shared/ids/client-id';
+import { newInvoiceId } from '@/shared/ids/invoice-id';
+import { newClientId } from '@/shared/ids/client-id';
 import { createInvoice } from '../entities/invoice';
-import type { DueDate } from '../../shared/time/due-date';
+import type { DueDate } from '@/shared/time/due-date';
 import type { TaxRate } from '../value-objects/tax-rate';
-import { expectOk } from '../../shared/testing/expect-ok';
-import { expectErr } from '../../shared/testing/expect-err';
+import { expectOk } from '@/shared/testing/expect-ok';
+import { expectErr } from '@/shared/testing/expect-err';
 
 describe('deleteInvoice', () => {
   it('deletes an invoice', () => {

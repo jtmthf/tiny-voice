@@ -15,16 +15,16 @@ export class ConsoleNotificationSender implements NotificationSender {
     this.logger = logger;
   }
 
-  async sendInvoiceSent(input: InvoiceSentNotification): Promise<Result<void, NotificationError>> {
+  sendInvoiceSent(input: InvoiceSentNotification): Promise<Result<void, NotificationError>> {
     this.logger.info('Invoice sent notification', {
       invoiceId: input.invoiceId,
       clientName: input.clientName,
       totalCents: input.totalCents.toString(),
     });
-    return ok(undefined);
+    return Promise.resolve(ok(undefined));
   }
 
-  async sendPaymentReceived(
+  sendPaymentReceived(
     input: PaymentReceivedNotification,
   ): Promise<Result<void, NotificationError>> {
     this.logger.info('Payment received notification', {
@@ -32,6 +32,6 @@ export class ConsoleNotificationSender implements NotificationSender {
       amountCents: input.amountCents.toString(),
       outstandingCents: input.outstanding.cents.toString(),
     });
-    return ok(undefined);
+    return Promise.resolve(ok(undefined));
   }
 }

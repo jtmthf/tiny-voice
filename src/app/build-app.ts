@@ -50,8 +50,10 @@ function createDatabase(overrides: Partial<AppDeps>, config: Config, logger: Log
   const dbPath = config.get('DATABASE_PATH');
   const database = new SqliteDatabase(dbPath);
   // import.meta.dirname may be undefined in Turbopack builds; fall back to cwd-relative.
-  const baseDir = import.meta.dirname ?? process.cwd();
-  const migrationsDir = import.meta.dirname
+  // Lib types declare it as always `string` — assert the wider type so this reflects reality.
+  const importMetaDirname = import.meta.dirname as string | undefined;
+  const baseDir = importMetaDirname ?? process.cwd();
+  const migrationsDir = importMetaDirname
     ? resolve(baseDir, '../../migrations')
     : resolve(baseDir, 'migrations');
   runMigrations(database, migrationsDir, logger);
@@ -128,9 +130,13 @@ function createEventingAndSubscribers(
   void outbox
     .drain(
       (eventName, payload) => eventBus.publish(eventName, payload),
-      (eventName, error) => deps.logger.warn('outbox.recovery.failed', { eventName, error }),
+      (eventName, error) => {
+        deps.logger.warn('outbox.recovery.failed', { eventName, error });
+      },
     )
-    .catch((error) => deps.logger.warn('outbox.recovery.error', { error }));
+    .catch((error: unknown) => {
+      deps.logger.warn('outbox.recovery.error', { error });
+    });
 
   return { eventBus, outbox, unsubscribe };
 }

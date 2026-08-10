@@ -39,6 +39,10 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 - **TypeScript strict** -- `tsconfig.json`: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedLocals`, `noUnusedParameters`, `noPropertyAccessFromIndexSignature`, `noImplicitOverride`, `noUncheckedSideEffectImports`, `erasableSyntaxOnly`
 - **No parameter properties, no enums** -- TypeScript: `erasableSyntaxOnly`. Constructors take plain parameters and assign to declared fields. This also forecloses decorator-based DI by construction (see plan 004).
 - **Conventional commits** -- commitlint via `simple-git-hooks`
+- **ESLint type-checked linting** -- `eslint.config.js`: `tseslint.configs.strictTypeChecked` + `stylisticTypeChecked` (full type information via `projectService`, not the non-type-checked variants)
+- **One import path convention** -- ESLint: `no-restricted-imports` bans `../../` and deeper parent imports. Relative imports are for siblings and direct children only; anything further away uses the `@/` alias.
+- **No throw in domain code** -- ESLint: scoped `no-restricted-syntax` (`ThrowStatement`) over `{clients,invoicing,reporting}/{entities,commands,queries,value-objects,errors,ports}/**` and `shared/{money,ids,time,outcome}/**`, enforcing rule 1 below at lint time. Deliberate assertions on values that can't be invalid by construction (e.g. `Money.multiplyByInt`, `bankersRound`) get a scoped inline disable with a one-line reason instead of a rewrite.
+- **No hand-rolled brand casts** (planned) -- a `no-restricted-syntax` rule banning `as EmailAddress`/`TaxRate`/`DueDate`/`YearMonth` outside `src/shared/domain/` is written into `eslint.config.js` but commented out until plan 003 (domain value-object kit) lands and the value-object kit exists to parse into. TODO(plan-003): uncomment.
 
 ## Rules the toolchain cannot enforce
 

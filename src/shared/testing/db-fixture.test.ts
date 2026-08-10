@@ -7,7 +7,8 @@ import type { Database } from '../db/database';
 
 describe('setupDb', () => {
   let db: Database;
-  let teardown: () => void;
+  // Unassigned if setupDb() throws before a test's destructure runs.
+  let teardown: (() => void) | undefined;
   let tempDir: string | undefined;
 
   afterEach(() => {

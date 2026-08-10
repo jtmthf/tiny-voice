@@ -76,7 +76,10 @@ function multiply(m: Money, scalar: number): Result<Money, MoneyError> {
 }
 
 function equals(a: Money, b: Money): boolean {
-  return a.currency === b.currency && a.cents === b.cents;
+  // No currency comparison: `currency: 'USD'` is a literal type, so a
+  // second currency would be a compile error at every construction site,
+  // not a silent equality bug (see the single-currency note above).
+  return a.cents === b.cents;
 }
 
 /**
@@ -123,6 +126,9 @@ function toDisplayString(m: Money): string {
  */
 function multiplyByInt(m: Money, n: number): Money {
   if (!Number.isInteger(n)) {
+    // Deliberate assertion, not a domain error: callers pass line-item
+    // quantities, which are integers by construction.
+    // eslint-disable-next-line no-restricted-syntax
     throw new Error(`multiplyByInt requires an integer, got ${n}`);
   }
   return fromCents(m.cents * BigInt(n));

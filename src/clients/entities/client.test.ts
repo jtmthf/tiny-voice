@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { makeClient } from './client';
-import { FixedClock } from '../../shared/time/fixed-clock';
-import { newClientId } from '../../shared/ids/client-id';
+import { FixedClock } from '@/shared/time/fixed-clock';
+import { newClientId } from '@/shared/ids/client-id';
 import { emailAddress } from '../value-objects/email-address';
 import { expectOk } from '@/shared/testing/expect-ok';
 import { expectErr } from '@/shared/testing/expect-err';

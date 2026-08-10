@@ -1,6 +1,6 @@
 import type { Result } from 'neverthrow';
 import { ok, err } from 'neverthrow';
-import type { InvoiceId } from '../../shared/ids/invoice-id';
+import type { InvoiceId } from '@/shared/ids/invoice-id';
 import type { InvoiceRepository } from '../ports/invoice-repository';
 import { InvoiceError } from '../errors/invoice-error';
 import type { InvoiceError as InvoiceErrorType } from '../errors/invoice-error';

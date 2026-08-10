@@ -10,8 +10,6 @@ import { TaxRateSchema } from '@/invoicing/value-objects/tax-rate';
 import { DueDateSchema } from '@/shared/time/due-date';
 import { invoiceErrorMessage } from '@/app/lib/error-messages';
 import { parseBracketNotation } from './parse-bracket-notation';
-import type { TaxRate } from '@/invoicing/value-objects/tax-rate';
-import type { DueDate } from '@/shared/time/due-date';
 
 export const CreateInvoiceInput = z.object({
   clientId: ClientIdSchema,
@@ -38,19 +36,19 @@ export function parseCreateInvoiceInput(data: unknown): CreateInvoiceInput {
   return CreateInvoiceInput.parse(raw);
 }
 
-export async function createInvoiceHandler(data: CreateInvoiceInput): Promise<never> {
+export function createInvoiceHandler(data: CreateInvoiceInput): Promise<never> {
   const app = getAppInstance();
 
   const client = app.queries.clients.getClient(data.clientId);
-  if (!client) throw new Error('Client not found');
+  if (!client) return Promise.reject(new Error('Client not found'));
 
   const result = createInvoice(
     { repo: app.invoiceRepo, clock: app.clock },
     {
       id: newInvoiceId(),
       clientId: data.clientId,
-      taxRate: data.taxRate as TaxRate,
-      dueDate: data.dueDate as DueDate,
+      taxRate: data.taxRate,
+      dueDate: data.dueDate,
       lineItems: data.lineItems.map((li) => ({
         id: newLineItemId(),
         description: li.description,
@@ -59,8 +57,10 @@ export async function createInvoiceHandler(data: CreateInvoiceInput): Promise<ne
       })),
     },
   );
-  if (result.isErr()) throw new Error(invoiceErrorMessage(result.error));
-  throw redirect({ to: '/invoices/$id', params: { id: result.value.id } });
+  if (result.isErr()) return Promise.reject(new Error(invoiceErrorMessage(result.error)));
+  // redirect() is TanStack Router's documented control-flow signal, not an Error.
+  // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+  return Promise.reject(redirect({ to: '/invoices/$id', params: { id: result.value.id } }));
 }
 
 export const createInvoiceFn = createServerFn({ method: 'POST' })
