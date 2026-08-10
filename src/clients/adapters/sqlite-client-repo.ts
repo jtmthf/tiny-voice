@@ -2,7 +2,7 @@ import type { Database } from '@/shared/db/database';
 import type { ClientId } from '@/shared/ids/client-id';
 import type { Client } from '../entities/client';
 import type { ClientRepository } from '../ports/client-repository';
-import { fromDb, toDb } from '@/shared/ids/id';
+import { fromDb, toDb } from '@/shared/domain/branded-id';
 import { EmailAddressSchema } from '../value-objects/email-address';
 
 interface ClientRow {

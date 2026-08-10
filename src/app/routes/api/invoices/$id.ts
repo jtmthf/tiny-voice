@@ -8,10 +8,11 @@ export const Route = createFileRoute('/api/invoices/$id')({
     handlers: {
       DELETE: ({ params }) => {
         const app = getAppInstance();
-        const result = deleteInvoice(
-          { repo: app.invoiceRepo },
-          { invoiceId: parseInvoiceId(params.id) },
-        );
+        const invoiceId = parseInvoiceId(params.id);
+        if (invoiceId.isErr()) {
+          return new Response(JSON.stringify({ error: invoiceId.error }), { status: 400 });
+        }
+        const result = deleteInvoice({ repo: app.invoiceRepo }, { invoiceId: invoiceId.value });
         if (result.isErr()) {
           return new Response(JSON.stringify({ error: result.error }), { status: 400 });
         }

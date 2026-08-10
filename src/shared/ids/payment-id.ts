@@ -1,10 +1,11 @@
-import type { Id } from './id';
-import { newId, parseId, prefixedIdSchema } from './id';
+import { defineBrandedId } from '@/shared/domain/branded-id';
 
-export type PaymentId = Id<'pay'>;
+const PaymentIdKit = defineBrandedId('pay');
 
-export const newPaymentId: () => PaymentId = newId('pay');
+export type PaymentId = ReturnType<typeof PaymentIdKit.create>;
 
-export const parsePaymentId: (value: string) => PaymentId = (v) => parseId('pay', v);
+export const newPaymentId = PaymentIdKit.create;
 
-export const PaymentIdSchema = prefixedIdSchema('pay');
+export const parsePaymentId = PaymentIdKit.parse;
+
+export const PaymentIdSchema = PaymentIdKit.schema;

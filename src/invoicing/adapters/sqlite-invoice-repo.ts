@@ -3,7 +3,7 @@ import type { ClientId } from '@/shared/ids/client-id';
 import type { Database } from '@/shared/db/database';
 import type { Result } from 'neverthrow';
 import { ok, err } from 'neverthrow';
-import { fromDb, toDb } from '@/shared/ids/id';
+import { fromDb, toDb } from '@/shared/domain/branded-id';
 import { Money } from '@/shared/money/money';
 import type { Invoice } from '../entities/invoice';
 import type { LineItem } from '../entities/line-item';

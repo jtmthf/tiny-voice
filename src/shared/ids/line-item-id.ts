@@ -1,10 +1,11 @@
-import type { Id } from './id';
-import { newId, parseId, prefixedIdSchema } from './id';
+import { defineBrandedId } from '@/shared/domain/branded-id';
 
-export type LineItemId = Id<'li'>;
+const LineItemIdKit = defineBrandedId('li');
 
-export const newLineItemId: () => LineItemId = newId('li');
+export type LineItemId = ReturnType<typeof LineItemIdKit.create>;
 
-export const parseLineItemId: (value: string) => LineItemId = (v) => parseId('li', v);
+export const newLineItemId = LineItemIdKit.create;
 
-export const LineItemIdSchema = prefixedIdSchema('li');
+export const parseLineItemId = LineItemIdKit.parse;
+
+export const LineItemIdSchema = LineItemIdKit.schema;
