@@ -6,7 +6,7 @@ import { parseInvoiceId } from '@/shared/ids/invoice-id';
 export const Route = createFileRoute('/api/invoices/$id')({
   server: {
     handlers: {
-      DELETE: async ({ params }) => {
+      DELETE: ({ params }) => {
         const app = getAppInstance();
         const result = deleteInvoice(
           { repo: app.invoiceRepo },

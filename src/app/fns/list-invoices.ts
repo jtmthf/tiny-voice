@@ -8,7 +8,7 @@ const Input = z.object({ status: z.string().optional() });
 
 export const listInvoicesFn = createServerFn({ method: 'GET' })
   .validator((data: unknown) => Input.parse(data ?? {}))
-  .handler(async ({ data }) => {
+  .handler(({ data }) => {
     const app = getAppReadView();
     const filters = data.status ? { status: data.status as InvoiceStatus } : undefined;
     return app.queries.invoicing.listInvoices(filters).map(invoiceSummaryToDto);

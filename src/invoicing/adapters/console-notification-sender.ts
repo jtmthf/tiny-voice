@@ -15,6 +15,7 @@ export class ConsoleNotificationSender implements NotificationSender {
     this.logger = logger;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- NotificationSender port requires Promise<Result<...>>
   async sendInvoiceSent(input: InvoiceSentNotification): Promise<Result<void, NotificationError>> {
     this.logger.info('Invoice sent notification', {
       invoiceId: input.invoiceId,
@@ -24,6 +25,7 @@ export class ConsoleNotificationSender implements NotificationSender {
     return ok(undefined);
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- NotificationSender port requires Promise<Result<...>>
   async sendPaymentReceived(
     input: PaymentReceivedNotification,
   ): Promise<Result<void, NotificationError>> {

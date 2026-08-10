@@ -8,7 +8,7 @@ const Input = z.object({ clientId: ClientIdSchema });
 
 export const getOutstandingByClientFn = createServerFn({ method: 'GET' })
   .validator((data: unknown) => Input.parse(data))
-  .handler(async ({ data }): Promise<MoneyDto> => {
+  .handler(({ data }): MoneyDto => {
     const app = getAppReadView();
     const money = app.queries.invoicing.getOutstandingByClient(data.clientId);
     return { cents: money.cents.toString(), currency: 'USD' };

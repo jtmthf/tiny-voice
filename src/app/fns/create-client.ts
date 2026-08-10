@@ -17,6 +17,7 @@ export function parseCreateClientInput(data: unknown): CreateClientInput {
   return CreateClientInput.parse(raw);
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await -- callers (handlers.test.ts) use .rejects.toThrow, which needs a real Promise
 export async function createClientHandler(data: CreateClientInput): Promise<never> {
   const app = getAppInstance();
   const result = createClient(

@@ -14,11 +14,13 @@ type SentEntry =
 export class CapturingNotificationSender implements NotificationSender {
   readonly sent: SentEntry[] = [];
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- NotificationSender port requires Promise<Result<...>>
   async sendInvoiceSent(input: InvoiceSentNotification): Promise<Result<void, NotificationError>> {
     this.sent.push({ type: 'invoiceSent', input });
     return ok(undefined);
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- NotificationSender port requires Promise<Result<...>>
   async sendPaymentReceived(
     input: PaymentReceivedNotification,
   ): Promise<Result<void, NotificationError>> {

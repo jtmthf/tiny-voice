@@ -36,6 +36,7 @@ export function parseCreateInvoiceInput(data: unknown): CreateInvoiceInput {
   return CreateInvoiceInput.parse(raw);
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await -- callers (handlers.test.ts) use .rejects.toThrow, which needs a real Promise
 export async function createInvoiceHandler(data: CreateInvoiceInput): Promise<never> {
   const app = getAppInstance();
 

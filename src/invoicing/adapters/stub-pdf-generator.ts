@@ -7,6 +7,7 @@ import type { PdfInput, PdfError, PdfGenerator } from '../ports/pdf-generator';
  * Same input always produces the same bytes.
  */
 export class StubPdfGenerator implements PdfGenerator {
+  // eslint-disable-next-line @typescript-eslint/require-await -- PdfGenerator port requires Promise<Result<...>>
   async generate(input: PdfInput): Promise<Result<Uint8Array, PdfError>> {
     const invoiceId = input.invoice.id;
     // Build a minimal valid PDF with the invoice ID embedded as text.

@@ -9,7 +9,7 @@ const Input = z.object({ id: ClientIdSchema });
 
 export const getClientFn = createServerFn({ method: 'GET' })
   .validator((data: unknown) => Input.parse(data))
-  .handler(async ({ data }): Promise<ClientDto | null> => {
+  .handler(({ data }): ClientDto | null => {
     const app = getAppReadView();
     const client = app.queries.clients.getClient(data.id);
     return client ? clientToDto(client) : null;
