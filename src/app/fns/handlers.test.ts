@@ -335,8 +335,9 @@ describe('calculateLateFee handler + middleware gate', () => {
         options: { server: (opts: { next: () => Promise<unknown> }) => Promise<unknown> };
       }
     ).options.server;
-    // eslint-disable-next-line @typescript-eslint/require-await -- next is typed () => Promise<unknown>
-    await expect(serverFn({ next: async () => ({}) })).rejects.toThrow(/Feature is disabled/);
+    await expect(serverFn({ next: () => Promise.resolve({}) })).rejects.toThrow(
+      /Feature is disabled/,
+    );
   });
 
   it('middleware passes through when flag is on', async () => {
@@ -349,10 +350,9 @@ describe('calculateLateFee handler + middleware gate', () => {
     ).options.server;
     let called = false;
     await serverFn({
-      // eslint-disable-next-line @typescript-eslint/require-await -- next is typed () => Promise<unknown>
-      next: async () => {
+      next: () => {
         called = true;
-        return {};
+        return Promise.resolve({});
       },
     });
     expect(called).toBe(true);

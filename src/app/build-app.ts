@@ -50,9 +50,10 @@ function createDatabase(overrides: Partial<AppDeps>, config: Config, logger: Log
   const dbPath = config.get('DATABASE_PATH');
   const database = new SqliteDatabase(dbPath);
   // import.meta.dirname may be undefined in Turbopack builds; fall back to cwd-relative.
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- lib types say string, but Turbopack can leave it undefined at runtime
-  const baseDir = import.meta.dirname ?? process.cwd();
-  const migrationsDir = import.meta.dirname
+  // Lib types declare it as always `string` — assert the wider type so this reflects reality.
+  const importMetaDirname = import.meta.dirname as string | undefined;
+  const baseDir = importMetaDirname ?? process.cwd();
+  const migrationsDir = importMetaDirname
     ? resolve(baseDir, '../../migrations')
     : resolve(baseDir, 'migrations');
   runMigrations(database, migrationsDir, logger);

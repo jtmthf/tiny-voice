@@ -50,16 +50,14 @@ describe('buildTestApp', () => {
     expect(app.pdfGenerator).toBeDefined();
     expect(app.notifications).toBeDefined();
     expect(app.queries).toBeDefined();
-    /* eslint-disable @typescript-eslint/unbound-method -- app.queries holds plain arrow functions (see wire-queries.ts), none use `this` */
-    expect(app.queries.clients.getClient).toBeTypeOf('function');
-    expect(app.queries.clients.listClients).toBeTypeOf('function');
-    expect(app.queries.invoicing.getInvoiceSummary).toBeTypeOf('function');
-    expect(app.queries.invoicing.listInvoices).toBeTypeOf('function');
-    expect(app.queries.invoicing.getOutstandingByClient).toBeTypeOf('function');
-    expect(app.queries.reporting.getRevenueByMonth).toBeTypeOf('function');
-    expect(app.queries.reporting.getRevenueByYear).toBeTypeOf('function');
-    expect(app.queries.reporting.listAllRevenue).toBeTypeOf('function');
-    /* eslint-enable @typescript-eslint/unbound-method */
+    expect(typeof app.queries.clients.getClient).toBe('function');
+    expect(typeof app.queries.clients.listClients).toBe('function');
+    expect(typeof app.queries.invoicing.getInvoiceSummary).toBe('function');
+    expect(typeof app.queries.invoicing.listInvoices).toBe('function');
+    expect(typeof app.queries.invoicing.getOutstandingByClient).toBe('function');
+    expect(typeof app.queries.reporting.getRevenueByMonth).toBe('function');
+    expect(typeof app.queries.reporting.getRevenueByYear).toBe('function');
+    expect(typeof app.queries.reporting.listAllRevenue).toBe('function');
     expect(app.unsubscribe).toBeTypeOf('function');
   });
 

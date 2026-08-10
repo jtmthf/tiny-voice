@@ -17,16 +17,16 @@ export function parseCreateClientInput(data: unknown): CreateClientInput {
   return CreateClientInput.parse(raw);
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await -- callers (handlers.test.ts) use .rejects.toThrow, which needs a real Promise
-export async function createClientHandler(data: CreateClientInput): Promise<never> {
+export function createClientHandler(data: CreateClientInput): Promise<never> {
   const app = getAppInstance();
   const result = createClient(
     { repo: app.clientRepo, clock: app.clock, logger: app.logger },
     { name: data.name, email: data.email },
   );
-  if (result.isErr()) throw new Error(clientErrorMessage(result.error));
-  // eslint-disable-next-line @typescript-eslint/only-throw-error -- redirect() is TanStack Router's documented control-flow throw, not an error
-  throw redirect({ to: '/clients/$id', params: { id: result.value.id } });
+  if (result.isErr()) return Promise.reject(new Error(clientErrorMessage(result.error)));
+  // redirect() is TanStack Router's documented control-flow signal, not an Error.
+  // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+  return Promise.reject(redirect({ to: '/clients/$id', params: { id: result.value.id } }));
 }
 
 export const createClientFn = createServerFn({ method: 'POST' })

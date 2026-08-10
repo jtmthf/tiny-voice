@@ -7,11 +7,11 @@ import type { Database } from '../db/database';
 
 describe('setupDb', () => {
   let db: Database;
-  let teardown: () => void;
+  // Unassigned if setupDb() throws before a test's destructure runs.
+  let teardown: (() => void) | undefined;
   let tempDir: string | undefined;
 
   afterEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- teardown is unassigned if setupDb() throws before the destructure in a test
     teardown?.();
     if (tempDir) {
       rmSync(tempDir, { recursive: true, force: true });

@@ -36,12 +36,11 @@ export function parseCreateInvoiceInput(data: unknown): CreateInvoiceInput {
   return CreateInvoiceInput.parse(raw);
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await -- callers (handlers.test.ts) use .rejects.toThrow, which needs a real Promise
-export async function createInvoiceHandler(data: CreateInvoiceInput): Promise<never> {
+export function createInvoiceHandler(data: CreateInvoiceInput): Promise<never> {
   const app = getAppInstance();
 
   const client = app.queries.clients.getClient(data.clientId);
-  if (!client) throw new Error('Client not found');
+  if (!client) return Promise.reject(new Error('Client not found'));
 
   const result = createInvoice(
     { repo: app.invoiceRepo, clock: app.clock },
@@ -58,9 +57,10 @@ export async function createInvoiceHandler(data: CreateInvoiceInput): Promise<ne
       })),
     },
   );
-  if (result.isErr()) throw new Error(invoiceErrorMessage(result.error));
-  // eslint-disable-next-line @typescript-eslint/only-throw-error -- redirect() is TanStack Router's documented control-flow throw, not an error
-  throw redirect({ to: '/invoices/$id', params: { id: result.value.id } });
+  if (result.isErr()) return Promise.reject(new Error(invoiceErrorMessage(result.error)));
+  // redirect() is TanStack Router's documented control-flow signal, not an Error.
+  // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+  return Promise.reject(redirect({ to: '/invoices/$id', params: { id: result.value.id } }));
 }
 
 export const createInvoiceFn = createServerFn({ method: 'POST' })
