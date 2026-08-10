@@ -1,7 +1,7 @@
 import type { InvoiceId } from '@/shared/ids/invoice-id';
 import type { ClientId } from '@/shared/ids/client-id';
 import type { Money } from '@/shared/money/money';
-import type { DueDate } from '@/shared/time/due-date';
+import { type DueDate } from '@/shared/time/due-date';
 import type { InvoiceStatus } from '../value-objects/invoice-status';
 import { subtotal, taxAmount, total, paidAmount, outstandingBalance } from '../entities/invoice';
 import type { InvoiceRepository } from '../ports/invoice-repository';

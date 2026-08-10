@@ -8,9 +8,13 @@ export const Route = createFileRoute('/api/clients/$id')({
     handlers: {
       DELETE: ({ params }) => {
         const app = getAppInstance();
+        const clientId = parseClientId(params.id);
+        if (clientId.isErr()) {
+          return new Response(JSON.stringify({ error: clientId.error }), { status: 400 });
+        }
         const result = deleteClient(
           { clientRepo: app.clientRepo, invoiceRepo: app.invoiceRepo },
-          { clientId: parseClientId(params.id) },
+          { clientId: clientId.value },
         );
         if (result.isErr()) {
           return new Response(JSON.stringify({ error: result.error }), { status: 400 });

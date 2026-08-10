@@ -16,12 +16,26 @@ describe('emailAddress', () => {
 
   it('rejects empty string', () => {
     const result = emailAddress('');
-    expect(expectErr(result)).toEqual({ kind: 'InvalidEmail', raw: '' });
+    expect(expectErr(result)).toEqual({
+      kind: 'InvalidEmail',
+      raw: '',
+      issues: ['Invalid email address'],
+    });
   });
 
   it('rejects string without @', () => {
     const result = emailAddress('not-an-email');
-    expect(expectErr(result)).toEqual({ kind: 'InvalidEmail', raw: 'not-an-email' });
+    expect(expectErr(result)).toEqual({
+      kind: 'InvalidEmail',
+      raw: 'not-an-email',
+      issues: ['Invalid email address'],
+    });
+  });
+
+  it('forwards a non-empty issues list on every rejection', () => {
+    for (const bad of ['', 'not-an-email', 'user @example.com', 'user@']) {
+      expect(expectErr(emailAddress(bad)).issues.length).toBeGreaterThan(0);
+    }
   });
 
   it('rejects string with spaces', () => {

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { Result } from 'neverthrow';
 import { Money } from '@/shared/money/money';
 import { newLineItemId } from '@/shared/ids/line-item-id';
-import type { DueDate } from '@/shared/time/due-date';
+import { DueDate } from '@/shared/time/due-date';
 import { expectOk } from '@/shared/testing/expect-ok';
 import type { InvoiceError } from '../errors/invoice-error';
 import {
@@ -17,8 +17,8 @@ import type { Invoice, InvoiceOutcome } from './invoice';
 import { addLineItem, sendInvoice, recordPayment, addLateFee, voidInvoice, total } from './invoice';
 
 const NOW = new Date('2025-01-15T12:00:00Z');
-const OVERDUE_TODAY = '2099-01-01' as DueDate;
-const NOT_OVERDUE_TODAY = '2025-01-01' as DueDate;
+const OVERDUE_TODAY = DueDate.trusted('2099-01-01');
+const NOT_OVERDUE_TODAY = DueDate.trusted('2025-01-01');
 
 interface TransitionCase {
   readonly start: 'draft' | 'sent' | 'paid' | 'void';

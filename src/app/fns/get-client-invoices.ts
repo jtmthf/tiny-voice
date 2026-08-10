@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { getAppReadView } from '@/app/instance';
 import { ClientIdSchema } from '@/shared/ids/client-id';
 import { invoiceSummaryToDto } from './dto';

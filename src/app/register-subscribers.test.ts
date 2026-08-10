@@ -9,7 +9,7 @@ import { testClient } from '@/clients/testing/client-factory';
 import type { InvoiceSent } from '@/invoicing/events/invoice-sent';
 import type { InvoicePaymentRecorded } from '@/invoicing/events/invoice-payment-recorded';
 import type { InvoiceVoided } from '@/invoicing/events/invoice-voided';
-import type { YearMonth } from '@/shared/time/year-month';
+import { YearMonth } from '@/shared/time/year-month';
 
 describe('subscribers', () => {
   let app: AppDeps;
@@ -71,7 +71,7 @@ describe('subscribers', () => {
       await app.eventBus.publish('InvoicePaymentRecorded', event);
 
       // Revenue projection updated
-      const revenue = app.revenueReadModel.getByMonth('2026-04' as YearMonth);
+      const revenue = app.revenueReadModel.getByMonth(YearMonth.trusted('2026-04'));
       expect(revenue).not.toBeNull();
       expect(revenue!.total.cents).toBe(5000n);
 

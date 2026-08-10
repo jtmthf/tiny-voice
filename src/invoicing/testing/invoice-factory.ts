@@ -3,8 +3,8 @@ import { newClientId } from '@/shared/ids/client-id';
 import { newLineItemId } from '@/shared/ids/line-item-id';
 import { newPaymentId } from '@/shared/ids/payment-id';
 import { Money } from '@/shared/money/money';
-import type { DueDate } from '@/shared/time/due-date';
-import type { TaxRate } from '../value-objects/tax-rate';
+import { DueDate } from '@/shared/time/due-date';
+import { TaxRate } from '../value-objects/tax-rate';
 import type { Invoice } from '../entities/invoice';
 import {
   createInvoice,
@@ -19,8 +19,8 @@ import type { Payment } from '../entities/payment';
 import { expectOk } from '@/shared/testing/expect-ok';
 
 const DEFAULT_DATE = new Date('2025-01-15T12:00:00Z');
-const DEFAULT_DUE_DATE = '2025-02-15' as DueDate;
-const DEFAULT_TAX_RATE = 0.1 as TaxRate;
+const DEFAULT_DUE_DATE = DueDate.trusted('2025-02-15');
+const DEFAULT_TAX_RATE = TaxRate.trusted(0.1);
 
 export function buildLineItem(overrides?: Partial<LineItem>): LineItem {
   return {

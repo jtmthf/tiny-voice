@@ -7,7 +7,7 @@ import { CapturingLogger } from '@/shared/logger/capturing-logger';
 import { SqliteRevenueReadModel } from '@/reporting/adapters/sqlite-revenue-read-model';
 import { registerRevenueProjection } from '@/reporting/projections/register-revenue-projection';
 import { newPaymentId } from '@/shared/ids/payment-id';
-import type { YearMonth } from '@/shared/time/year-month';
+import { YearMonth } from '@/shared/time/year-month';
 import { sendInvoice, recordPayment, total } from '../entities/invoice';
 import type { InvoicingEventMap } from '../events/invoicing-event-map';
 import { SqliteInvoiceRepo } from '../adapters/sqlite-invoice-repo';
@@ -151,7 +151,7 @@ describe('applyInvoiceCommand (real SQLite outbox)', () => {
     const rowsAfterSecondDrain = db.prepare<OutboxRow>('SELECT event_name FROM outbox').all();
     expect(rowsAfterSecondDrain).toHaveLength(0);
 
-    const revenue = revenueReadModel.getByMonth('2025-01' as YearMonth);
+    const revenue = revenueReadModel.getByMonth(YearMonth.trusted('2025-01'));
     expect(revenue?.total.cents).toBe(amount.cents);
     expect(revenue?.paymentCount).toBe(1);
   });

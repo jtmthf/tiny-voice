@@ -3,7 +3,7 @@ import { SystemClock } from './system-clock';
 import { FixedClock } from './fixed-clock';
 import { dueDateOf, isOverdue, DueDateSchema } from './due-date';
 import { yearMonthOf, YearMonthSchema } from './year-month';
-import type { DueDate } from './due-date';
+import { DueDate } from './due-date';
 
 describe('SystemClock', () => {
   it('returns a Date close to now', () => {
@@ -48,15 +48,15 @@ describe('DueDate', () => {
   });
 
   it('isOverdue returns true when past due', () => {
-    expect(isOverdue('2025-01-01' as DueDate, '2025-01-02' as DueDate)).toBe(true);
+    expect(isOverdue(DueDate.trusted('2025-01-01'), DueDate.trusted('2025-01-02'))).toBe(true);
   });
 
   it('isOverdue returns false when not past due', () => {
-    expect(isOverdue('2025-01-02' as DueDate, '2025-01-01' as DueDate)).toBe(false);
+    expect(isOverdue(DueDate.trusted('2025-01-02'), DueDate.trusted('2025-01-01'))).toBe(false);
   });
 
   it('isOverdue returns false on same day', () => {
-    expect(isOverdue('2025-01-01' as DueDate, '2025-01-01' as DueDate)).toBe(false);
+    expect(isOverdue(DueDate.trusted('2025-01-01'), DueDate.trusted('2025-01-01'))).toBe(false);
   });
 
   it('DueDateSchema validates correct format', () => {

@@ -89,6 +89,35 @@ const filenameMatchesExport = {
 };
 const localPlugin = { rules: { 'filename-matches-export': filenameMatchesExport } };
 
+// `no-restricted-syntax` does not merge across config blocks — the last block
+// that sets it wins outright. These selectors are composed explicitly into each
+// block below so that narrowing one concern never silently drops another.
+const noUnsafeUnwrap = [
+  {
+    selector: "MemberExpression[property.name='_unsafeUnwrap']",
+    message:
+      "Don't use _unsafeUnwrap. In tests use expectOk from @/shared/testing/expect-ok. In production handle the Result or fix the type design so the operation is infallible.",
+  },
+  {
+    selector: "MemberExpression[property.name='_unsafeUnwrapErr']",
+    message:
+      "Don't use _unsafeUnwrapErr. In tests use expectErr from @/shared/testing/expect-err. In production handle the Result branch explicitly.",
+  },
+];
+
+const noThrowInDomain = {
+  selector: 'ThrowStatement',
+  message:
+    'Domain code returns Result<T, DomainError> (AGENTS.md rule 1). Throw only for infrastructure failures, which belong in adapters.',
+};
+
+const noBrandCast = {
+  selector:
+    'TSAsExpression > TSTypeReference[typeName.name=/^(EmailAddress|TaxRate|DueDate|YearMonth|Id)$/]',
+  message:
+    'Do not cast into a branded type. Parse it through the value object, or — when the value is valid by construction — use its .trusted() with a comment saying why (src/shared/domain/).',
+};
+
 export default tseslint.config(
   // Global ignores
   {
@@ -212,27 +241,14 @@ export default tseslint.config(
       ],
 
       // Ban neverthrow's escape hatches — use expectOk/expectErr (tests) or
-      // pattern matching / type-level guarantees (production) instead.
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: "MemberExpression[property.name='_unsafeUnwrap']",
-          message:
-            "Don't use _unsafeUnwrap. In tests use expectOk from @/shared/testing/expect-ok. In production handle the Result or fix the type design so the operation is infallible.",
-        },
-        {
-          selector: "MemberExpression[property.name='_unsafeUnwrapErr']",
-          message:
-            "Don't use _unsafeUnwrapErr. In tests use expectErr from @/shared/testing/expect-err. In production handle the Result branch explicitly.",
-        },
-      ],
+      // pattern matching / type-level guarantees (production) instead — and
+      // hand-rolled brand casts, which the domain kit replaces.
+      'no-restricted-syntax': ['error', ...noUnsafeUnwrap, noBrandCast],
     },
   },
 
   // Domain code returns Result<T, DomainError> (AGENTS.md rule 1); throw only
-  // for infrastructure failures, which belong in adapters. Note: no-restricted-syntax
-  // does not merge across config blocks, so the _unsafeUnwrap/_unsafeUnwrapErr
-  // selectors from the main rules block are repeated here.
+  // for infrastructure failures, which belong in adapters.
   {
     files: [
       'src/{clients,invoicing,reporting}/{entities,commands,queries,value-objects,errors,ports}/**/*.ts',
@@ -240,44 +256,32 @@ export default tseslint.config(
     ],
     ignores: ['**/*.test.ts', '**/*.property.test.ts'],
     rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: 'ThrowStatement',
-          message:
-            'Domain code returns Result<T, DomainError> (AGENTS.md rule 1). Throw only for infrastructure failures, which belong in adapters.',
-        },
-        {
-          selector: "MemberExpression[property.name='_unsafeUnwrap']",
-          message:
-            "Don't use _unsafeUnwrap. In tests use expectOk from @/shared/testing/expect-ok. In production handle the Result or fix the type design so the operation is infallible.",
-        },
-        {
-          selector: "MemberExpression[property.name='_unsafeUnwrapErr']",
-          message:
-            "Don't use _unsafeUnwrapErr. In tests use expectErr from @/shared/testing/expect-err. In production handle the Result branch explicitly.",
-        },
-      ],
+      'no-restricted-syntax': ['error', noThrowInDomain, ...noUnsafeUnwrap, noBrandCast],
     },
   },
 
-  // Ban hand-rolled brand casts outside the domain kit — commented out until
-  // plan 003 (domain value-object kit) lands; enabling it now would flag the
-  // existing casts that 003 is about to delete. TODO(plan-003): uncomment.
-  // {
-  //   files: ['**/*.ts', '**/*.tsx'],
-  //   ignores: ['src/shared/domain/**'],
-  //   rules: {
-  //     'no-restricted-syntax': [
-  //       'error',
-  //       {
-  //         selector:
-  //           "TSAsExpression > TSTypeReference[typeName.name=/^(EmailAddress|TaxRate|DueDate|YearMonth)$/]",
-  //         message: 'Do not cast into a branded type. Parse it through the value object (src/shared/domain/).',
-  //       },
-  //     ],
-  //   },
-  // },
+  // The domain kit is where `trusted` lives, so it is the one place a brand
+  // cast is sanctioned. It is still domain code: no throwing.
+  {
+    files: ['src/shared/domain/**/*.ts'],
+    ignores: ['**/*.test.ts', '**/*.property.test.ts'],
+    rules: {
+      'no-restricted-syntax': ['error', noThrowInDomain, ...noUnsafeUnwrap],
+    },
+  },
+
+  // Test support (factories, arbitraries) and the kit's own tests construct
+  // known-valid values directly; they may cast and may throw.
+  {
+    files: [
+      'src/shared/domain/**/*.test.ts',
+      'src/shared/domain/**/*.property.test.ts',
+      '**/testing/**/*.ts',
+    ],
+    rules: {
+      'no-restricted-syntax': ['error', ...noUnsafeUnwrap],
+    },
+  },
 
   // Relax rules for config files, scripts, and e2e infrastructure
   {

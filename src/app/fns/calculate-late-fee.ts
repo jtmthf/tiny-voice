@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { getAppInstance } from '@/app/instance';
 import { applyInvoiceCommand } from '@/invoicing/commands/apply-invoice-command';
 import { addLateFee } from '@/invoicing/entities/invoice';

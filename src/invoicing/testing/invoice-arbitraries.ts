@@ -6,7 +6,7 @@ import type { Invoice } from '../entities/invoice';
 import { outstandingBalance, recordPayment } from '../entities/invoice';
 import type { LineItem, LineItemKind } from '../entities/line-item';
 import type { InvoiceStatus } from '../value-objects/invoice-status';
-import type { TaxRate } from '../value-objects/tax-rate';
+import { TaxRate } from '../value-objects/tax-rate';
 import {
   buildDraftInvoice,
   buildLineItem,
@@ -36,9 +36,10 @@ const lineItemsArb: fc.Arbitrary<LineItem[]> = fc
     });
   });
 
+// Every constant is a literal in [0, 1].
 const taxRateArb: fc.Arbitrary<TaxRate> = fc
   .constantFrom(0, 0.05, 0.075, 0.1)
-  .map((n) => n as TaxRate);
+  .map((n) => TaxRate.trusted(n));
 
 const statusArb: fc.Arbitrary<InvoiceStatus> = fc.constantFrom('draft', 'sent', 'paid', 'void');
 

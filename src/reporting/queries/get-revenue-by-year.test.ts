@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Money } from '@/shared/money/money';
-import type { YearMonth } from '@/shared/time/year-month';
+import { YearMonth } from '@/shared/time/year-month';
 import { InMemoryRevenueReadModel } from '../adapters/in-memory-revenue-read-model';
 import { getRevenueByYear } from './get-revenue-by-year';
 
@@ -9,13 +9,13 @@ describe('getRevenueByYear', () => {
     const readModel = new InMemoryRevenueReadModel();
     readModel.recordPayment({
       paymentId: 'pay_1',
-      month: '2025-01' as YearMonth,
+      month: YearMonth.trusted('2025-01'),
       amount: Money.fromCents(1000n),
       at: new Date('2025-01-01'),
     });
     readModel.recordPayment({
       paymentId: 'pay_2',
-      month: '2025-06' as YearMonth,
+      month: YearMonth.trusted('2025-06'),
       amount: Money.fromCents(2000n),
       at: new Date('2025-06-01'),
     });

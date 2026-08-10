@@ -1,4 +1,4 @@
-import type { DueDate } from './due-date';
+import { type DueDate } from './due-date';
 
 /**
  * Port interface for obtaining the current time.

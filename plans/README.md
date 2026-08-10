@@ -27,7 +27,7 @@ or the linter enforces**. If a plan's change leaves the rule as prose in
 | ---- | ----------------------------------------------------------- | ------------ | -------- | ------ | ---------- | ------ |
 | 001  | tsconfig strictness sweep (8 flags, 18 known errors)        | Types & lint | P1       | S      | —          | DONE   |
 | 002  | typescript-eslint `strictTypeChecked` + repo-specific rules | Types & lint | P1       | M      | 001        | DONE   |
-| 003  | Domain kit: value objects and branded IDs                   | Entities     | P1       | M      | —          | TODO   |
+| 003  | Domain kit: value objects and branded IDs                   | Entities     | P1       | M      | —          | DONE   |
 | 004  | DI container primitive (`src/shared/di/`)                   | DI           | P1       | M–L    | —          | TODO   |
 | 005  | Migrate the composition root onto the container             | DI           | P1       | L      | 004        | TODO   |
 | 006  | Invoice as a discriminated union of status states           | Entities     | P2       | L      | 003        | TODO   |
@@ -90,8 +90,8 @@ wrong even if it typechecks:
    each restate how they preserve it; if your implementation loses the
    guarantee, STOP rather than widening the surface.
 2. **Domain code returns `Result`, never throws for domain errors** (AGENTS.md
-   rule 1). Infrastructure failures may throw. Plan 003 fixes the one place
-   this is currently violated (`parseId`).
+   rule 1). Infrastructure failures may throw. Plan 003 fixed the one place
+   this was violated (`parseId`, now `BrandedId.parse`).
 3. **Migrations are append-only.** Plan 008 needs an outbox schema change; it
    adds `migrations/0011_*.sql`, it does not edit `0005_create_outbox.sql`.
 4. **No barrel files, no default exports outside `src/app/`, kebab-case

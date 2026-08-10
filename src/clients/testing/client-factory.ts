@@ -1,9 +1,11 @@
 import { parseClientId } from '@/shared/ids/client-id';
+import { expectOk } from '@/shared/testing/expect-ok';
 import type { Client } from '../entities/client';
-import type { EmailAddress } from '../value-objects/email-address';
+import { EmailAddress } from '../value-objects/email-address';
 
-const FIXED_ID = parseClientId('client_00000000-0000-7000-8000-000000000001');
-const FIXED_EMAIL = 'test@example.com' as unknown as EmailAddress;
+const FIXED_ID = expectOk(parseClientId('client_00000000-0000-7000-8000-000000000001'));
+// A literal, known-valid address — parsing it in a factory would only add noise.
+const FIXED_EMAIL = EmailAddress.trusted('test@example.com');
 const FIXED_DATE = new Date('2025-01-15T12:00:00.000Z');
 
 /**

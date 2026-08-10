@@ -1,10 +1,11 @@
-import type { Id } from './id';
-import { newId, parseId, prefixedIdSchema } from './id';
+import { defineBrandedId } from '@/shared/domain/branded-id';
 
-export type ClientId = Id<'client'>;
+const ClientIdKit = defineBrandedId('client');
 
-export const newClientId: () => ClientId = newId('client');
+export type ClientId = ReturnType<typeof ClientIdKit.create>;
 
-export const parseClientId: (value: string) => ClientId = (v) => parseId('client', v);
+export const newClientId = ClientIdKit.create;
 
-export const ClientIdSchema = prefixedIdSchema('client');
+export const parseClientId = ClientIdKit.parse;
+
+export const ClientIdSchema = ClientIdKit.schema;

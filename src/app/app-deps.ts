@@ -5,7 +5,7 @@ import type { FeatureFlags } from '@/shared/flags/feature-flags';
 import type { EventBus } from '@/shared/events/event-bus';
 import type { Outbox } from '@/shared/events/outbox';
 import type { Database } from '@/shared/db/database';
-import type { YearMonth } from '@/shared/time/year-month';
+import { type YearMonth } from '@/shared/time/year-month';
 import type { ClientId } from '@/shared/ids/client-id';
 import type { InvoiceId } from '@/shared/ids/invoice-id';
 import type { Money } from '@/shared/money/money';

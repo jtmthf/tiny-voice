@@ -10,7 +10,7 @@ import {
   buildPayment,
 } from '../testing/invoice-factory';
 import { recordPayment, outstandingBalance } from '../entities/invoice';
-import type { TaxRate } from '../value-objects/tax-rate';
+import { TaxRate } from '../value-objects/tax-rate';
 import { getOutstandingByClient } from './get-outstanding-by-client';
 import { expectOk } from '@/shared/testing/expect-ok';
 
@@ -76,7 +76,7 @@ describe('getOutstandingByClient', () => {
     const sent = {
       ...buildSentInvoice({
         lineItems: [buildLineItem({ unitPrice: Money.fromCents(2020n) })],
-        taxRate: 0.075 as TaxRate,
+        taxRate: TaxRate.trusted(0.075),
       }),
       clientId,
     };

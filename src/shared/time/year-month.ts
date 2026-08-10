@@ -1,21 +1,25 @@
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { format } from 'date-fns';
+import { defineValueObject } from '@/shared/domain/value-object';
+
+const YEAR_MONTH_REGEX = /^\d{4}-(?:0[1-9]|1[0-2])$/;
 
 /**
  * Branded string type for year-month in "YYYY-MM" format.
  */
-export type YearMonth = string & { readonly __brand: 'YearMonth' };
+export const YearMonth = defineValueObject(
+  'YearMonth',
+  z.string().regex(YEAR_MONTH_REGEX, 'Expected YYYY-MM format'),
+);
 
-const YEAR_MONTH_REGEX = /^\d{4}-(?:0[1-9]|1[0-2])$/;
+export type YearMonth = z.infer<typeof YearMonth.schema>;
 
-export const YearMonthSchema = z
-  .string()
-  .regex(YEAR_MONTH_REGEX, 'Expected YYYY-MM format')
-  .transform((val) => val as YearMonth);
+export const YearMonthSchema = YearMonth.schema;
 
 /**
  * Creates a YearMonth from a Date.
  */
 export function yearMonthOf(date: Date): YearMonth {
-  return format(date, 'yyyy-MM') as YearMonth;
+  // date-fns' 'yyyy-MM' output is well-formed by construction.
+  return YearMonth.trusted(format(date, 'yyyy-MM'));
 }
