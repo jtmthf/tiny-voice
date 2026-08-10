@@ -104,6 +104,16 @@ describe('SqliteInvoiceRepo', () => {
     expect(results).toHaveLength(1);
   });
 
+  it('lists an invoice with zero line items and zero payments as empty arrays', () => {
+    const invoice = buildDraftInvoice({ lineItems: [] });
+    repo.save(invoice);
+
+    const [found] = repo.list();
+    expect(found).toBeDefined();
+    expect(found!.lineItems).toEqual([]);
+    expect(found!.payments).toEqual([]);
+  });
+
   it('preserves payments on subsequent saves (append-only)', () => {
     const sent = buildSentInvoice();
     repo.save(sent);
