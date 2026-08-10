@@ -44,7 +44,11 @@ describe('createClient', () => {
     const deps = makeDeps();
     const result = createClient(deps, { name: 'Acme Corp', email: 'not-an-email' });
 
-    expect(expectErr(result)).toEqual({ kind: 'InvalidEmail', raw: 'not-an-email' });
+    expect(expectErr(result)).toEqual({
+      kind: 'InvalidEmail',
+      raw: 'not-an-email',
+      issues: ['Invalid email address'],
+    });
   });
 
   it('returns NameTooShort for empty name', () => {

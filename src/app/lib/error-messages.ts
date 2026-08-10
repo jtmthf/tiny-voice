@@ -34,6 +34,7 @@ export function clientErrorMessage(err: CreateClientError): string {
     case 'NameTooLong':
       return 'Client name is too long';
     case 'InvalidEmail':
-      return `Invalid email: ${err.raw}`;
+      // The schema's own reason, so tightening EmailAddress surfaces here for free.
+      return `${err.issues.join('; ') || 'Invalid email'}: ${err.raw}`;
   }
 }

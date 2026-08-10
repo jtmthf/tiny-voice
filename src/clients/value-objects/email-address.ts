@@ -14,15 +14,21 @@ export const EmailAddressSchema = EmailAddress.schema;
 export interface EmailError {
   readonly kind: 'InvalidEmail';
   readonly raw: string;
+  /** The kit's validation messages, forwarded verbatim. */
+  readonly issues: readonly string[];
 }
 
 /**
  * Parses a raw string into a validated EmailAddress.
  *
- * Narrows the kit's `ValueObjectError` to `EmailError` because
- * `CreateClientError` and the app's error-message switch discriminate on
- * `kind: 'InvalidEmail'`.
+ * Narrows the kit's `ValueObjectError` to `EmailError` rather than surfacing it
+ * directly: `CreateClientError` is a union discriminated on `kind`, and
+ * `kind: 'InvalidValueObject'` would stop discriminating as soon as a second
+ * value object joins that union. The validation detail is carried across in
+ * `issues` instead of being discarded.
  */
 export function emailAddress(raw: string): Result<EmailAddress, EmailError> {
-  return EmailAddress.parse(raw).mapErr(() => ({ kind: 'InvalidEmail', raw }) as const);
+  return EmailAddress.parse(raw).mapErr(
+    (error): EmailError => ({ kind: 'InvalidEmail', raw, issues: error.issues }),
+  );
 }
