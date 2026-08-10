@@ -1,4 +1,5 @@
-import { z } from 'zod/v4';
+import { z } from 'zod';
+import { defineValueObject } from '@/shared/domain/value-object';
 import { bankersRound } from '@/shared/money/bankers-round';
 import type { Money as MoneyType } from '@/shared/money/money';
 import { Money } from '@/shared/money/money';
@@ -7,13 +8,14 @@ import { Money } from '@/shared/money/money';
  * Fractional tax rate in range [0, 1].
  * Example: 0.075 for 7.5% tax.
  */
-export type TaxRate = number & { readonly __brand: 'TaxRate' };
+export const TaxRate = defineValueObject(
+  'TaxRate',
+  z.number().min(0, 'Tax rate must be >= 0').max(1, 'Tax rate must be <= 1'),
+);
 
-export const TaxRateSchema = z
-  .number()
-  .min(0, 'Tax rate must be >= 0')
-  .max(1, 'Tax rate must be <= 1')
-  .transform((val) => val as TaxRate);
+export type TaxRate = z.infer<typeof TaxRate.schema>;
+
+export const TaxRateSchema = TaxRate.schema;
 
 /**
  * Calculates the tax on a subtotal using banker's rounding.
