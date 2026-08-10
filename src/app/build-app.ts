@@ -128,9 +128,9 @@ function createEventingAndSubscribers(
   void outbox
     .drain(
       (eventName, payload) => eventBus.publish(eventName, payload),
-      (eventName, error) => deps.logger.warn('outbox.recovery.failed', { eventName, error }),
+      (eventName, error) => { deps.logger.warn('outbox.recovery.failed', { eventName, error }); },
     )
-    .catch((error) => deps.logger.warn('outbox.recovery.error', { error }));
+    .catch((error) => { deps.logger.warn('outbox.recovery.error', { error }); });
 
   return { eventBus, outbox, unsubscribe };
 }

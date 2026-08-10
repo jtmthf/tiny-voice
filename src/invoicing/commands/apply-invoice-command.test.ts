@@ -174,7 +174,7 @@ describe('applyInvoiceCommand', () => {
         if (prop === 'enqueue') {
           return (...args: Parameters<typeof outbox.enqueue>) => {
             outboxEnqueued += 1;
-            return target.enqueue(...args);
+            target.enqueue(...args);
           };
         }
         return Reflect.get(target, prop);
@@ -251,7 +251,7 @@ describe('applyInvoiceCommand', () => {
         if (prop === 'enqueue') {
           return (name: string, payload: unknown) => {
             enqueueCalls.push({ name, payload });
-            return (target.enqueue as (n: string, p: unknown) => void)(name, payload);
+            ;(target.enqueue as (n: string, p: unknown) => void)(name, payload);
           };
         }
         return Reflect.get(target, prop);

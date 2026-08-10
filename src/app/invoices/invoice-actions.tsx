@@ -59,7 +59,7 @@ export function InvoiceActions({ invoiceId, status, showLateFeeButton, onSuccess
 
   const pdfMutation = useMutation({
     mutationFn: () => generatePdfFn({ data: { invoiceId } }),
-    onSuccess: (d) => triggerDownload(d.bytesBase64, d.contentType, d.filenameSuggestion),
+    onSuccess: (d) => { triggerDownload(d.bytesBase64, d.contentType, d.filenameSuggestion); },
   });
 
   const isPending = [sendMutation, recordMutation, voidMutation, lateFeeMutation, pdfMutation].some(

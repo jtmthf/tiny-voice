@@ -10,8 +10,6 @@ import { TaxRateSchema } from '@/invoicing/value-objects/tax-rate';
 import { DueDateSchema } from '@/shared/time/due-date';
 import { invoiceErrorMessage } from '@/app/lib/error-messages';
 import { parseBracketNotation } from './parse-bracket-notation';
-import type { TaxRate } from '@/invoicing/value-objects/tax-rate';
-import type { DueDate } from '@/shared/time/due-date';
 
 export const CreateInvoiceInput = z.object({
   clientId: ClientIdSchema,
@@ -49,8 +47,8 @@ export async function createInvoiceHandler(data: CreateInvoiceInput): Promise<ne
     {
       id: newInvoiceId(),
       clientId: data.clientId,
-      taxRate: data.taxRate as TaxRate,
-      dueDate: data.dueDate as DueDate,
+      taxRate: data.taxRate,
+      dueDate: data.dueDate,
       lineItems: data.lineItems.map((li) => ({
         id: newLineItemId(),
         description: li.description,

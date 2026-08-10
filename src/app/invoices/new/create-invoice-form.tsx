@@ -16,7 +16,7 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['invoices'] }),
   });
 
-  const addRow = () => setLineItemCount((n) => n + 1);
+  const addRow = () => { setLineItemCount((n) => n + 1); };
   const removeRow = (index: number) => {
     // Removing a row shifts the indices of later rows in the DOM, which would
     // misalign their name attributes (lineItems[i]) with their values.
@@ -136,7 +136,7 @@ export function CreateInvoiceForm({ clients }: { clients: { id: string; name: st
           </Field>
           <button
             type="button"
-            onClick={() => removeRow(i)}
+            onClick={() => { removeRow(i); }}
             disabled={lineItemCount <= 1 || i !== lineItemCount - 1}
             aria-label={`Remove line item ${i + 1}`}
             style={{ marginBottom: i === 0 ? 0 : undefined }}

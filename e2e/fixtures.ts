@@ -42,7 +42,7 @@ export const test = base.extend<Fixtures>({
     await page.getByRole('textbox', { name: 'Email' }).fill(`${name}@e2e.test`);
     await page.getByRole('button', { name: 'Create Client' }).click();
     await page.waitForURL(/\/clients\/client_/);
-    const id = page.url().match(/\/clients\/([^/]+)/)?.[1] ?? '';
+    const id = (/\/clients\/([^/]+)/.exec(page.url()))?.[1] ?? '';
 
     await use({ id, name });
 

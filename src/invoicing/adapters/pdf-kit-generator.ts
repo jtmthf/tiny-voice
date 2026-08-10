@@ -22,7 +22,7 @@ export class PdfKitGenerator implements PdfGenerator {
       const chunks: Buffer[] = [];
 
       doc.on('data', (chunk: Buffer) => chunks.push(chunk));
-      doc.on('end', () => resolve(new Uint8Array(Buffer.concat(chunks))));
+      doc.on('end', () => { resolve(new Uint8Array(Buffer.concat(chunks))); });
       doc.on('error', reject);
 
       const { invoice, clientName } = input;
