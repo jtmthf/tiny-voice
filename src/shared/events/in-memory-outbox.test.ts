@@ -15,6 +15,7 @@ describe('InMemoryOutbox', () => {
     outbox.enqueue('Baz', { value: 3 });
 
     const received: { name: string; value: number }[] = [];
+    // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
     await outbox.drain(async (eventName, payload) => {
       received.push({ name: eventName, value: (payload as { value: number }).value });
     });
@@ -26,6 +27,7 @@ describe('InMemoryOutbox', () => {
     ]);
 
     const secondDrainCalls: unknown[] = [];
+    // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
     await outbox.drain(async (eventName, payload) => {
       secondDrainCalls.push({ eventName, payload });
     });
@@ -38,6 +40,7 @@ describe('InMemoryOutbox', () => {
     outbox.enqueue('Bar', { value: 2 });
 
     await outbox
+      // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
       .drain(async () => {
         throw new Error('boom');
       })
@@ -46,6 +49,7 @@ describe('InMemoryOutbox', () => {
       });
 
     const received: { name: string; value: number }[] = [];
+    // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
     await outbox.drain(async (eventName, payload) => {
       received.push({ name: eventName, value: (payload as { value: number }).value });
     });
@@ -66,6 +70,7 @@ describe('InMemoryOutbox', () => {
     const errors: { eventName: string; error: unknown }[] = [];
 
     await outbox.drain(
+      // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
       async (eventName) => {
         if (eventName === 'Bar') throw new Error('boom');
         received.push(eventName);
@@ -80,6 +85,7 @@ describe('InMemoryOutbox', () => {
     expect(errors[0]!.eventName).toBe('Bar');
 
     const secondDrainReceived: string[] = [];
+    // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
     await outbox.drain(async (eventName) => {
       secondDrainReceived.push(eventName);
     });

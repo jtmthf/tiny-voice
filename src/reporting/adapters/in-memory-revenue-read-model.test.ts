@@ -13,7 +13,7 @@ function usd(cents: bigint): Money {
 }
 
 describe('InMemoryRevenueReadModel', () => {
-  it('records a payment and retrieves by month', async () => {
+  it('records a payment and retrieves by month', () => {
     const model = new InMemoryRevenueReadModel();
     model.recordPayment({
       paymentId: 'pay_1',
@@ -29,7 +29,7 @@ describe('InMemoryRevenueReadModel', () => {
     expect(result!.paymentCount).toBe(1);
   });
 
-  it('aggregates multiple payments in the same month', async () => {
+  it('aggregates multiple payments in the same month', () => {
     const model = new InMemoryRevenueReadModel();
     model.recordPayment({
       paymentId: 'pay_1',
@@ -49,13 +49,13 @@ describe('InMemoryRevenueReadModel', () => {
     expect(result!.paymentCount).toBe(2);
   });
 
-  it('returns null for unknown month', async () => {
+  it('returns null for unknown month', () => {
     const model = new InMemoryRevenueReadModel();
     const result = model.getByMonth(jan);
     expect(result).toBeNull();
   });
 
-  it('getByYear returns months in ascending order', async () => {
+  it('getByYear returns months in ascending order', () => {
     const model = new InMemoryRevenueReadModel();
     model.recordPayment({
       paymentId: 'pay_1',
@@ -83,7 +83,7 @@ describe('InMemoryRevenueReadModel', () => {
     expect(results[2]!.month).toBe(mar);
   });
 
-  it('getByYear excludes other years', async () => {
+  it('getByYear excludes other years', () => {
     const model = new InMemoryRevenueReadModel();
     model.recordPayment({
       paymentId: 'pay_1',
@@ -103,7 +103,7 @@ describe('InMemoryRevenueReadModel', () => {
     expect(results[0]!.month).toBe(jan);
   });
 
-  it('listAll returns months in descending order', async () => {
+  it('listAll returns months in descending order', () => {
     const model = new InMemoryRevenueReadModel();
     model.recordPayment({
       paymentId: 'pay_1',
@@ -131,7 +131,7 @@ describe('InMemoryRevenueReadModel', () => {
     expect(results[2]!.month).toBe(jan);
   });
 
-  it('updatedAt reflects the most recent payment', async () => {
+  it('updatedAt reflects the most recent payment', () => {
     const model = new InMemoryRevenueReadModel();
     const early = new Date('2025-01-10');
     const late = new Date('2025-01-20');
@@ -142,7 +142,7 @@ describe('InMemoryRevenueReadModel', () => {
     expect(result!.updatedAt).toEqual(late);
   });
 
-  it('redelivering the same paymentId is a no-op', async () => {
+  it('redelivering the same paymentId is a no-op', () => {
     const model = new InMemoryRevenueReadModel();
     model.recordPayment({
       paymentId: 'pay_1',
@@ -162,7 +162,7 @@ describe('InMemoryRevenueReadModel', () => {
     expect(result!.paymentCount).toBe(1);
   });
 
-  it('different paymentIds accumulate normally', async () => {
+  it('different paymentIds accumulate normally', () => {
     const model = new InMemoryRevenueReadModel();
     model.recordPayment({
       paymentId: 'pay_1',

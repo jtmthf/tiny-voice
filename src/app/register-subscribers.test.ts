@@ -71,7 +71,7 @@ describe('subscribers', () => {
       await app.eventBus.publish('InvoicePaymentRecorded', event);
 
       // Revenue projection updated
-      const revenue = await app.revenueReadModel.getByMonth('2026-04' as YearMonth);
+      const revenue = app.revenueReadModel.getByMonth('2026-04' as YearMonth);
       expect(revenue).not.toBeNull();
       expect(revenue!.total.cents).toBe(5000n);
 

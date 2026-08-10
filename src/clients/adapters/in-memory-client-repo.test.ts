@@ -4,7 +4,7 @@ import { testClient } from '../testing/client-factory';
 import { newClientId } from '../../shared/ids/client-id';
 
 describe('InMemoryClientRepo', () => {
-  it('save then findById round-trip', async () => {
+  it('save then findById round-trip', () => {
     const repo = new InMemoryClientRepo();
     const client = testClient();
     repo.save(client);
@@ -13,13 +13,13 @@ describe('InMemoryClientRepo', () => {
     expect(found).toEqual(client);
   });
 
-  it('findById returns null for non-existent id', async () => {
+  it('findById returns null for non-existent id', () => {
     const repo = new InMemoryClientRepo();
     const found = repo.findById(newClientId());
     expect(found).toBeNull();
   });
 
-  it('can be seeded with initial data', async () => {
+  it('can be seeded with initial data', () => {
     const client = testClient();
     const repo = new InMemoryClientRepo([client]);
 
@@ -27,7 +27,7 @@ describe('InMemoryClientRepo', () => {
     expect(found).toEqual(client);
   });
 
-  it('save overwrites existing client', async () => {
+  it('save overwrites existing client', () => {
     const repo = new InMemoryClientRepo();
     const client = testClient();
     repo.save(client);
@@ -39,7 +39,7 @@ describe('InMemoryClientRepo', () => {
     expect(found!.name).toBe('Updated');
   });
 
-  it('list returns clients sorted by createdAt', async () => {
+  it('list returns clients sorted by createdAt', () => {
     const repo = new InMemoryClientRepo();
     const first = testClient({
       id: newClientId(),

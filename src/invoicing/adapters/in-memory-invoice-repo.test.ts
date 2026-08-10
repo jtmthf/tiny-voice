@@ -12,7 +12,7 @@ describe('InMemoryInvoiceRepo', () => {
     repo = new InMemoryInvoiceRepo();
   });
 
-  it('round-trips an invoice', async () => {
+  it('round-trips an invoice', () => {
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     const saveResult = repo.save(invoice);
     expect(saveResult.isOk()).toBe(true);
@@ -23,12 +23,12 @@ describe('InMemoryInvoiceRepo', () => {
     expect(found!.lineItems).toHaveLength(1);
   });
 
-  it('returns null for unknown id', async () => {
+  it('returns null for unknown id', () => {
     const found = repo.findById(newInvoiceId());
     expect(found).toBeNull();
   });
 
-  it('detects version conflict on stale update', async () => {
+  it('detects version conflict on stale update', () => {
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);
 
@@ -44,7 +44,7 @@ describe('InMemoryInvoiceRepo', () => {
     if (saveB.isErr()) expect(saveB.error.kind).toBe('ConcurrencyConflict');
   });
 
-  it('returns the same reference on repeated findById (readonly contract, no defensive copy)', async () => {
+  it('returns the same reference on repeated findById (readonly contract, no defensive copy)', () => {
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);
 
@@ -53,7 +53,7 @@ describe('InMemoryInvoiceRepo', () => {
     expect(found).toBe(found2);
   });
 
-  it('lists with status filter', async () => {
+  it('lists with status filter', () => {
     const draft = buildDraftInvoice({ lineItems: [buildLineItem()] });
     const sent = buildSentInvoice();
 
@@ -69,7 +69,7 @@ describe('InMemoryInvoiceRepo', () => {
     expect(sents[0]!.status).toBe('sent');
   });
 
-  it('lists with clientId filter', async () => {
+  it('lists with clientId filter', () => {
     const a = buildDraftInvoice({ lineItems: [buildLineItem()] });
     const b = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(a);

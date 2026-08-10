@@ -38,6 +38,7 @@ describe('SqliteOutbox', () => {
     expect(rowsBeforeDrain).toHaveLength(1);
 
     const received: { name: string; value: number }[] = [];
+    // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
     await outbox.drain(async (eventName, payload) => {
       received.push({ name: eventName, value: (payload as { value: number }).value });
     });
@@ -53,6 +54,7 @@ describe('SqliteOutbox', () => {
     outbox.enqueue('Baz', { value: 3 });
 
     const received: string[] = [];
+    // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
     await outbox.drain(async (eventName) => {
       received.push(eventName);
     });
@@ -76,6 +78,7 @@ describe('SqliteOutbox', () => {
     outbox.enqueue('Foo', { value: 1 });
 
     await outbox
+      // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
       .drain(async () => {
         throw new Error('boom');
       })
@@ -87,6 +90,7 @@ describe('SqliteOutbox', () => {
     expect(rowsAfterFailedDrain).toHaveLength(1);
 
     const received: string[] = [];
+    // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
     await outbox.drain(async (eventName) => {
       received.push(eventName);
     });
@@ -105,6 +109,7 @@ describe('SqliteOutbox', () => {
     const errors: { eventName: string; error: unknown }[] = [];
 
     await outbox.drain(
+      // eslint-disable-next-line @typescript-eslint/require-await -- Outbox.drain's handler param is typed Promise<void>
       async (eventName) => {
         if (eventName === 'Bar') throw new Error('boom');
         received.push(eventName);

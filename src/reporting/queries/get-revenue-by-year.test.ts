@@ -5,7 +5,7 @@ import { InMemoryRevenueReadModel } from '../adapters/in-memory-revenue-read-mod
 import { getRevenueByYear } from './get-revenue-by-year';
 
 describe('getRevenueByYear', () => {
-  it('returns all months for the given year', async () => {
+  it('returns all months for the given year', () => {
     const readModel = new InMemoryRevenueReadModel();
     readModel.recordPayment({
       paymentId: 'pay_1',
@@ -26,7 +26,7 @@ describe('getRevenueByYear', () => {
     expect(results[1]!.month).toBe('2025-06');
   });
 
-  it('returns empty array when no data for the year', async () => {
+  it('returns empty array when no data for the year', () => {
     const readModel = new InMemoryRevenueReadModel();
     const results = getRevenueByYear({ readModel }, 2025);
     expect(results).toHaveLength(0);

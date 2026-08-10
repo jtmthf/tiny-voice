@@ -25,7 +25,7 @@ describe('SqliteInvoiceRepo', () => {
     teardown();
   });
 
-  it('round-trips an invoice with line items', async () => {
+  it('round-trips an invoice with line items', () => {
     const items = [buildLineItem(), buildLineItem({ quantity: 3 })];
     const invoice = buildDraftInvoice({ lineItems: items });
 
@@ -43,7 +43,7 @@ describe('SqliteInvoiceRepo', () => {
     expect(found!.version).toBe(invoice.version);
   });
 
-  it('round-trips an invoice with payments', async () => {
+  it('round-trips an invoice with payments', () => {
     const sent = buildSentInvoice();
     repo.save(sent);
 
@@ -61,12 +61,12 @@ describe('SqliteInvoiceRepo', () => {
     expect(found!.payments[0]!.amount.cents).toBe(1000n);
   });
 
-  it('returns null for unknown id', async () => {
+  it('returns null for unknown id', () => {
     const found = repo.findById(newInvoiceId());
     expect(found).toBeNull();
   });
 
-  it('detects version conflict on stale update', async () => {
+  it('detects version conflict on stale update', () => {
     const invoice = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(invoice);
 
@@ -81,7 +81,7 @@ describe('SqliteInvoiceRepo', () => {
     if (saveB.isErr()) expect(saveB.error.kind).toBe('ConcurrencyConflict');
   });
 
-  it('lists with status filter', async () => {
+  it('lists with status filter', () => {
     const draft = buildDraftInvoice({ lineItems: [buildLineItem()] });
     const sent = buildSentInvoice();
     repo.save(draft);
@@ -94,7 +94,7 @@ describe('SqliteInvoiceRepo', () => {
     expect(sents).toHaveLength(1);
   });
 
-  it('lists with clientId filter', async () => {
+  it('lists with clientId filter', () => {
     const a = buildDraftInvoice({ lineItems: [buildLineItem()] });
     const b = buildDraftInvoice({ lineItems: [buildLineItem()] });
     repo.save(a);
@@ -104,7 +104,7 @@ describe('SqliteInvoiceRepo', () => {
     expect(results).toHaveLength(1);
   });
 
-  it('preserves payments on subsequent saves (append-only)', async () => {
+  it('preserves payments on subsequent saves (append-only)', () => {
     const sent = buildSentInvoice();
     repo.save(sent);
 

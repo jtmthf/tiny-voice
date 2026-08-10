@@ -17,9 +17,9 @@ function makeDeps() {
 }
 
 describe('createClient', () => {
-  it('creates and persists a valid client', async () => {
+  it('creates and persists a valid client', () => {
     const deps = makeDeps();
-    const result = await createClient(deps, { name: 'Acme Corp', email: 'acme@example.com' });
+    const result = createClient(deps, { name: 'Acme Corp', email: 'acme@example.com' });
 
     const client = expectOk(result);
     expect(client.name).toBe('Acme Corp');
@@ -31,32 +31,32 @@ describe('createClient', () => {
     expect(found).toEqual(client);
   });
 
-  it('logs on successful creation', async () => {
+  it('logs on successful creation', () => {
     const deps = makeDeps();
-    await createClient(deps, { name: 'Acme Corp', email: 'acme@example.com' });
+    createClient(deps, { name: 'Acme Corp', email: 'acme@example.com' });
 
     expect(deps.logger.entries).toHaveLength(1);
     expect(deps.logger.entries[0]!.level).toBe('info');
     expect(deps.logger.entries[0]!.message).toBe('Client created');
   });
 
-  it('returns InvalidEmail for bad email', async () => {
+  it('returns InvalidEmail for bad email', () => {
     const deps = makeDeps();
-    const result = await createClient(deps, { name: 'Acme Corp', email: 'not-an-email' });
+    const result = createClient(deps, { name: 'Acme Corp', email: 'not-an-email' });
 
     expect(expectErr(result)).toEqual({ kind: 'InvalidEmail', raw: 'not-an-email' });
   });
 
-  it('returns NameTooShort for empty name', async () => {
+  it('returns NameTooShort for empty name', () => {
     const deps = makeDeps();
-    const result = await createClient(deps, { name: '', email: 'acme@example.com' });
+    const result = createClient(deps, { name: '', email: 'acme@example.com' });
 
     expect(expectErr(result)).toEqual({ kind: 'NameTooShort' });
   });
 
-  it('returns NameTooLong for name exceeding 200 characters', async () => {
+  it('returns NameTooLong for name exceeding 200 characters', () => {
     const deps = makeDeps();
-    const result = await createClient(deps, {
+    const result = createClient(deps, {
       name: 'A'.repeat(201),
       email: 'acme@example.com',
     });
@@ -64,9 +64,9 @@ describe('createClient', () => {
     expect(expectErr(result)).toEqual({ kind: 'NameTooLong' });
   });
 
-  it('does not persist on validation failure', async () => {
+  it('does not persist on validation failure', () => {
     const deps = makeDeps();
-    await createClient(deps, { name: '', email: 'acme@example.com' });
+    createClient(deps, { name: '', email: 'acme@example.com' });
 
     const all = deps.repo.list();
     expect(all).toHaveLength(0);
