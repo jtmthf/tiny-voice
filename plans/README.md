@@ -26,7 +26,7 @@ or the linter enforces**. If a plan's change leaves the rule as prose in
 | Plan | Title                                                       | Theme        | Priority | Effort | Depends on | Status |
 | ---- | ----------------------------------------------------------- | ------------ | -------- | ------ | ---------- | ------ |
 | 001  | tsconfig strictness sweep (8 flags, 18 known errors)        | Types & lint | P1       | S      | —          | DONE   |
-| 002  | typescript-eslint `strictTypeChecked` + repo-specific rules | Types & lint | P1       | M      | 001        | TODO   |
+| 002  | typescript-eslint `strictTypeChecked` + repo-specific rules | Types & lint | P1       | M      | 001        | DONE   |
 | 003  | Domain kit: value objects and branded IDs                   | Entities     | P1       | M      | —          | TODO   |
 | 004  | DI container primitive (`src/shared/di/`)                   | DI           | P1       | M–L    | —          | TODO   |
 | 005  | Migrate the composition root onto the container             | DI           | P1       | L      | 004        | TODO   |
@@ -186,15 +186,19 @@ Surfaced during this review with repo evidence:
    envelopes in the outbox, projection rebuild from the event log becomes
    nearly free and would exercise the CQRS story end to end. Effort M–L.
 
-## Latent bug found during planning (not yet a plan)
+## Latent bug found during planning (resolved by plan 002)
 
-`src/invoicing/adapters/sqlite-invoice-repo.ts:237-243` — `JSON.parse` returns
-`any`, so `lineItems`/`payments` are unchecked. The `.filter((li) => li.id !== null)`
-guards are reported by `@typescript-eslint/no-unnecessary-condition` as
-"the types have no overlap", yet the comment above them claims
-`json_group_array` returns `[null]` for empty sets. Either the comment is
-stale or the guard is checking the wrong thing (if the _element_ is `null`,
-`li.id` throws a `TypeError` before the comparison runs). Plan 002 will
-surface it as a lint error and plan 006 rewrites this hydration path entirely.
-Whichever executor gets there first: determine which is wrong, fix it, and add
-a test with a zero-line-item invoice. Do not silence the rule.
+`src/invoicing/adapters/sqlite-invoice-repo.ts:237-243` — `JSON.parse` returned
+`any`, so `lineItems`/`payments` were unchecked. The `.filter((li) => li.id !== null)`
+guards were reported by `@typescript-eslint/no-unnecessary-condition` as
+"the types have no overlap", contradicting the comment above them, which
+claimed `json_group_array` returns `[null]` for empty sets.
+
+Resolved: verified empirically (throwaway better-sqlite3 script) that a
+correlated subquery `json_group_array` over zero matching rows returns `[]`,
+not `[null]` — the comment was stale, not the guard. The guard was dead code,
+not a live crash path. Plan 002 typed the `JSON.parse` results explicitly,
+deleted the guard, and added a regression test
+(`SqliteInvoiceRepo.list` with a zero-line-item, zero-payment invoice) in
+`sqlite-invoice-repo.test.ts`, written before the guard was removed so it
+could be observed passing against the old code too.
