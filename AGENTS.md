@@ -18,7 +18,7 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 
 ## Module map
 
-- `src/shared/` -- Shared kernel: `Money` (bigint cents), `Clock`, `DueDate`/`YearMonth`, branded IDs (UUID v7), `EventBus`, `Logger`, `Config`, `FeatureFlags`, `Database` port, `Result` re-exports from neverthrow.
+- `src/shared/` -- Shared kernel: the value-object kit (`domain/value-object.ts`, `domain/branded-id.ts`), `Money` (bigint cents), `Clock`, `DueDate`/`YearMonth`, branded IDs (UUID v7), `EventBus`, `Logger`, `Config`, `FeatureFlags`, `Database` port, `Result` re-exports from neverthrow.
 - `src/clients/` -- Client entity (name + email), `ClientRepository` port, create/get/list operations.
 - `src/invoicing/` -- Invoice aggregate root with state machine (draft/sent/paid/void), line items, payments, events (`InvoiceSent`, `InvoicePaymentRecorded`, `InvoiceVoided`), `PdfGenerator` and `NotificationSender` ports.
 - `src/reporting/` -- Revenue read model projected from payment events; `getRevenueByMonth` and `getRevenueByYear` queries.
@@ -41,8 +41,9 @@ tiny-voice is a small invoicing system built as a validation exercise for AI-nat
 - **Conventional commits** -- commitlint via `simple-git-hooks`
 - **ESLint type-checked linting** -- `eslint.config.js`: `tseslint.configs.strictTypeChecked` + `stylisticTypeChecked` (full type information via `projectService`, not the non-type-checked variants)
 - **One import path convention** -- ESLint: `no-restricted-imports` bans `../../` and deeper parent imports. Relative imports are for siblings and direct children only; anything further away uses the `@/` alias.
-- **No throw in domain code** -- ESLint: scoped `no-restricted-syntax` (`ThrowStatement`) over `{clients,invoicing,reporting}/{entities,commands,queries,value-objects,errors,ports}/**` and `shared/{money,ids,time,outcome}/**`, enforcing rule 1 below at lint time. Deliberate assertions on values that can't be invalid by construction (e.g. `Money.multiplyByInt`, `bankersRound`) get a scoped inline disable with a one-line reason instead of a rewrite.
-- **No hand-rolled brand casts** (planned) -- a `no-restricted-syntax` rule banning `as EmailAddress`/`TaxRate`/`DueDate`/`YearMonth` outside `src/shared/domain/` is written into `eslint.config.js` but commented out until plan 003 (domain value-object kit) lands and the value-object kit exists to parse into. TODO(plan-003): uncomment.
+- **No throw in domain code** -- ESLint: scoped `no-restricted-syntax` (`ThrowStatement`) over `{clients,invoicing,reporting}/{entities,commands,queries,value-objects,errors,ports}/**` and `shared/{money,ids,time,outcome,domain}/**`, enforcing rule 1 below at lint time. Deliberate assertions on values that can't be invalid by construction (e.g. `Money.multiplyByInt`, `bankersRound`) get a scoped inline disable with a one-line reason instead of a rewrite.
+- **No hand-rolled brand casts** -- ESLint: `no-restricted-syntax` bans `as EmailAddress`/`TaxRate`/`DueDate`/`YearMonth`/`Id<...>` everywhere except `src/shared/domain/**` (where `trusted` lives) and `**/testing/**`. Parse the value or use the value object's `.trusted()`. Note that `no-restricted-syntax` does **not** merge across config blocks -- the selectors are composed from shared constants at the top of `eslint.config.js` so that narrowing one concern never silently drops another.
+- **Value objects** -- every validated primitive is defined via `defineValueObject` / `defineBrandedId` in `src/shared/domain/`. Parsing returns `Result`; the only sanctioned cast is `.trusted()`, which in production code requires a comment justifying why the value is valid by construction (in test fixtures a literal is its own justification). `Money` is the deliberate exception -- it is an arithmetic namespace, not a parse-and-brand wrapper.
 
 ## Rules the toolchain cannot enforce
 
