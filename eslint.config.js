@@ -105,9 +105,16 @@ export default tseslint.config(
     ],
   },
 
-  // Base TypeScript strict + stylistic
-  ...tseslint.configs.strict,
-  ...tseslint.configs.stylistic,
+  // Base TypeScript strict + stylistic (type-checked variants — projectService
+  // is already configured below, so full type information is available)
+  ...tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
+
+  // Type-aware rules need type info; these files aren't part of the TS project
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
 
   // Main rules for all TS files
   {
