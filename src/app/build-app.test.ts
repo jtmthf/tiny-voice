@@ -50,6 +50,7 @@ describe('buildTestApp', () => {
     expect(app.pdfGenerator).toBeDefined();
     expect(app.notifications).toBeDefined();
     expect(app.queries).toBeDefined();
+    /* eslint-disable @typescript-eslint/unbound-method -- app.queries holds plain arrow functions (see wire-queries.ts), none use `this` */
     expect(app.queries.clients.getClient).toBeTypeOf('function');
     expect(app.queries.clients.listClients).toBeTypeOf('function');
     expect(app.queries.invoicing.getInvoiceSummary).toBeTypeOf('function');
@@ -58,6 +59,7 @@ describe('buildTestApp', () => {
     expect(app.queries.reporting.getRevenueByMonth).toBeTypeOf('function');
     expect(app.queries.reporting.getRevenueByYear).toBeTypeOf('function');
     expect(app.queries.reporting.listAllRevenue).toBeTypeOf('function');
+    /* eslint-enable @typescript-eslint/unbound-method */
     expect(app.unsubscribe).toBeTypeOf('function');
   });
 
@@ -255,7 +257,7 @@ describe('buildApp startup recovery drain', () => {
             return drainPromise;
           };
         }
-        return Reflect.get(target, prop, receiver);
+        return Reflect.get(target, prop, receiver) as unknown;
       },
     });
 

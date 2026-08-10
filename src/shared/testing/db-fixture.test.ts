@@ -11,6 +11,7 @@ describe('setupDb', () => {
   let tempDir: string | undefined;
 
   afterEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- teardown is unassigned if setupDb() throws before the destructure in a test
     teardown?.();
     if (tempDir) {
       rmSync(tempDir, { recursive: true, force: true });
