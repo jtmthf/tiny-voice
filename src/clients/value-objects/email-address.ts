@@ -1,13 +1,15 @@
-import { z } from 'zod/v4';
-import { ok, err } from 'neverthrow';
+import { z } from 'zod';
 import type { Result } from 'neverthrow';
+import { defineValueObject } from '@/shared/domain/value-object';
 
 /**
  * Branded string type for validated email addresses.
  */
-export type EmailAddress = string & { readonly __brand: 'EmailAddress' };
+export const EmailAddress = defineValueObject('EmailAddress', z.email());
 
-export const EmailAddressSchema = z.email().transform((val) => val as EmailAddress);
+export type EmailAddress = z.infer<typeof EmailAddress.schema>;
+
+export const EmailAddressSchema = EmailAddress.schema;
 
 export interface EmailError {
   readonly kind: 'InvalidEmail';
@@ -16,11 +18,11 @@ export interface EmailError {
 
 /**
  * Parses a raw string into a validated EmailAddress.
+ *
+ * Narrows the kit's `ValueObjectError` to `EmailError` because
+ * `CreateClientError` and the app's error-message switch discriminate on
+ * `kind: 'InvalidEmail'`.
  */
 export function emailAddress(raw: string): Result<EmailAddress, EmailError> {
-  const result = EmailAddressSchema.safeParse(raw);
-  if (result.success) {
-    return ok(result.data);
-  }
-  return err({ kind: 'InvalidEmail', raw });
+  return EmailAddress.parse(raw).mapErr(() => ({ kind: 'InvalidEmail', raw }) as const);
 }
