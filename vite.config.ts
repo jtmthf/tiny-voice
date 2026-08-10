@@ -27,10 +27,14 @@ function securityHeaders(): Plugin {
   return {
     name: 'security-headers',
     configureServer: (s) => {
-      s.middlewares.use((_req, res, next) => { apply(res, next); });
+      s.middlewares.use((_req, res, next) => {
+        apply(res, next);
+      });
     },
     configurePreviewServer: (s) => {
-      s.middlewares.use((_req, res, next) => { apply(res, next); });
+      s.middlewares.use((_req, res, next) => {
+        apply(res, next);
+      });
     },
   };
 }

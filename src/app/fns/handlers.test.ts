@@ -79,7 +79,9 @@ afterEach(() => {
 });
 
 describe('createClient handler', () => {
-  beforeEach(() => { setUp(); });
+  beforeEach(() => {
+    setUp();
+  });
 
   it('redirects to /clients/:id on success', async () => {
     try {
@@ -114,7 +116,9 @@ describe('createClient handler', () => {
 });
 
 describe('createInvoice handler', () => {
-  beforeEach(() => { setUp(); });
+  beforeEach(() => {
+    setUp();
+  });
 
   it('redirects to /invoices/:id on success', async () => {
     const clientId = await createTestClient();
@@ -184,7 +188,9 @@ describe('createInvoice handler', () => {
 });
 
 describe('sendInvoice handler', () => {
-  beforeEach(() => { setUp(); });
+  beforeEach(() => {
+    setUp();
+  });
 
   it('returns { error: null } and fires notification on success', async () => {
     const clientId = await createTestClient();
@@ -203,7 +209,9 @@ describe('sendInvoice handler', () => {
 });
 
 describe('recordPayment handler', () => {
-  beforeEach(() => { setUp(); });
+  beforeEach(() => {
+    setUp();
+  });
 
   async function createSentInvoice(): Promise<string> {
     const clientId = await createTestClient();
@@ -265,7 +273,9 @@ describe('recordPayment handler', () => {
 });
 
 describe('voidInvoice handler', () => {
-  beforeEach(() => { setUp(); });
+  beforeEach(() => {
+    setUp();
+  });
 
   it('voids a draft invoice', async () => {
     const clientId = await createTestClient();
@@ -294,7 +304,9 @@ describe('voidInvoice handler', () => {
 });
 
 describe('generatePdf handler', () => {
-  beforeEach(() => { setUp(); });
+  beforeEach(() => {
+    setUp();
+  });
 
   it('returns base64 PDF for an existing invoice', async () => {
     const clientId = await createTestClient();

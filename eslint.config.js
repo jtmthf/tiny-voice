@@ -138,6 +138,13 @@ export default tseslint.config(
       // Deprecated API detection
       '@typescript-eslint/no-deprecated': 'error',
 
+      // number/bigint have unambiguous, lossless string forms — permit them
+      // in template literals. bigint has no allow* option in this
+      // typescript-eslint version because the rule already allows it
+      // unconditionally. Do NOT add allowAny/allowNullish/allowBoolean;
+      // those are the cases where interpolation hides a bug.
+      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
+
       // import-x rules
       'import-x/no-default-export': 'error',
       'import-x/no-cycle': 'error',

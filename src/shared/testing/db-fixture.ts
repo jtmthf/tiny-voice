@@ -37,6 +37,8 @@ export function setupDb(options?: { migrationsDir?: string; logger?: Logger }): 
 
   return {
     db,
-    teardown: () => { db.close(); },
+    teardown: () => {
+      db.close();
+    },
   };
 }

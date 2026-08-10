@@ -22,7 +22,9 @@ export class PdfKitGenerator implements PdfGenerator {
       const chunks: Buffer[] = [];
 
       doc.on('data', (chunk: Buffer) => chunks.push(chunk));
-      doc.on('end', () => { resolve(new Uint8Array(Buffer.concat(chunks))); });
+      doc.on('end', () => {
+        resolve(new Uint8Array(Buffer.concat(chunks)));
+      });
       doc.on('error', reject);
 
       const { invoice, clientName } = input;
@@ -32,7 +34,7 @@ export class PdfKitGenerator implements PdfGenerator {
       doc.moveDown();
       doc.fontSize(12).text(`Invoice #: ${invoice.id}`);
       doc.text(`Client: ${clientName}`);
-      doc.text(`Date: ${invoice.createdAt.toISOString().split('T')[0]}`);
+      doc.text(`Date: ${invoice.createdAt.toISOString().slice(0, 10)}`);
       doc.text(`Due: ${invoice.dueDate}`);
       doc.text(`Status: ${invoice.status}`);
       doc.moveDown();

@@ -251,7 +251,7 @@ describe('applyInvoiceCommand', () => {
         if (prop === 'enqueue') {
           return (name: string, payload: unknown) => {
             enqueueCalls.push({ name, payload });
-            ;(target.enqueue as (n: string, p: unknown) => void)(name, payload);
+            (target.enqueue as (n: string, p: unknown) => void)(name, payload);
           };
         }
         return Reflect.get(target, prop);
