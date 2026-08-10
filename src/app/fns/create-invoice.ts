@@ -59,6 +59,7 @@ export async function createInvoiceHandler(data: CreateInvoiceInput): Promise<ne
     },
   );
   if (result.isErr()) throw new Error(invoiceErrorMessage(result.error));
+  // eslint-disable-next-line @typescript-eslint/only-throw-error -- redirect() is TanStack Router's documented control-flow throw, not an error
   throw redirect({ to: '/invoices/$id', params: { id: result.value.id } });
 }
 

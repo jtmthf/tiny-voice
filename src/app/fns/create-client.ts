@@ -25,6 +25,7 @@ export async function createClientHandler(data: CreateClientInput): Promise<neve
     { name: data.name, email: data.email },
   );
   if (result.isErr()) throw new Error(clientErrorMessage(result.error));
+  // eslint-disable-next-line @typescript-eslint/only-throw-error -- redirect() is TanStack Router's documented control-flow throw, not an error
   throw redirect({ to: '/clients/$id', params: { id: result.value.id } });
 }
 
