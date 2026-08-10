@@ -132,7 +132,7 @@ function createEventingAndSubscribers(
         deps.logger.warn('outbox.recovery.failed', { eventName, error });
       },
     )
-    .catch((error) => {
+    .catch((error: unknown) => {
       deps.logger.warn('outbox.recovery.error', { error });
     });
 
